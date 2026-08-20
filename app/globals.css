@@ -1,0 +1,358 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root,
+[data-theme="day"] {
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* ─── Day: Sunlit Provence / Organic Wheat Palette ─── */
+  --color-bg: #F8F4E8;
+  --color-green: #28551C;
+  --color-green-light: #3a7528;
+  --color-brown-deep: #2B1D10;
+  --color-brown: #8A7654;
+  --color-cream: #FFFDF5;
+  --color-yellow: #F5D35C;
+  --color-orange: #E87B32;
+  --color-border: #DDD2B8;
+  --color-card-bg: #F3EBD7;
+  --color-white: #ffffff;
+  --color-error: #c0392b;
+
+  --color-text-primary: #2B1D10;
+  --color-text-secondary: #28551C;
+  --color-text-tertiary: #8A7654;
+  --color-text-inverse: #FFFDF5;
+  --color-surface-base: #F8F4E8;
+  --color-surface-raised: #FFFDF5;
+  --color-surface-muted: #f0ebe0;
+
+  --shadow-sm: 0 1px 3px rgba(43, 29, 16, 0.06);
+  --shadow-md: 0 4px 16px rgba(43, 29, 16, 0.08);
+  --shadow-lg: 0 12px 40px rgba(43, 29, 16, 0.1);
+  --shadow-card: 0 2px 12px rgba(43, 29, 16, 0.06);
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --space-1: 1px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 20px;
+  --space-7: 24px;
+  --space-8: 32px;
+  --space-9: 40px;
+  --space-10: 48px;
+  --space-12: 64px;
+  --space-16: 80px;
+
+  --text-xs: 0.7rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.95rem;
+  --text-lg: 1.05rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.5rem;
+  --text-5xl: clamp(2.8rem, 5.5vw, 4.5rem);
+  --text-6xl: clamp(3.4rem, 7vw, 6rem);
+
+  --motion-fast: 200ms;
+  --motion-normal: 350ms;
+  --motion-slow: 500ms;
+  --motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --max-width: 1240px;
+  --header-height: 72px;
+
+  --header-bg: rgba(248, 244, 232, 0.92);
+  --nav-link-color: #2B1D10;
+
+  color-scheme: light;
+}
+
+/* ─── Night: Van Gogh "The Starry Night" & "Café Terrace" Palette ─── */
+[data-theme="night"] {
+  --color-bg: #09101F;
+  --color-green: #388E3C;
+  --color-green-light: #52B788;
+  --color-brown-deep: #F5EFEB;
+  --color-brown: #B0C4DE;
+  --color-cream: #121D36;
+  --color-yellow: #F5D35C;
+  --color-orange: #FFA726;
+  --color-border: rgba(245, 211, 92, 0.22);
+  --color-card-bg: #111C38;
+  --color-white: #ffffff;
+  --color-error: #e74c3c;
+
+  --color-text-primary: #F5EFEB;
+  --color-text-secondary: #F5D35C;
+  --color-text-tertiary: #A5B8D0;
+  --color-text-inverse: #09101F;
+  --color-surface-base: #09101F;
+  --color-surface-raised: #121D36;
+  --color-surface-muted: #162444;
+
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 14px 48px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  --header-bg: rgba(9, 16, 31, 0.92);
+  --nav-link-color: #F5EFEB;
+
+  color-scheme: dark;
+}
+
+/* ─── Van Gogh Impasto & Painting Animations ─── */
+@keyframes van-gogh-swirl {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.05); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes starry-twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(245, 211, 92, 0.9)); }
+}
+
+@keyframes celestial-halo {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.08); }
+}
+
+.van-gogh-canvas {
+  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-surface-base);
+  line-height: 1.6;
+  overflow-x: hidden;
+  font-size: var(--text-base);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  background: none;
+}
+
+ul {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  color: var(--color-text-primary);
+}
+
+::selection {
+  background: rgba(40, 85, 28, 0.15);
+  color: var(--color-brown-deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-green);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brown);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+.section {
+  padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 80px);
+}
+
+.section-title {
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 400;
+  margin-bottom: var(--space-5);
+}
+
+.section-subtitle {
+  color: var(--color-text-tertiary);
+  font-size: clamp(0.9rem, 1.3vw, 1rem);
+  max-width: 520px;
+  margin: 0 auto 48px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s var(--motion-ease), transform 0.7s var(--motion-ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s var(--motion-ease), transform 0.7s var(--motion-ease);
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s var(--motion-ease), transform 0.7s var(--motion-ease);
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.7s var(--motion-ease), transform 0.7s var(--motion-ease);
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes drawLine {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ─── Permanent Admin Dark Mode Theme ────────────────────── */
+.admin-root-dark {
+  --color-bg: #09101F;
+  --color-green: #388E3C;
+  --color-green-light: #52B788;
+  --color-brown-deep: #F5EFEB;
+  --color-brown: #B0C4DE;
+  --color-cream: #111C38;
+  --color-yellow: #F5D35C;
+  --color-orange: #FFA726;
+  --color-border: rgba(245, 211, 92, 0.22);
+  --color-card-bg: #111C38;
+  --color-white: #ffffff;
+  --color-error: #e74c3c;
+  --color-text-primary: #F5EFEB;
+  --color-text-secondary: #52B788;
+  --color-text-tertiary: #94A3B8;
+  --color-surface-base: #09101F;
+  --color-surface-raised: #12203E;
+  --color-surface-muted: #162445;
+  color-scheme: dark;
+  background: #09101F !important;
+  color: #F5EFEB !important;
+}
+
+.admin-root-dark input,
+.admin-root-dark select,
+.admin-root-dark textarea {
+  background: #111C38 !important;
+  color: #FFFDF5 !important;
+  border-color: rgba(245, 211, 92, 0.25) !important;
+}
+
+.admin-root-dark input:focus,
+.admin-root-dark select:focus,
+.admin-root-dark textarea:focus {
+  border-color: #F5D35C !important;
+  box-shadow: 0 0 0 3px rgba(245, 211, 92, 0.15) !important;
+}
+
+.admin-root-dark table {
+  color: #FFFDF5 !important;
+}
+
+.admin-root-dark tr {
+  border-color: rgba(245, 211, 92, 0.12) !important;
+}
+
+.admin-root-dark .admin-table td {
+  border-bottom: 1px solid rgba(245, 211, 92, 0.1) !important;
+  color: #E2E8F0 !important;
+}
+
+.admin-root-dark .admin-table th {
+  color: #94A3B8 !important;
+  border-bottom: 1px solid rgba(245, 211, 92, 0.2) !important;
+}
+
