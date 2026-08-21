@@ -172,6 +172,19 @@ button {
   cursor: pointer;
   font-family: inherit;
   background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+a:focus,
+[role='button']:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 2px;
 }
 
 ul {

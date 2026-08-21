@@ -151,6 +151,9 @@ export default function Header() {
           transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease;
           cursor: pointer;
           border-radius: 9999px;
+          -webkit-tap-highlight-color: transparent;
+          user-select: none;
+          touch-action: manipulation;
         }
 
         .vg-nav-link:hover {
@@ -254,6 +257,10 @@ export default function Header() {
           background: var(--color-surface-raised);
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          -webkit-tap-highlight-color: transparent;
+          -webkit-touch-callout: none;
+          user-select: none;
+          touch-action: manipulation;
         }
 
         .hamburger-btn:hover {

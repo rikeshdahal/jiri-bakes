@@ -7,6 +7,7 @@ import Button from '@/components/buttons/Button';
 import { useCart } from '@/components/layout/AppShell';
 import { useWishlist } from '@/components/layout/WishlistContext';
 import HeroSection from '@/components/layout/HeroSection';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 
 const fallbackProducts: MenuItem[] = [
   { id: 'c1', name: 'Sunflower Cream Cake', description: 'A light layered sponge kissed with organic cream and sunflower honey, decorated with seasonal blooms.', price: 1800, unit: '/whole', category: 'cake', badge: 'Fresh Today', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', rating: 5 },
@@ -91,21 +92,30 @@ export default function HomePage() {
   useMultiReveal();
   const [collectionItems, setCollectionItems] = useState<MenuItem[]>(fallbackProducts);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(fallbackTestimonials);
+  const [booting, setBooting] = useState(true);
+  const [hidingLoader, setHidingLoader] = useState(false);
 
   useEffect(() => {
-    fetch('/api/products').then((r) => r.json()).then((d) => {
+    const productsP = fetch('/api/products').then((r) => r.json()).then((d) => {
       if (d.data && d.data.length > 0) setCollectionItems(d.data);
     }).catch(() => { });
-    fetch('/api/testimonials').then((r) => r.json()).then((d) => {
+    const testimonialsP = fetch('/api/testimonials').then((r) => r.json()).then((d) => {
       if (d.data) {
         const approved = d.data.filter((t: Testimonial) => t.approved !== false);
         if (approved.length > 0) setTestimonials(approved);
       }
     }).catch(() => { });
+    // keep the loader visible long enough for the intro animation to play
+    const minDelay = new Promise((res) => setTimeout(res, 1500));
+    Promise.all([productsP, testimonialsP, minDelay]).finally(() => {
+      setHidingLoader(true);
+      setTimeout(() => setBooting(false), 500);
+    });
   }, []);
 
   return (
     <>
+      {booting && <LoadingScreen hiding={hidingLoader} />}
       <HeroSection bakeOfTheWeek={collectionItems.find((p) => p.featured) || collectionItems[0]} />
       <FeaturedCakeSection featured={collectionItems.find((p) => p.featured) || collectionItems[0]} />
       <CollectionSection items={collectionItems} />
