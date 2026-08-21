@@ -18,10 +18,10 @@ interface TrackedOrder {
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: string; step: number }> = {
   pending:   { label: 'Order Received',   color: '#E87B32', bg: 'rgba(232,123,50,0.12)',  border: 'rgba(232,123,50,0.3)',  icon: '○', step: 1 },
-  baking:    { label: 'Being Baked',      color: '#8A7654', bg: 'rgba(245,211,92,0.18)',  border: 'rgba(245,211,92,0.4)',  icon: '◌', step: 2 },
-  ready:     { label: 'Ready for Pickup', color: '#28551C', bg: 'rgba(40,85,28,0.12)',    border: 'rgba(40,85,28,0.25)',   icon: '◉', step: 3 },
+  baking:    { label: 'Being Baked',      color: 'var(--color-text-secondary)', bg: 'rgba(245,211,92,0.18)',  border: 'rgba(245,211,92,0.4)',  icon: '◌', step: 2 },
+  ready:     { label: 'Ready for Pickup', color: 'var(--color-green)', bg: 'rgba(40,85,28,0.12)',    border: 'rgba(40,85,28,0.25)',   icon: '◉', step: 3 },
   completed: { label: 'Delivered',        color: '#27ae60', bg: 'rgba(39,174,96,0.12)',   border: 'rgba(39,174,96,0.25)',  icon: '★', step: 4 },
-  cancelled: { label: 'Cancelled',        color: '#c0392b', bg: 'rgba(192,57,43,0.10)',   border: 'rgba(192,57,43,0.25)',  icon: '✕', step: 0 },
+  cancelled: { label: 'Cancelled',        color: 'var(--color-error)', bg: 'rgba(192,57,43,0.10)',   border: 'rgba(192,57,43,0.25)',  icon: '✕', step: 0 },
 };
 
 export default function CartDrawer() {
@@ -117,13 +117,15 @@ export default function CartDrawer() {
       <style>{`
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .cqb { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-               background:#FAF6EE;border:1px solid #E8DFCE;color:var(--color-brown-deep);font-size:1rem;cursor:pointer;transition:all .2s; }
+               background:var(--color-surface-muted);border:1px solid var(--color-border);color:var(--color-brown-deep);font-size:1rem;cursor:pointer;transition:all .2s; }
         .cqb:hover { background:var(--color-green);color:#FFFDF5;border-color:var(--color-green); }
-        .pay-opt { display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;border:2px solid #E8DFCE;
-                   cursor:pointer;transition:all .22s;background:#FAF6EE; }
-        .pay-opt.selected { border-color:var(--color-green);background:rgba(40,85,28,0.06); }
-        .drawer-input { width:100%;padding:11px 14px;border-radius:10px;border:1px solid #E8DFCE;background:#FAF6EE;
-                        font-size:.88rem;font-family:inherit;outline:none;transition:border .2s; }
+        .pay-opt { display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;border:2px solid var(--color-border);
+                   cursor:pointer;transition:all .22s;background:var(--color-surface-muted); }
+        .pay-opt.selected { border-color:var(--color-green);background:rgba(40,85,28,0.10); }
+        [data-theme="night"] .pay-opt.selected { background:rgba(245,211,92,0.10); }
+        .drawer-input { width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--color-border);background:var(--color-surface-muted);
+                        color:var(--color-text-primary);font-size:.88rem;font-family:inherit;outline:none;transition:border .2s; }
+        .drawer-input::placeholder { color:var(--color-text-tertiary);opacity:.75; }
         .drawer-input:focus { border-color:var(--color-green); }
       `}</style>
 
@@ -133,13 +135,13 @@ export default function CartDrawer() {
       {/* Panel */}
       <div style={{
         position:'relative', width:'100%', maxWidth:480, height:'100%',
-        background:'#FFFDF5', boxShadow:'-8px 0 40px rgba(0,0,0,0.22)',
+        background:'var(--color-surface-raised)', boxShadow:'-8px 0 40px rgba(0,0,0,0.22)',
         display:'flex', flexDirection:'column', zIndex:10,
         animation:'slideInRight .3s cubic-bezier(.4,0,.2,1)',
       }}>
 
         {/* ── Header ── */}
-        <div style={{ padding:'18px 22px', borderBottom:'1px solid #E8DFCE', background:'#FAF6EE', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div style={{ padding:'18px 22px', borderBottom:'1px solid var(--color-border)', background:'var(--color-card-bg)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             {/* Tab switcher */}
             <div style={{ display:'flex', gap:6 }}>
@@ -150,14 +152,14 @@ export default function CartDrawer() {
                     fontFamily:'inherit', cursor:'pointer', border:'1px solid transparent', transition:'all .2s',
                     background: (step === t || (t==='cart' && (step==='checkout'||step==='success'))) ? 'var(--color-green)' : 'transparent',
                     color:      (step === t || (t==='cart' && (step==='checkout'||step==='success'))) ? '#FFFDF5' : 'var(--color-brown)',
-                    borderColor:(step === t || (t==='cart' && (step==='checkout'||step==='success'))) ? 'var(--color-green)' : '#D8C9A4',
+                    borderColor:(step === t || (t==='cart' && (step==='checkout'||step==='success'))) ? 'var(--color-green)' : 'var(--color-border)',
                   }}>
                   {t === 'cart' ? 'Bag' : 'Track'}
                 </button>
               ))}
             </div>
           </div>
-          <button onClick={handleClose} style={{ width:30,height:30,borderRadius:'50%',background:'rgba(0,0,0,0.05)',border:'none',cursor:'pointer',fontSize:'0.9rem',display:'flex',alignItems:'center',justifyContent:'center' }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button onClick={handleClose} style={{ width:30,height:30,borderRadius:'50%',background:'var(--color-surface-muted)',border:'1px solid var(--color-border)',cursor:'pointer',fontSize:'0.9rem',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--color-text-primary)' }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
 
         {/* ── Scrollable Body ── */}
@@ -179,8 +181,8 @@ export default function CartDrawer() {
             ) : (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                 {items.map((item) => (
-                  <div key={item.id} style={{ display:'flex', gap:12, padding:'12px', borderRadius:14, background:'#FAF6EE', border:'1px solid #E8DFCE', alignItems:'center' }}>
-                    <div style={{ width:54, height:54, borderRadius:10, overflow:'hidden', flexShrink:0, border:'1px solid #E8DFCE', background:'#EEE8D5' }}>
+                  <div key={item.id} style={{ display:'flex', gap:12, padding:'12px', borderRadius:14, background:'var(--color-card-bg)', border:'1px solid var(--color-border)', alignItems:'center' }}>
+                    <div style={{ width:54, height:54, borderRadius:10, overflow:'hidden', flexShrink:0, border:'1px solid var(--color-border)', background:'var(--color-surface-muted)' }}>
                       <img src={item.img} alt={item.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={(e) => { e.currentTarget.style.display='none'; }} />
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
@@ -228,7 +230,7 @@ export default function CartDrawer() {
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                   {/* COD */}
                   <div className={`pay-opt${paymentMethod === 'cod' ? ' selected' : ''}`} onClick={() => setPaymentMethod('cod')}>
-                    <div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${paymentMethod==='cod'?'var(--color-green)':'#D8C9A4'}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
+                    <div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${paymentMethod==='cod'?'var(--color-green)':'var(--color-border)'}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
                       {paymentMethod === 'cod' && <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--color-green)' }} />}
                     </div>
                     <div>
@@ -243,7 +245,7 @@ export default function CartDrawer() {
 
                   {/* Visit Store */}
                   <div className={`pay-opt${paymentMethod === 'visit' ? ' selected' : ''}`} onClick={() => setPaymentMethod('visit')}>
-                    <div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${paymentMethod==='visit'?'var(--color-green)':'#D8C9A4'}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
+                    <div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${paymentMethod==='visit'?'var(--color-green)':'var(--color-border)'}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
                       {paymentMethod === 'visit' && <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--color-green)' }} />}
                     </div>
                     <div>
@@ -288,7 +290,7 @@ export default function CartDrawer() {
                 {paymentMethod === 'cod' ? ' Our bakers are preparing your fresh artisan treats for delivery.' : ' Your order is reserved — please visit us at Lokanthali Bakery.'}
               </p>
 
-              <div style={{ padding:'16px 20px', borderRadius:14, background:'#FAF6EE', border:'1px solid #E8DFCE', marginBottom:22, textAlign:'left', display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ padding:'16px 20px', borderRadius:14, background:'var(--color-card-bg)', border:'1px solid var(--color-border)', marginBottom:22, textAlign:'left', display:'flex', flexDirection:'column', gap:10 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', fontSize:'.82rem' }}>
                   <span style={{ color:'var(--color-text-tertiary)' }}>Order ID:</span>
                   <span style={{ fontWeight:700, color:'var(--color-brown-deep)', fontFamily:'monospace', letterSpacing:.5 }}>{lastOrderId}</span>
@@ -338,7 +340,7 @@ export default function CartDrawer() {
                 const currentStep = steps.indexOf(order.status);
 
                 return (
-                  <div key={order.id} style={{ background:'#FAF6EE', borderRadius:16, border:'1px solid #E8DFCE', padding:'18px', marginBottom:16 }}>
+                  <div key={order.id} style={{ background:'var(--color-card-bg)', borderRadius:16, border:'1px solid var(--color-border)', padding:'18px', marginBottom:16 }}>
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
                       <span style={{ fontFamily:'monospace', fontWeight:700, fontSize:'.88rem', color:'var(--color-brown-deep)' }}>{order.id}</span>
                       <span style={{ padding:'4px 12px', borderRadius:9999, fontSize:'.72rem', fontWeight:700, background:cfg.bg, color:cfg.color, border:`1px solid ${cfg.border}` }}>
@@ -356,12 +358,12 @@ export default function CartDrawer() {
                             <div key={s} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', position:'relative' }}>
                               {/* connector line */}
                               {i < steps.length - 1 && (
-                                <div style={{ position:'absolute', top:12, left:'50%', width:'100%', height:3, background: i < currentStep ? 'var(--color-green)' : '#E8DFCE', zIndex:0, transition:'background .4s' }} />
+                                <div style={{ position:'absolute', top:12, left:'50%', width:'100%', height:3, background: i < currentStep ? 'var(--color-green)' : 'var(--color-border)', zIndex:0, transition:'background .4s' }} />
                               )}
-                              <div style={{ width:24, height:24, borderRadius:'50%', background: done ? 'var(--color-green)' : '#E8DFCE', color: done ? '#FFFDF5' : '#BBB', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.72rem', zIndex:1, position:'relative', transition:'all .4s', border:`2px solid ${done ? 'var(--color-green)' : '#E8DFCE'}` }}>
+                              <div style={{ width:24, height:24, borderRadius:'50%', background: done ? 'var(--color-green)' : 'var(--color-surface-muted)', color: done ? '#FFFDF5' : 'var(--color-text-tertiary)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.72rem', zIndex:1, position:'relative', transition:'all .4s', border:`2px solid ${done ? 'var(--color-green)' : 'var(--color-border)'}` }}>
                                 {done ? '✓' : i + 1}
                               </div>
-                              <div style={{ fontSize:'.6rem', fontWeight:600, color: done ? 'var(--color-green)' : '#BBB', marginTop:5, textAlign:'center', letterSpacing:'.2px', lineHeight:1.3 }}>
+                              <div style={{ fontSize:'.6rem', fontWeight:600, color: done ? 'var(--color-green)' : 'var(--color-text-tertiary)', marginTop:5, textAlign:'center', letterSpacing:'.2px', lineHeight:1.3 }}>
                                 {sCfg.label}
                               </div>
                             </div>
@@ -388,7 +390,7 @@ export default function CartDrawer() {
                           </ul>
                         </div>
                       )}
-                      <div style={{ display:'flex', justifyContent:'space-between', borderTop:'1px solid #E8DFCE', paddingTop:8, marginTop:4 }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', borderTop:'1px solid var(--color-border)', paddingTop:8, marginTop:4 }}>
                         <span style={{ color:'var(--color-text-tertiary)' }}>Total:</span>
                         <span style={{ fontFamily:'var(--font-display)', fontWeight:600, color:'var(--color-green)', fontSize:'1rem' }}>NPR {order.total.toLocaleString()}</span>
                       </div>
@@ -415,7 +417,7 @@ export default function CartDrawer() {
 
         {/* ── Footer / Summary ── */}
         {items.length > 0 && (step === 'cart' || step === 'checkout') && (
-          <div style={{ padding:'18px 22px', borderTop:'1px solid #E8DFCE', background:'#FAF6EE' }}>
+          <div style={{ padding:'18px 22px', borderTop:'1px solid var(--color-border)', background:'var(--color-card-bg)' }}>
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5, fontSize:'.84rem', color:'var(--color-text-tertiary)' }}>
               <span>Subtotal</span>
               <span style={{ fontWeight:600, color:'var(--color-brown-deep)' }}>NPR {subtotal.toLocaleString()}</span>
@@ -439,7 +441,7 @@ export default function CartDrawer() {
             ) : (
               <div style={{ display:'flex', gap:10 }}>
                 <button type="button" onClick={() => setStep('cart')}
-                  style={{ padding:'13px 18px', borderRadius:9999, background:'transparent', border:'1.5px solid #E8DFCE', color:'var(--color-brown-deep)', fontSize:'.84rem', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+                  style={{ padding:'13px 18px', borderRadius:9999, background:'transparent', border:'1.5px solid var(--color-border)', color:'var(--color-brown-deep)', fontSize:'.84rem', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
                   ← Back
                 </button>
                 <button type="submit" form="checkout-form" disabled={submitting}

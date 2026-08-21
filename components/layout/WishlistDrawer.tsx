@@ -163,7 +163,7 @@ export default function WishlistDrawer() {
                       overflow: 'hidden',
                       flexShrink: 0,
                       border: '1px solid var(--color-border)',
-                      background: '#EEE8D5',
+                      background: 'var(--color-surface-muted, #EEE8D5)',
                     }}
                   >
                     <img
