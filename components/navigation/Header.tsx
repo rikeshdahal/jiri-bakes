@@ -239,6 +239,87 @@ export default function Header() {
         .vg-logo-wrap:active {
           transform: scale(0.96);
         }
+
+        /* ─── Responsive Navbar ─── */
+        .hamburger-btn {
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 1.5px solid var(--color-border);
+          background: var(--color-surface-raised);
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hamburger-btn:hover {
+          border-color: #F5D35C;
+          box-shadow: 0 0 14px rgba(245, 211, 92, 0.35);
+        }
+
+        .hamburger-btn:active {
+          transform: scale(0.92);
+        }
+
+        @keyframes drawerSlideDown {
+          from { opacity: 0; transform: translateY(-12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vg-mobile-drawer {
+          animation: drawerSlideDown 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .vg-mobile-drawer a {
+          text-decoration: none;
+          font-family: var(--font-body);
+          transition: color 0.2s ease, padding-left 0.2s ease;
+        }
+
+        .vg-mobile-drawer a:hover,
+        .vg-mobile-drawer a.active {
+          padding-left: 6px;
+        }
+
+        @media (max-width: 920px) {
+          .nav-links-desktop {
+            display: none !important;
+          }
+          .hamburger-btn {
+            display: flex !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .vg-actions {
+            gap: 8px !important;
+          }
+          .vg-cart-btn {
+            width: 40px;
+            padding: 0 !important;
+            justify-content: center;
+          }
+          .cart-label {
+            display: none !important;
+          }
+          .vg-logo-wrap img {
+            height: 42px !important;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .vg-theme-btn {
+            width: 36px;
+            height: 36px;
+          }
+          .vg-logo-wrap img {
+            height: 38px !important;
+          }
+        }
       `}</style>
 
       <nav
@@ -335,7 +416,7 @@ export default function Header() {
           </ul>
 
           {/* Right Action Icons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="vg-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {/* ─── Day / Night Theme Toggle Switch (ICON ONLY) ─── */}
             <button
               onClick={toggleTheme}
@@ -436,7 +517,7 @@ export default function Header() {
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
-              <span style={{ fontSize: '0.84rem', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+              <span className="cart-label" style={{ fontSize: '0.84rem', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
                 {count > 0 ? `${count} items` : 'Bag'}
               </span>
             </button>
@@ -447,12 +528,7 @@ export default function Header() {
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileOpen}
-              style={{
-                display: 'none',
-                flexDirection: 'column',
-                gap: 5,
-                padding: 4,
-              }}
+              style={{ padding: 4 }}
             >
               <span style={{
                 display: 'block', width: 22, height: 2, borderRadius: 2,
@@ -479,13 +555,17 @@ export default function Header() {
         {/* Mobile Navigation Drawer */}
         {mobileOpen && (
           <div
+            className="vg-mobile-drawer"
             style={{
-              padding: '24px',
+              padding: '20px 24px 24px',
               background: 'var(--header-bg)',
+              backdropFilter: 'blur(18px)',
               borderBottom: '1.5px solid var(--color-border)',
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
+              gap: 4,
+              maxHeight: 'calc(100vh - var(--header-height))',
+              overflowY: 'auto',
             }}
           >
             {navLinks.map((link) => (
@@ -493,12 +573,14 @@ export default function Header() {
                 key={link.id}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href, link.id)}
+                className={activeSection === link.id ? 'active' : ''}
                 style={{
                   fontSize: '1rem',
-                  fontWeight: 600,
+                  fontWeight: activeSection === link.id ? 700 : 500,
                   color: activeSection === link.id ? '#F5D35C' : 'var(--color-text-primary)',
-                  padding: '8px 0',
+                  padding: '12px 0',
                   textDecoration: 'none',
+                  borderBottom: '1px solid var(--color-border)',
                 }}
               >
                 {link.label}

@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#E87B32',
+  baking: '#8A7654',
+  ready: '#28551C',
+  completed: '#27ae60',
+  delivered: '#27ae60',
+  cancelled: '#c0392b',
+};
+
 interface DashboardStats {
   totalProducts: number;
   totalOrders: number;
@@ -306,7 +315,8 @@ export default function AdminDashboard() {
             No orders recorded yet.
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <>
+          <div style={{ overflowX: 'auto' }} className="admin-orders-table-wrapper">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--color-border)' }}>
@@ -361,7 +371,7 @@ export default function AdminDashboard() {
                             color: '#2980b9',
                             border: '1px solid rgba(41, 128, 185, 0.3)',
                           }}>
-                            🏪 Visit Shop
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visit Shop
                           </span>
                         ) : (
                           <span style={{
@@ -376,7 +386,7 @@ export default function AdminDashboard() {
                             color: '#E87B32',
                             border: '1px solid rgba(232, 123, 50, 0.3)',
                           }}>
-                            💵 COD
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/></svg> COD
                           </span>
                         )}
                       </td>
@@ -411,8 +421,47 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card View for Orders */}
+          <div className="admin-orders-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: 12 }}>
+            {recentOrders.map((o) => (
+              <div key={o.id} style={{
+                background: '#111C38', borderRadius: 12, border: '1px solid rgba(245,211,92,0.15)',
+                padding: '16px', display: 'flex', flexDirection: 'column', gap: 8
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#94A3B8' }}>{o.id}</span>
+                  <span style={{ padding: '4px 10px', borderRadius: 9999, fontSize: '0.68rem', fontWeight: 700, background: STATUS_COLORS[o.status] || 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                    {o.status}
+                  </span>
+                </div>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#FFFDF5' }}>{o.customer_name}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                  <span style={{ color: '#94A3B8' }}>{o.payment_method === 'visit' ? 'Visit Shop' : 'COD'}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', color: '#F5D35C', fontWeight: 600 }}>NPR {o.total.toLocaleString()}</span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                  {new Date(o.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            ))}
+            {recentOrders.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '30px', color: '#64748B', fontSize: '0.85rem' }}>No orders yet.</div>
+            )}
+          </div>
+          </>
         )}
       </div>
+
+      <style>{`
+@media (max-width: 768px) {
+  .admin-orders-table-wrapper { display: none !important; }
+  .admin-orders-mobile-cards { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .admin-orders-mobile-cards { display: none !important; }
+}
+      `}</style>
     </div>
   );
 }

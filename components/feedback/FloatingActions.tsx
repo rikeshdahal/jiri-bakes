@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useTheme } from '../layout/ThemeContext';
 
 export default function FloatingActions() {
+  const pathname = usePathname();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [visible, setVisible] = useState(false);
   const { theme } = useTheme();
   const isNight = theme === 'night';
+
+  if (pathname.startsWith('/admin')) return null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,7 +41,7 @@ export default function FloatingActions() {
   const strokeDashoffset = circumference - (scrollProgress / 100) * circumference;
 
   const whatsappNumber = '9779841234567';
-  const whatsappMessage = encodeURIComponent('Hello Jiri Bakes! 🥐 I would like to inquire about your fresh artisan bakery items.');
+  const whatsappMessage = encodeURIComponent('Hello Jiri Bakes! I would like to inquire about your fresh artisan bakery items.');
 
   return (
     <>

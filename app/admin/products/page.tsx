@@ -113,7 +113,7 @@ export default function AdminProductsPage() {
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
       }}>
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className="admin-products-table-wrapper">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'rgba(255, 255, 255, 0.03)', borderBottom: '1px solid var(--color-border)' }}>
@@ -192,7 +192,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     {p.featured ? (
-                      <span style={{ color: '#27ae60', fontSize: '0.8rem', fontWeight: 600 }}>★ Showcase</span>
+                      <span style={{ color: '#27ae60', fontSize: '0.8rem', fontWeight: 600 }}><svg width="12" height="12" viewBox="0 0 24 24" fill="#27ae60" stroke="#27ae60" strokeWidth="1" style={{verticalAlign:'-1px',marginRight:2}}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Showcase</span>
                     ) : (
                       <span style={{ color: '#bbb', fontSize: '0.75rem' }}>Standard</span>
                     )}
@@ -247,7 +247,45 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="admin-products-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: 12 }}>
+          {filtered.map((p) => (
+            <div key={p.id} style={{
+              background: '#111C38', borderRadius: 12, border: '1px solid rgba(245,211,92,0.15)',
+              padding: 16, display: 'flex', gap: 14, alignItems: 'center'
+            }}>
+              <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#1a2744' }}>
+                {p.image ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '1.2rem' }}>🍞</div>
+                )}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#FFFDF5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: 2 }}>{p.category}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+                  <span style={{ fontFamily: 'var(--font-display)', color: '#F5D35C', fontWeight: 600 }}>NPR {p.price.toLocaleString()}</span>
+                  {p.featured && <span style={{ fontSize: '0.68rem', color: '#27ae60', fontWeight: 600 }}>Featured</span>}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                <Link href={`/admin/products/${p.id}`} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(245,211,92,0.12)', color: '#F5D35C', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none', textAlign: 'center', border: '1px solid rgba(245,211,92,0.2)' }}>Edit</Link>
+                <button onClick={() => { if (confirm('Delete this product?')) handleDelete(p.id); }} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(192,57,43,0.15)', color: '#e74c3c', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(192,57,43,0.25)', cursor: 'pointer' }}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <style>{`
+@media (max-width: 768px) {
+  .admin-products-table-wrapper { display: none !important; }
+  .admin-products-mobile-cards { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .admin-products-mobile-cards { display: none !important; }
+}
+      `}</style>
     </div>
   );
 }

@@ -111,7 +111,8 @@ export default function AdminTestimonialsPage() {
             No testimonials yet.
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <>
+          <div style={{ overflowX: 'auto' }} className="admin-testimonials-table-wrapper">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
@@ -157,14 +158,14 @@ export default function AdminTestimonialsPage() {
                       <button
                         onClick={() => toggleApproved(t)}
                         style={{
-                          position: 'relative', width: 42, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer',
+                          position: 'relative', width: 50, height: 28, borderRadius: 14, border: 'none', cursor: 'pointer',
                           background: t.approved ? 'var(--color-green)' : 'var(--color-border)',
                           transition: 'background 0.25s',
                         }}
                       >
                         <span style={{
-                          position: 'absolute', top: 2, left: t.approved ? 22 : 2,
-                          width: 18, height: 18, borderRadius: 'var(--radius-full)',
+                          position: 'absolute', top: 3, left: t.approved ? 25 : 3,
+                          width: 22, height: 22, borderRadius: 'var(--radius-full)',
                           background: 'var(--color-cream)', transition: 'left 0.25s',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
                         }} />
@@ -190,6 +191,44 @@ export default function AdminTestimonialsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card View */}
+          <div className="admin-testimonials-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: 12 }}>
+            {testimonials.map((t) => (
+              <div key={t.id} style={{
+                background: '#111C38', borderRadius: 12, border: '1px solid rgba(245,211,92,0.15)',
+                padding: 16, display: 'flex', flexDirection: 'column', gap: 10
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(245,211,92,0.15)', color: '#F5D35C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, flexShrink: 0 }}>
+                      {t.initials || t.name?.charAt(0) || '?'}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#FFFDF5' }}>{t.name}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{t.role}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {'★'.repeat(t.rating || 5)}{'☆'.repeat(5 - (t.rating || 5))}
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: '#CBD5E1', lineHeight: 1.5, fontStyle: 'italic' }}>"{t.text}"</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
+                  <span style={{ fontSize: '0.72rem', color: t.approved ? '#27ae60' : '#E87B32', fontWeight: 600 }}>{t.approved ? 'Approved' : 'Pending'}</span>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => toggleApproved(t)} style={{ padding: '6px 12px', borderRadius: 6, background: t.approved ? 'rgba(232,123,50,0.15)' : 'rgba(39,174,96,0.15)', color: t.approved ? '#E87B32' : '#27ae60', fontSize: '0.72rem', fontWeight: 600, border: `1px solid ${t.approved ? 'rgba(232,123,50,0.3)' : 'rgba(39,174,96,0.3)'}`, cursor: 'pointer', minHeight: 36 }}>
+                      {t.approved ? 'Unapprove' : 'Approve'}
+                    </button>
+                    <button onClick={() => { if (t.id && confirm('Delete this testimonial?')) handleDelete(t.id); }} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(192,57,43,0.15)', color: '#e74c3c', fontSize: '0.72rem', fontWeight: 600, border: '1px solid rgba(192,57,43,0.25)', cursor: 'pointer', minHeight: 36 }}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          </>
         )}
       </div>
 
@@ -310,7 +349,9 @@ export default function AdminTestimonialsPage() {
                     style={{
                       fontSize: '1.4rem', background: 'none', border: 'none', cursor: 'pointer',
                       color: n <= form.rating ? 'var(--color-yellow)' : 'var(--color-border)',
-                      transition: 'color 0.15s', padding: '0 2px',
+                      transition: 'color 0.15s',                       padding: '0 2px',
+                      minWidth: 40,
+                      minHeight: 40,
                     }}
                   >
                     {n <= form.rating ? '\u2605' : '\u2606'}
@@ -335,6 +376,16 @@ export default function AdminTestimonialsPage() {
           </form>
         )}
       </div>
+
+      <style>{`
+@media (max-width: 768px) {
+  .admin-testimonials-table-wrapper { display: none !important; }
+  .admin-testimonials-mobile-cards { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .admin-testimonials-mobile-cards { display: none !important; }
+}
+      `}</style>
     </div>
   );
 }

@@ -184,7 +184,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         className={`modern-sidebar ${sidebarOpen ? 'open' : ''}`}
       >
         {/* Brand Header */}
-        <div style={{ padding: '26px 22px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+        <div style={{ padding: '26px 22px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: 13, textDecoration: 'none' }}>
             <div style={{ position: 'relative' }}>
               <img
@@ -321,8 +321,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               disabled={loggingOut}
               title="Logout"
               style={{
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 borderRadius: 8,
                 background: 'rgba(255,255,255,0.06)',
                 border: '1px solid rgba(255,255,255,0.1)',
@@ -332,6 +332,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 justifyContent: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
+                flexShrink: 0,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(192, 57, 43, 0.35)';
@@ -419,16 +420,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <button
               onClick={() => setSidebarOpen(true)}
               className="admin-hamburger-btn"
+              aria-label="Open menu"
               style={{
                 display: 'none',
-                background: 'none',
-                border: 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 cursor: 'pointer',
-                padding: 6,
                 color: '#FFFDF5',
+                flexShrink: 0,
               }}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="18" x2="21" y2="18" />
@@ -445,8 +452,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </div>
 
           {/* Quick Actions & Live Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
+          <div className="admin-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="admin-live-badge" style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
@@ -467,6 +474,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
             <Link
               href="/admin/products/new"
+              className="admin-new-product-link"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -487,8 +495,30 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             >
               <span>+</span>
               <span>New Product</span>
-            </Link>
-          </div>
+          </Link>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="admin-sidebar-close"
+            aria-label="Close menu"
+            style={{
+              display: 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.6)',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
         </header>
 
         {/* Main Content Area */}
@@ -502,6 +532,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         @media (max-width: 960px) {
           .modern-sidebar {
             transform: translateX(-100%) !important;
+            width: 280px !important;
           }
           .modern-sidebar.open {
             transform: translateX(0) !important;
@@ -511,6 +542,30 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           }
           .admin-hamburger-btn {
             display: flex !important;
+          }
+          .admin-sidebar-close {
+            display: flex !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .modern-sidebar {
+            width: 85vw !important;
+            max-width: 300px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .admin-header-actions {
+            gap: 6px !important;
+          }
+          .admin-header-actions .admin-live-badge {
+            display: none !important;
+          }
+          .admin-header-actions .admin-new-product-link {
+            padding: 8px 12px !important;
+            font-size: 0.72rem !important;
+          }
+          .admin-header-actions .admin-new-product-link span:first-child {
+            display: none !important;
           }
         }
       `}</style>

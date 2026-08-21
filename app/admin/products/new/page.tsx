@@ -112,12 +112,12 @@ export default function NewProductPage() {
         <Input label="Product Name" value={form.name} onChange={(e) => update('name', e.target.value)} placeholder="e.g. Honey Glazed Brioche" required />
         <Textarea label="Description" value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Detailed description of the artisan ingredients, notes, etc." />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Input label="Price (NPR)" type="number" value={form.price} onChange={(e) => update('price', e.target.value)} placeholder="e.g. 650" required />
           <Input label="Unit" value={form.unit} onChange={(e) => update('unit', e.target.value)} placeholder="/piece, /loaf, /whole" />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Select
             label="Category"
             value={form.category}
@@ -138,7 +138,7 @@ export default function NewProductPage() {
           <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-brown-deep)', marginBottom: 6 }}>
             Product Image
           </label>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
             <input
               type="text"
               value={form.image}
@@ -170,12 +170,12 @@ export default function NewProductPage() {
               gap: 6,
             }}>
               <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
-              {uploading ? 'Uploading...' : '📁 Upload Photo'}
+              {uploading ? 'Uploading...' : 'Upload Photo'}
             </label>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Select
             label="Rating"
             value={form.rating}
@@ -205,18 +205,18 @@ export default function NewProductPage() {
                 onChange={(e) => update('is_bake_of_week', e.target.checked)}
                 style={{ width: 18, height: 18, accentColor: '#F5D35C' }}
               />
-              👑 Bake of the Week (Hero Floating Card)
+              Bake of the Week (Hero Floating Card)
             </label>
           </div>
         </div>
 
         {form.image && (
-          <div style={{ borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)', maxHeight: 220, position: 'relative' }}>
-            <img src={form.image} alt="Preview" style={{ width: '100%', height: 220, objectFit: 'cover' }} />
+          <div style={{ borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)', maxHeight: 180, position: 'relative' }}>
+            <img src={form.image} alt="Preview" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 12, paddingTop: 8 }}>
+        <div style={{ display: 'flex', gap: 12, paddingTop: 8, flexWrap: 'wrap' }}>
           <button type="submit" disabled={saving || uploading} style={{
             padding: '12px 32px', borderRadius: 'var(--radius-full)',
             background: 'var(--color-green)', color: 'var(--color-cream)',
@@ -235,6 +235,13 @@ export default function NewProductPage() {
           </button>
         </div>
       </form>
+      <style>{`
+        @media (max-width: 600px) {
+          .admin-form-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

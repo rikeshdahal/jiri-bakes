@@ -17,11 +17,11 @@ interface TrackedOrder {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: string; step: number }> = {
-  pending:   { label: 'Order Received',   color: '#E87B32', bg: 'rgba(232,123,50,0.12)',  border: 'rgba(232,123,50,0.3)',  icon: '📋', step: 1 },
-  baking:    { label: 'Being Baked',      color: '#8A7654', bg: 'rgba(245,211,92,0.18)',  border: 'rgba(245,211,92,0.4)',  icon: '👨‍🍳', step: 2 },
-  ready:     { label: 'Ready for Pickup', color: '#28551C', bg: 'rgba(40,85,28,0.12)',    border: 'rgba(40,85,28,0.25)',   icon: '✅', step: 3 },
-  completed: { label: 'Delivered',        color: '#27ae60', bg: 'rgba(39,174,96,0.12)',   border: 'rgba(39,174,96,0.25)',  icon: '🎉', step: 4 },
-  cancelled: { label: 'Cancelled',        color: '#c0392b', bg: 'rgba(192,57,43,0.10)',   border: 'rgba(192,57,43,0.25)',  icon: '❌', step: 0 },
+  pending:   { label: 'Order Received',   color: '#E87B32', bg: 'rgba(232,123,50,0.12)',  border: 'rgba(232,123,50,0.3)',  icon: '○', step: 1 },
+  baking:    { label: 'Being Baked',      color: '#8A7654', bg: 'rgba(245,211,92,0.18)',  border: 'rgba(245,211,92,0.4)',  icon: '◌', step: 2 },
+  ready:     { label: 'Ready for Pickup', color: '#28551C', bg: 'rgba(40,85,28,0.12)',    border: 'rgba(40,85,28,0.25)',   icon: '◉', step: 3 },
+  completed: { label: 'Delivered',        color: '#27ae60', bg: 'rgba(39,174,96,0.12)',   border: 'rgba(39,174,96,0.25)',  icon: '★', step: 4 },
+  cancelled: { label: 'Cancelled',        color: '#c0392b', bg: 'rgba(192,57,43,0.10)',   border: 'rgba(192,57,43,0.25)',  icon: '✕', step: 0 },
 };
 
 export default function CartDrawer() {
@@ -152,12 +152,12 @@ export default function CartDrawer() {
                     color:      (step === t || (t==='cart' && (step==='checkout'||step==='success'))) ? '#FFFDF5' : 'var(--color-brown)',
                     borderColor:(step === t || (t==='cart' && (step==='checkout'||step==='success'))) ? 'var(--color-green)' : '#D8C9A4',
                   }}>
-                  {t === 'cart' ? '🛒 Bag' : '📦 Track'}
+                  {t === 'cart' ? 'Bag' : 'Track'}
                 </button>
               ))}
             </div>
           </div>
-          <button onClick={handleClose} style={{ width:30,height:30,borderRadius:'50%',background:'rgba(0,0,0,0.05)',border:'none',cursor:'pointer',fontSize:'0.9rem',display:'flex',alignItems:'center',justifyContent:'center' }}>✕</button>
+          <button onClick={handleClose} style={{ width:30,height:30,borderRadius:'50%',background:'rgba(0,0,0,0.05)',border:'none',cursor:'pointer',fontSize:'0.9rem',display:'flex',alignItems:'center',justifyContent:'center' }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
 
         {/* ── Scrollable Body ── */}
@@ -167,7 +167,7 @@ export default function CartDrawer() {
           {step === 'cart' && (
             items.length === 0 ? (
               <div style={{ textAlign:'center', padding:'56px 20px', color:'var(--color-text-tertiary)' }}>
-                <div style={{ fontSize:'3rem', marginBottom:14 }}>🥐</div>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:14}}><path d="M12 2C9.5 2 7.1 3.2 5.6 5.2L2 10l3 1 2-3c1.2 1.5 3.1 2.5 5 2.5s3.8-1 5-2.5l2 3 3-1-3.6-5C16.9 3.2 14.5 2 12 2z"/><path d="M5 11c-1 1.5-2 3.5-2 5.5C3 20 7 22 12 22s9-2 9-5.5c0-2-1-4-2-5.5"/></svg>
                 <h4 style={{ fontFamily:'var(--font-display)', fontSize:'1.3rem', color:'var(--color-brown-deep)', marginBottom:8 }}>Your bag is empty</h4>
                 <p style={{ fontSize:'.85rem', maxWidth:260, margin:'0 auto 24px', lineHeight:1.65 }}>
                   Explore our artisan sourdoughs, honey cakes, and morning croissants to fill your bag.
@@ -193,7 +193,7 @@ export default function CartDrawer() {
                       <button className="cqb" onClick={() => updateQty(item.id, -1)} aria-label="Decrease">−</button>
                       <span style={{ fontSize:'.88rem', fontWeight:700, minWidth:18, textAlign:'center', color:'var(--color-brown-deep)' }}>{item.qty}</span>
                       <button className="cqb" onClick={() => updateQty(item.id, 1)}  aria-label="Increase">+</button>
-                      <button onClick={() => removeItem(item.id)} style={{ background:'none', border:'none', cursor:'pointer', color:'#c0392b', fontSize:'.8rem', marginLeft:4, padding:4 }} title="Remove">✕</button>
+                      <button onClick={() => removeItem(item.id)} style={{ background:'none', border:'none', cursor:'pointer', color:'#c0392b', fontSize:'.8rem', marginLeft:4, padding:4 }} title="Remove"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                     </div>
                   </div>
                 ))}
@@ -232,7 +232,7 @@ export default function CartDrawer() {
                       {paymentMethod === 'cod' && <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--color-green)' }} />}
                     </div>
                     <div>
-                      <div style={{ fontWeight:700, fontSize:'.88rem', color:'var(--color-brown-deep)', marginBottom:3 }}>💵 Cash on Delivery</div>
+                      <div style={{ fontWeight:700, fontSize:'.88rem', color:'var(--color-brown-deep)', marginBottom:3, display:'flex', alignItems:'center', gap:6 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/><path d="M9 10h6"/><path d="M9 14h6"/></svg> Cash on Delivery</div>
                       <div style={{ fontSize:'.78rem', color:'var(--color-text-tertiary)', lineHeight:1.5 }}>
                         Pay cash when your order arrives at your door. Delivery within Lokanthali area.
                         {deliveryFee > 0 && <span style={{ color:'var(--color-orange)', fontWeight:600 }}> +NPR {deliveryFee} delivery fee.</span>}
@@ -247,7 +247,7 @@ export default function CartDrawer() {
                       {paymentMethod === 'visit' && <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--color-green)' }} />}
                     </div>
                     <div>
-                      <div style={{ fontWeight:700, fontSize:'.88rem', color:'var(--color-brown-deep)', marginBottom:3 }}>🏪 Visit Store & Pay</div>
+                      <div style={{ fontWeight:700, fontSize:'.88rem', color:'var(--color-brown-deep)', marginBottom:3, display:'flex', alignItems:'center', gap:6 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visit Store & Pay</div>
                       <div style={{ fontSize:'.78rem', color:'var(--color-text-tertiary)', lineHeight:1.5 }}>
                         Reserve your order and pay in person at our bakery in Lokanthali, Bhaktapur. Mon–Sat 7AM–8PM.
                         <span style={{ color:'var(--color-green)', fontWeight:600 }}> No delivery fee.</span>
@@ -273,7 +273,7 @@ export default function CartDrawer() {
               </div>
 
               <div style={{ padding:'10px 14px', borderRadius:10, background:'rgba(40,85,28,.07)', border:'1px solid rgba(40,85,28,.15)', fontSize:'.78rem', color:'var(--color-green)', lineHeight:1.5 }}>
-                📦 After placing, use your <strong>Order ID</strong> or <strong>phone number</strong> in the <em>Track</em> tab to follow your order live.
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-2px',marginRight:2}}><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> After placing, use your <strong>Order ID</strong> or <strong>phone number</strong> in the <em>Track</em> tab to follow your order live.
               </div>
             </form>
           )}
@@ -281,7 +281,7 @@ export default function CartDrawer() {
           {/* ════ SUCCESS VIEW ════ */}
           {step === 'success' && (
             <div style={{ textAlign:'center', padding:'40px 10px' }}>
-              <div style={{ width:70, height:70, borderRadius:'50%', background:'rgba(40,85,28,.12)', color:'var(--color-green)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 18px', fontSize:'1.8rem' }}>✓</div>
+              <div style={{ width:70, height:70, borderRadius:'50%', background:'rgba(40,85,28,.12)', color:'var(--color-green)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 18px', fontSize:'1.8rem' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
               <h3 style={{ fontFamily:'var(--font-display)', fontSize:'1.55rem', color:'var(--color-brown-deep)', marginBottom:8 }}>Order Confirmed!</h3>
               <p style={{ fontSize:'.85rem', color:'var(--color-text-tertiary)', marginBottom:22, lineHeight:1.65 }}>
                 Thank you, <strong>{customerName}</strong>!
@@ -301,7 +301,7 @@ export default function CartDrawer() {
 
               <button onClick={() => { setTrackInput(lastOrderId); setStep('track'); }}
                 style={{ width:'100%', padding:'13px', borderRadius:9999, background:'rgba(40,85,28,.1)', color:'var(--color-green)', fontSize:'.88rem', fontWeight:600, border:'1.5px solid rgba(40,85,28,.2)', cursor:'pointer', marginBottom:10, transition:'all .2s' }}>
-                📦 Track My Order
+                Track My Order
               </button>
               <button onClick={handleClose}
                 style={{ width:'100%', padding:'13px', borderRadius:9999, background:'var(--color-green)', color:'#FFFDF5', fontSize:'.88rem', fontWeight:600, border:'none', cursor:'pointer', boxShadow:'0 4px 14px rgba(40,85,28,.25)' }}>
@@ -405,7 +405,7 @@ export default function CartDrawer() {
 
               {trackedOrders.length === 0 && !trackError && (
                 <div style={{ textAlign:'center', padding:'36px 0', color:'var(--color-text-tertiary)', fontSize:'.86rem' }}>
-                  <div style={{ fontSize:'2.5rem', marginBottom:12 }}>📦</div>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:12}}><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                   Enter your details above to see your order status.
                 </div>
               )}

@@ -87,7 +87,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         showToast?.(`Removed "${item.name}" from your wishlist`, 'info');
       } else {
         setItems((prev) => [...prev, item]);
-        showToast?.(`Added "${item.name}" to your wishlist ❤️`, 'success');
+        showToast?.(`Added "${item.name}" to your wishlist`, 'success');
       }
     },
     [items, showToast]

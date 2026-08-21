@@ -125,7 +125,7 @@ export default function AdminOrdersPage() {
             boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
           }}
         >
-          <span>🔄 Refresh</span>
+          <span style={{display:'inline-flex',alignItems:'center',gap:4}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Refresh</span>
         </button>
       </div>
 
@@ -138,14 +138,15 @@ export default function AdminOrdersPage() {
           </span>
           {[
             { key: 'all', label: 'All Types', count: orders.length },
-            { key: 'cod', label: '💵 Cash on Delivery', count: orders.filter((o) => !isVisitShop(o)).length },
-            { key: 'visit', label: '🏪 Visit Shop', count: orders.filter((o) => isVisitShop(o)).length },
+            { key: 'cod', label: 'Cash on Delivery', count: orders.filter((o) => !isVisitShop(o)).length },
+            { key: 'visit', label: 'Visit Shop', count: orders.filter((o) => isVisitShop(o)).length },
           ].map((t) => (
             <button
               key={t.key}
               onClick={() => setTypeFilter(t.key as typeof typeFilter)}
               style={{
                 padding: '7px 16px',
+                minHeight: 40,
                 borderRadius: 9999,
                 fontSize: '0.78rem',
                 fontWeight: 600,
@@ -176,6 +177,7 @@ export default function AdminOrdersPage() {
                 onClick={() => setStatusFilter(s)}
                 style={{
                   padding: '6px 14px',
+                  minHeight: 40,
                   borderRadius: 9999,
                   fontSize: '0.75rem',
                   fontWeight: 600,
@@ -228,6 +230,7 @@ export default function AdminOrdersPage() {
                 {/* Header Row */}
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : order.id)}
+                  className="admin-order-card-header"
                   style={{
                     width: '100%',
                     display: 'flex',
@@ -273,7 +276,7 @@ export default function AdminOrdersPage() {
                           border: '1px solid rgba(41, 128, 185, 0.3)',
                         }}
                       >
-                        🏪 Visit Shop / Store Pickup
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visit Shop / Store Pickup
                       </span>
                     ) : (
                       <span
@@ -290,7 +293,7 @@ export default function AdminOrdersPage() {
                           border: '1px solid rgba(232, 123, 50, 0.3)',
                         }}
                       >
-                        💵 Cash on Delivery
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/></svg> Cash on Delivery
                       </span>
                     )}
                   </div>
@@ -334,7 +337,7 @@ export default function AdminOrdersPage() {
                           <div>
                             <span style={{ color: 'var(--color-text-tertiary)' }}>Order Type: </span>
                             <strong style={{ color: visitMode ? '#2980b9' : '#E87B32' }}>
-                              {visitMode ? '🏪 Visit Store (Customer will pick up at Lokanthali)' : '💵 Cash on Delivery (Courier Delivery)'}
+                              {visitMode ? 'Visit Store (Customer will pick up at Lokanthali)' : 'Cash on Delivery (Courier Delivery)'}
                             </strong>
                           </div>
                           <div>
@@ -389,7 +392,7 @@ export default function AdminOrdersPage() {
                             disabled={updatingId === order.id || order.status === st}
                             onClick={() => handleStatusChange(order.id, st)}
                             style={{
-                              padding: '6px 14px',
+                              padding: '10px 16px',
                               borderRadius: 9999,
                               fontSize: '0.75rem',
                               fontWeight: 600,
@@ -414,6 +417,16 @@ export default function AdminOrdersPage() {
           })}
         </div>
       )}
+
+      <style>{`
+@media (max-width: 480px) {
+  .admin-order-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+}
+      `}</style>
     </div>
   );
 }

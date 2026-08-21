@@ -50,7 +50,7 @@ export default function AdminNotificationBell() {
 
             // Native browser notification (if permission granted)
             if (Notification.permission === 'granted') {
-              new Notification(`🔔 New Order: ${data.order.customer_name}`, {
+              new Notification(`New Order: ${data.order.customer_name}`, {
                 body: `NPR ${data.order.total.toLocaleString()} – ${data.order.items.map((i: { name: string; quantity: number }) => `${i.name} ×${i.quantity}`).join(', ')}`,
                 icon: '/jiri logo.jpg',
               });
@@ -164,7 +164,8 @@ export default function AdminNotificationBell() {
           position: 'absolute',
           top: 48,
           right: 0,
-          width: 340,
+          width: 'min(340px, calc(100vw - 32px))',
+          maxWidth: 340,
           maxHeight: 480,
           background: '#0D1A33',
           border: '1px solid rgba(245, 211, 92, 0.2)',
@@ -205,7 +206,7 @@ export default function AdminNotificationBell() {
           <div style={{ overflowY: 'auto', maxHeight: 400 }}>
             {notifications.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94A3B8', fontSize: '.84rem' }}>
-                <div style={{ fontSize: '2.2rem', marginBottom: 10 }}>🔕</div>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:10}}><path d="M13.73 21a2 2 0 01-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0118 8"/><path d="M6.26 6.26A5.86 5.86 0 006 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 00-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                 No new orders yet. Notifications appear here instantly when a customer places an order.
               </div>
             ) : (
@@ -222,7 +223,7 @@ export default function AdminNotificationBell() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                     <span style={{ fontWeight: 700, fontSize: '.86rem', color: '#FFFDF5' }}>
-                      🛍️ {n.customer_name}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-2px',marginRight:4}}><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> {n.customer_name}
                     </span>
                     <span style={{ fontFamily: 'var(--font-display)', color: '#F5D35C', fontWeight: 600, fontSize: '.9rem' }}>
                       NPR {n.total.toLocaleString()}
@@ -236,11 +237,11 @@ export default function AdminNotificationBell() {
                       <span style={{ fontSize: '.7rem', color: '#475569', fontFamily: 'monospace' }}>{n.id}</span>
                       {n.payment_method?.toLowerCase().includes('visit') ? (
                         <span style={{ fontSize: '.64rem', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(41,128,185,0.15)', color: '#60A5FA', border: '1px solid rgba(41,128,185,0.3)' }}>
-                          🏦 Visit Shop
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visit Shop
                         </span>
                       ) : (
                         <span style={{ fontSize: '.64rem', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(232,123,50,0.15)', color: '#E87B32', border: '1px solid rgba(232,123,50,0.3)' }}>
-                          💵 COD
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/></svg> COD
                         </span>
                       )}
                     </div>
