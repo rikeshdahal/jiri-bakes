@@ -12,8 +12,8 @@
       "rating": 5,
       "featured": true,
       "display_order": 1,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c2",
@@ -27,9 +27,8 @@
       "rating": 5,
       "featured": true,
       "display_order": 2,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T10:46:15.896Z",
-      "is_bake_of_week": true
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c3",
@@ -43,8 +42,8 @@
       "rating": 5,
       "featured": true,
       "display_order": 3,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c4",
@@ -58,8 +57,8 @@
       "rating": 5,
       "featured": false,
       "display_order": 4,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c5",
@@ -73,8 +72,8 @@
       "rating": 4,
       "featured": false,
       "display_order": 5,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c6",
@@ -88,8 +87,8 @@
       "rating": 5,
       "featured": false,
       "display_order": 6,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c7",
@@ -103,8 +102,8 @@
       "rating": 5,
       "featured": false,
       "display_order": 7,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "c8",
@@ -118,309 +117,64 @@
       "rating": 5,
       "featured": true,
       "display_order": 8,
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
-    },
-    {
-      "id": "p-1787213125180-tly6",
-      "name": "Artisan Matcha Eclair",
-      "description": "Japanese ceremonial grade matcha cream in choux pastry.",
-      "price": 350,
-      "unit": "/piece",
-      "category": "pastry",
-      "badge": "Popular",
-      "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": false,
-      "display_order": 9,
-      "created_at": "2026-08-20T08:05:25.180Z",
-      "updated_at": "2026-08-20T08:05:27.039Z"
-    },
-    {
-      "id": "p-1787214683518-rlq2",
-      "name": "Test",
-      "description": "This is test",
-      "price": 500,
-      "unit": "/piece",
-      "category": "seasonal",
-      "badge": "Fresh Today",
-      "image": "/uploads/1787214638195-yuzi1g.jpg",
-      "rating": 5,
-      "featured": true,
-      "display_order": 10,
-      "created_at": "2026-08-20T08:31:23.518Z",
-      "updated_at": "2026-08-20T08:31:23.518Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     }
   ],
   "orders": [
     {
-      "id": "ord-64619",
-      "customer_name": "Rikesh Dahal",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Visit to store – Lokanthali, Bhaktapur",
-      "items": [
-        {
-          "product_id": "heritage-sourdough-loaf",
-          "name": "Heritage Sourdough Loaf",
-          "price": 650,
-          "quantity": 1
-        }
-      ],
-      "total": 650,
-      "payment_method": "Visit Store / Pay in Person",
-      "status": "pending",
-      "notes": "name Rikesh",
-      "created_at": "2026-08-21T05:12:44.619Z",
-      "updated_at": "2026-08-21T05:12:44.619Z"
-    },
-    {
-      "id": "ord-09295",
-      "customer_name": "Rikesh Dahal",
+      "id": "ord-20962ek",
+      "customer_name": "Rikesh Hacker",
       "customer_phone": "9841255549",
       "customer_email": "",
       "customer_address": "Sinamangal",
       "items": [
         {
-          "product_id": "chocolate-hazelnut-cake",
-          "name": "Chocolate Hazelnut Cake",
-          "price": 2200,
+          "product_id": "c6",
+          "name": "Cinnamon Roll",
+          "price": 220,
           "quantity": 1
         },
-        {
-          "product_id": "butter-croissant",
-          "name": "Butter Croissant",
-          "price": 180,
-          "quantity": 1
-        },
-        {
-          "product_id": "c5",
-          "name": "Strawberry Tart",
-          "price": 650,
-          "quantity": 1
-        }
-      ],
-      "total": 3030,
-      "payment_method": "Cash on Delivery",
-      "status": "pending",
-      "notes": "",
-      "created_at": "2026-08-20T10:58:29.295Z",
-      "updated_at": "2026-08-20T10:58:29.295Z"
-    },
-    {
-      "id": "ord-37365",
-      "customer_name": "Bina Magar",
-      "customer_phone": "9865554433",
-      "customer_email": "",
-      "customer_address": "Gatthaghar, Bhaktapur",
-      "items": [
-        {
-          "product_id": "c3",
-          "name": "Heritage Sourdough Loaf",
-          "price": 650,
-          "quantity": 1
-        }
-      ],
-      "total": 750,
-      "payment_method": "Cash on Delivery",
-      "status": "pending",
-      "notes": "",
-      "created_at": "2026-08-20T09:55:37.365Z",
-      "updated_at": "2026-08-20T09:55:37.365Z"
-    },
-    {
-      "id": "ord-37342",
-      "customer_name": "Suman Shrestha",
-      "customer_phone": "9841112233",
-      "customer_email": "",
-      "customer_address": "Visit to store – Lokanthali, Bhaktapur",
-      "items": [
         {
           "product_id": "c2",
           "name": "Chocolate Hazelnut Tart",
           "price": 950,
-          "quantity": 2
-        }
-      ],
-      "total": 1900,
-      "payment_method": "Visit Store / Pay in Person",
-      "status": "pending",
-      "notes": "",
-      "created_at": "2026-08-20T09:55:37.342Z",
-      "updated_at": "2026-08-20T09:55:37.342Z"
-    },
-    {
-      "id": "ord-07428",
-      "customer_name": "Anita Tamang",
-      "customer_phone": "9812345678",
-      "customer_email": "",
-      "customer_address": "Thimi, Bhaktapur",
-      "items": [
-        {
-          "product_id": "c1",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
           "quantity": 1
-        },
-        {
-          "product_id": "c4",
-          "name": "Butter Croissant",
-          "price": 180,
-          "quantity": 2
         }
       ],
-      "total": 2160,
+      "total": 1270,
       "payment_method": "Cash on Delivery",
-      "status": "pending",
-      "notes": "Slice the cake please",
-      "created_at": "2026-08-20T09:43:27.428Z",
-      "updated_at": "2026-08-20T09:43:27.428Z"
+      "status": "completed",
+      "notes": "pickup at 4 pm",
+      "created_at": "2026-08-21T10:38:40.962Z",
+      "updated_at": "2026-08-21T10:38:55.502Z"
     },
     {
-      "id": "ord-68113",
-      "customer_name": "Rikesh Dahal",
+      "id": "ord-57814cu",
+      "customer_name": "Rikesh Hacker",
       "customer_phone": "9841255549",
       "customer_email": "",
       "customer_address": "Sinamangal",
       "items": [
         {
-          "product_id": "sunflower-cream-cake",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
-          "quantity": 2
-        }
-      ],
-      "total": 3600,
-      "status": "delivered",
-      "notes": "",
-      "created_at": "2026-08-20T09:06:08.113Z",
-      "updated_at": "2026-08-20T09:06:48.647Z"
-    },
-    {
-      "id": "ord-68820",
-      "customer_name": "Track Test User",
-      "customer_phone": "9800000001",
-      "customer_email": "",
-      "customer_address": "Lokanthali",
-      "items": [
-        {
-          "product_id": "c1",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
-          "quantity": 1
-        }
-      ],
-      "total": 1800,
-      "status": "pending",
-      "notes": "",
-      "created_at": "2026-08-20T09:04:28.820Z",
-      "updated_at": "2026-08-20T09:04:28.820Z"
-    },
-    {
-      "id": "ord-19040",
-      "customer_name": "Rikesh Dahal",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Sinamangal",
-      "items": [
-        {
-          "product_id": "sunflower-cream-cake",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
-          "quantity": 1
-        }
-      ],
-      "total": 1900,
-      "status": "pending",
-      "notes": "rikesh dahal",
-      "created_at": "2026-08-20T08:33:39.040Z",
-      "updated_at": "2026-08-20T08:33:39.040Z"
-    },
-    {
-      "id": "ord-25820",
-      "customer_name": "Rikesh Dahal",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Sinamangal",
-      "items": [
-        {
-          "product_id": "test",
-          "name": "Test",
-          "price": 500,
-          "quantity": 2
-        }
-      ],
-      "total": 1100,
-      "status": "confirmed",
-      "notes": "rikesh dahal",
-      "created_at": "2026-08-20T08:32:05.820Z",
-      "updated_at": "2026-08-20T08:32:26.907Z"
-    },
-    {
-      "id": "ord-18182",
-      "customer_name": "rikesh dahal",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Sinamangal",
-      "items": [
-        {
-          "product_id": "sunflower-cream-cake",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
-          "quantity": 1
-        }
-      ],
-      "total": 1900,
-      "status": "pending",
-      "notes": "",
-      "created_at": "2026-08-20T08:25:18.182Z",
-      "updated_at": "2026-08-20T08:25:18.182Z"
-    },
-    {
-      "id": "ord-08827",
-      "customer_name": "Prakash Maharjan",
-      "customer_phone": "+977 9849123456",
-      "customer_email": "",
-      "customer_address": "Lokanthali Chowk, Bhaktapur",
-      "items": [
-        {
-          "product_id": "c1",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
+          "product_id": "chocolate-hazelnut-tart",
+          "name": "Chocolate Hazelnut Tart",
+          "price": 950,
           "quantity": 1
         },
         {
-          "product_id": "c4",
-          "name": "Butter Croissant",
-          "price": 180,
-          "quantity": 3
-        }
-      ],
-      "total": 2340,
-      "status": "pending",
-      "notes": "Please pack in eco-friendly artisan box.",
-      "created_at": "2026-08-20T08:21:48.827Z",
-      "updated_at": "2026-08-20T08:21:48.827Z"
-    },
-    {
-      "id": "ord-27120",
-      "customer_name": "Anil Dangol",
-      "customer_phone": "+977 9812345678",
-      "customer_email": "",
-      "customer_address": "",
-      "items": [
-        {
-          "product_id": "c1",
+          "product_id": "sunflower-cream-cake",
           "name": "Sunflower Cream Cake",
           "price": 1800,
           "quantity": 1
         }
       ],
-      "total": 1800,
-      "status": "confirmed",
-      "notes": "Test order from customer",
-      "created_at": "2026-08-20T08:05:27.120Z",
-      "updated_at": "2026-08-20T08:11:59.972Z"
+      "total": 2750,
+      "payment_method": "Cash on Delivery",
+      "status": "completed",
+      "notes": "pickup at 4 pm",
+      "created_at": "2026-08-21T09:17:37.814Z",
+      "updated_at": "2026-08-21T09:18:59.796Z"
     },
     {
       "id": "ord-101",
@@ -445,8 +199,8 @@
       "total": 2520,
       "status": "completed",
       "notes": "Please add birthday candles and write Happy Birthday Pooja.",
-      "created_at": "2026-08-20T04:04:04.259Z",
-      "updated_at": "2026-08-20T06:04:04.259Z"
+      "created_at": "2026-08-21T05:16:25.713Z",
+      "updated_at": "2026-08-21T07:16:25.713Z"
     },
     {
       "id": "ord-102",
@@ -471,8 +225,8 @@
       "total": 3200,
       "status": "baking",
       "notes": "Please slice the sourdough loaf.",
-      "created_at": "2026-08-20T07:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T08:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     },
     {
       "id": "ord-103",
@@ -491,8 +245,8 @@
       "total": 2200,
       "status": "pending",
       "notes": "Delivery by 4 PM today please.",
-      "created_at": "2026-08-20T08:04:04.259Z",
-      "updated_at": "2026-08-20T08:04:04.259Z"
+      "created_at": "2026-08-21T09:16:25.713Z",
+      "updated_at": "2026-08-21T09:16:25.713Z"
     }
   ],
   "testimonials": [
@@ -501,10 +255,10 @@
       "name": "Anita Shrestha",
       "initials": "AS",
       "role": "Regular Customer",
-      "text": "The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture — absolute perfection every single time.",
+      "text": "The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture â€” absolute perfection every single time.",
       "rating": 5,
       "approved": true,
-      "created_at": "2026-08-17T08:04:04.259Z"
+      "created_at": "2026-08-18T09:16:25.713Z"
     },
     {
       "id": "t2",
@@ -514,7 +268,7 @@
       "text": "Ordered a custom birthday cake and it was stunning. Not only did it look beautiful, but every slice was moist and delicious. Everyone at the party was amazed.",
       "rating": 5,
       "approved": true,
-      "created_at": "2026-08-15T08:04:04.259Z"
+      "created_at": "2026-08-16T09:16:25.713Z"
     },
     {
       "id": "t3",
@@ -524,46 +278,10 @@
       "text": "Their croissants remind me of the ones I had in Paris. Flaky, buttery, and absolutely heavenly. Jiri Bakes has become my weekend ritual.",
       "rating": 5,
       "approved": true,
-      "created_at": "2026-08-12T08:04:04.259Z"
+      "created_at": "2026-08-13T09:16:25.713Z"
     }
   ],
   "settings": [
-    {
-      "key": "site_title",
-      "value": "Jiri Bakes – Simply Organic Artisan Bakery"
-    },
-    {
-      "key": "site_tagline",
-      "value": "Where Flour Meets Feeling"
-    },
-    {
-      "key": "bakery_address",
-      "value": "Lokanthali, Bhaktapur, Nepal"
-    },
-    {
-      "key": "bakery_phone",
-      "value": "+977 1-4567890"
-    },
-    {
-      "key": "bakery_email",
-      "value": "hello@jiribakes.com.np"
-    },
-    {
-      "key": "opening_hours_weekdays",
-      "value": "Mon – Sat: 7:00 AM – 8:00 PM"
-    },
-    {
-      "key": "opening_hours_sunday",
-      "value": "Sunday: 8:00 AM – 6:00 PM"
-    },
-    {
-      "key": "delivery_fee",
-      "value": "100"
-    },
-    {
-      "key": "currency_symbol",
-      "value": "NPR"
-    },
     {
       "key": "site_name",
       "value": "Jiri Bakes"
@@ -571,6 +289,14 @@
     {
       "key": "tagline",
       "value": "Simply Organic Artisan Bakery"
+    },
+    {
+      "key": "site_title",
+      "value": "Jiri Bakes â€“ Simply Organic Artisan Bakery"
+    },
+    {
+      "key": "site_tagline",
+      "value": "Where Flour Meets Feeling"
     },
     {
       "key": "phone",
@@ -586,20 +312,23 @@
     },
     {
       "key": "hours_weekday",
-      "value": "Mon – Sat: 7:00 AM – 8:00 PM"
+      "value": "Mon â€“ Sat: 7:00 AM â€“ 8:00 PM"
     },
     {
       "key": "hours_sunday",
-      "value": "Sunday: 8:00 AM – 6:00 PM"
+      "value": "Sunday: 8:00 AM â€“ 6:00 PM"
     },
     {
       "key": "fresh_bread_time",
       "value": "7:30 AM"
     },
     {
-      "key": "settings",
-      "value": "[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]",
-      "updated_at": "2026-08-20T16:54:57.471Z"
+      "key": "delivery_fee",
+      "value": "100"
+    },
+    {
+      "key": "currency_symbol",
+      "value": "NPR"
     }
   ]
 }

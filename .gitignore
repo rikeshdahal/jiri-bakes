@@ -56,3 +56,5 @@ Thumbs.db
 *.pem
 *.key
 *.cert
+
+data/db.json.corrupt-*

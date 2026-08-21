@@ -15,9 +15,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    if (!body.customer_name) {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+    if (!body?.customer_name || typeof body.customer_name !== 'string') {
       return NextResponse.json({ error: 'Customer name is required' }, { status: 400 });
+    }
+    if (!Array.isArray(body.items)) {
+      return NextResponse.json({ error: 'Order items are required' }, { status: 400 });
     }
     const data = await createDbOrder(body);
 

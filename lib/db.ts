@@ -1,9 +1,10 @@
-import fs from 'fs';
+﻿import fs from 'fs';
 import path from 'path';
 import type { MenuItem, Order, Testimonial, Setting } from '@/types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
+const TMP_FILE = `${DB_FILE}.${process.pid}.tmp`;
 
 interface DatabaseSchema {
   products: MenuItem[];
@@ -141,7 +142,7 @@ const defaultTestimonials: Testimonial[] = [
     name: 'Anita Shrestha',
     initials: 'AS',
     role: 'Regular Customer',
-    text: 'The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture — absolute perfection every single time.',
+    text: 'The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture â€” absolute perfection every single time.',
     rating: 5,
     approved: true,
     created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
@@ -221,17 +222,42 @@ const defaultOrders: Order[] = [
 const defaultSettings: Setting[] = [
   { key: 'site_name', value: 'Jiri Bakes' },
   { key: 'tagline', value: 'Simply Organic Artisan Bakery' },
-  { key: 'site_title', value: 'Jiri Bakes – Simply Organic Artisan Bakery' },
+  { key: 'site_title', value: 'Jiri Bakes â€“ Simply Organic Artisan Bakery' },
   { key: 'site_tagline', value: 'Where Flour Meets Feeling' },
   { key: 'phone', value: '+977 1-4567890' },
   { key: 'email', value: 'hello@jiribakes.com.np' },
   { key: 'address', value: 'Lokanthali, Bhaktapur, Nepal' },
-  { key: 'hours_weekday', value: 'Mon – Sat: 7:00 AM – 8:00 PM' },
-  { key: 'hours_sunday', value: 'Sunday: 8:00 AM – 6:00 PM' },
+  { key: 'hours_weekday', value: 'Mon â€“ Sat: 7:00 AM â€“ 8:00 PM' },
+  { key: 'hours_sunday', value: 'Sunday: 8:00 AM â€“ 6:00 PM' },
   { key: 'fresh_bread_time', value: '7:30 AM' },
   { key: 'delivery_fee', value: '100' },
   { key: 'currency_symbol', value: 'NPR' },
 ];
+
+// â”€â”€â”€ Concurrency-safe file access â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// All DB operations are serialized through this in-process queue so that two
+// simultaneous requests (e.g. a customer placing an order while an admin
+// updates a product) can never interleave read-modify-write cycles.
+let queue: Promise<unknown> = Promise.resolve();
+
+function enqueue<T>(task: () => T | Promise<T>): Promise<T> {
+  const run = queue.then(task);
+  queue = run.then(() => undefined, () => undefined);
+  return run;
+}
+
+function sleepSync(ms: number) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function normalise(parsed: Partial<DatabaseSchema> | null): DatabaseSchema {
+  return {
+    products: Array.isArray(parsed?.products) ? parsed!.products! : defaultProducts,
+    orders: Array.isArray(parsed?.orders) ? parsed!.orders! : defaultOrders,
+    testimonials: Array.isArray(parsed?.testimonials) ? parsed!.testimonials! : defaultTestimonials,
+    settings: Array.isArray(parsed?.settings) ? parsed!.settings! : defaultSettings,
+  };
+}
 
 function readDB(): DatabaseSchema {
   try {
@@ -239,224 +265,270 @@ function readDB(): DatabaseSchema {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     if (!fs.existsSync(DB_FILE)) {
-      const initialData: DatabaseSchema = {
-        products: defaultProducts,
-        orders: defaultOrders,
-        testimonials: defaultTestimonials,
-        settings: defaultSettings,
-      };
+      const initialData = normalise(null);
       fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
       return initialData;
     }
-    const content = fs.readFileSync(DB_FILE, 'utf-8');
-    const parsed = JSON.parse(content);
-    return {
-      products: Array.isArray(parsed.products) ? parsed.products : defaultProducts,
-      orders: Array.isArray(parsed.orders) ? parsed.orders : defaultOrders,
-      testimonials: Array.isArray(parsed.testimonials) ? parsed.testimonials : defaultTestimonials,
-      settings: Array.isArray(parsed.settings) ? parsed.settings : defaultSettings,
-    };
-  } catch {
-    return {
-      products: defaultProducts,
-      orders: defaultOrders,
-      testimonials: defaultTestimonials,
-      settings: defaultSettings,
-    };
+    // Retry a few times â€” another process may be mid-write (rename is atomic
+    // on the same volume, but Windows AV/indexers can briefly lock the file).
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const content = fs.readFileSync(DB_FILE, 'utf-8');
+        return normalise(JSON.parse(content));
+      } catch (err) {
+        if (attempt === 2) throw err;
+        sleepSync(25 * (attempt + 1));
+      }
+    }
+    return normalise(null); // unreachable, satisfies TS
+  } catch (err) {
+    // The file is unreadable/corrupted â€” back it up so data can be inspected,
+    // then fall back to defaults instead of crashing every request.
+    console.error('Database file unreadable, backing up and resetting:', err);
+    try {
+      if (fs.existsSync(DB_FILE)) {
+        fs.copyFileSync(DB_FILE, `${DB_FILE}.corrupt-${Date.now()}`);
+      }
+    } catch { /* best effort */ }
+    return normalise(null);
   }
 }
 
-function writeDB(data: DatabaseSchema) {
+function writeDB(data: DatabaseSchema): boolean {
+  // Atomic write: dump to a temp file first, then rename over the real file.
+  // A reader can therefore never observe a half-written JSON document.
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    fs.writeFileSync(TMP_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    fs.renameSync(TMP_FILE, DB_FILE);
+    return true;
   } catch (err) {
-    console.error('Failed to write database file:', err);
+    console.error('Atomic write failed, falling back to direct write:', err);
+    try {
+      fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      return true;
+    } catch (fallbackErr) {
+      console.error('Failed to write database file:', fallbackErr);
+      return false;
+    }
   }
 }
 
-// ─── Products ───
+
+// ----- Products -----
 export async function getDbProducts(): Promise<MenuItem[]> {
-  const db = readDB();
-  return db.products.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  return enqueue(() => {
+    const db = readDB();
+    return db.products.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  });
 }
 
 export async function getDbProductById(id: string): Promise<MenuItem | null> {
-  const db = readDB();
-  return db.products.find((p) => String(p.id) === String(id)) || null;
+  return enqueue(() => {
+    const db = readDB();
+    return db.products.find((p) => String(p.id) === String(id)) || null;
+  });
 }
 
 export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem> {
-  const db = readDB();
-  const newProduct: MenuItem = {
-    id: data.id || `p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    name: data.name || 'Untitled Product',
-    description: data.description || '',
-    price: Number(data.price) || 0,
-    unit: data.unit || '/piece',
-    category: data.category || 'pastry',
-    badge: data.badge || undefined,
-    image: data.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
-    rating: Number(data.rating) || 5,
-    featured: Boolean(data.featured),
-    display_order: Number(data.display_order) || db.products.length + 1,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-  db.products.push(newProduct);
-  writeDB(db);
-  return newProduct;
+  return enqueue(() => {
+    const db = readDB();
+    const newProduct: MenuItem = {
+      id: data.id || `p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: data.name || 'Untitled Product',
+      description: data.description || '',
+      price: Number(data.price) || 0,
+      unit: data.unit || '/piece',
+      category: data.category || 'pastry',
+      badge: data.badge || undefined,
+      image: data.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
+      rating: Number(data.rating) || 5,
+      featured: Boolean(data.featured),
+      display_order: Number(data.display_order) || db.products.length + 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    db.products.push(newProduct);
+    writeDB(db);
+    return newProduct;
+  });
 }
 
 export async function updateDbProduct(id: string, updates: Partial<MenuItem>): Promise<MenuItem | null> {
-  const db = readDB();
-  const idx = db.products.findIndex((p) => String(p.id) === String(id));
-  if (idx === -1) return null;
-  db.products[idx] = {
-    ...db.products[idx],
-    ...updates,
-    updated_at: new Date().toISOString(),
-  };
-  writeDB(db);
-  return db.products[idx];
+  return enqueue(() => {
+    const db = readDB();
+    const idx = db.products.findIndex((p) => String(p.id) === String(id));
+    if (idx === -1) return null;
+    db.products[idx] = {
+      ...db.products[idx],
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    writeDB(db);
+    return db.products[idx];
+  });
 }
 
 export async function deleteDbProduct(id: string): Promise<boolean> {
-  const db = readDB();
-  const initialLen = db.products.length;
-  db.products = db.products.filter((p) => String(p.id) !== String(id));
-  if (db.products.length !== initialLen) {
-    writeDB(db);
-    return true;
-  }
-  return false;
+  return enqueue(() => {
+    const db = readDB();
+    const initialLen = db.products.length;
+    db.products = db.products.filter((p) => String(p.id) !== String(id));
+    if (db.products.length !== initialLen) {
+      writeDB(db);
+      return true;
+    }
+    return false;
+  });
 }
 
-// ─── Orders ───
+// ----- Orders -----
 export async function getDbOrders(): Promise<Order[]> {
-  const db = readDB();
-  return db.orders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  return enqueue(() => {
+    const db = readDB();
+    return db.orders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  });
 }
 
 export async function getDbOrderById(id: string): Promise<Order | null> {
-  const db = readDB();
-  return db.orders.find((o) => String(o.id) === String(id)) || null;
+  return enqueue(() => {
+    const db = readDB();
+    return db.orders.find((o) => String(o.id) === String(id)) || null;
+  });
 }
 
 export async function createDbOrder(data: Partial<Order> & { payment_method?: string }): Promise<Order> {
-  const db = readDB();
-  const newOrder: Order = {
-    id: `ord-${Date.now().toString().slice(-5)}`,
-    customer_name: data.customer_name || 'Guest Customer',
-    customer_phone: data.customer_phone || '',
-    customer_email: data.customer_email || '',
-    customer_address: data.customer_address || '',
-    items: Array.isArray(data.items) ? data.items : [],
-    total: Number(data.total) || 0,
-    payment_method: data.payment_method || 'Cash on Delivery',
-    status: (data.status as Order['status']) || 'pending',
-    notes: data.notes || '',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-  db.orders.unshift(newOrder);
-  writeDB(db);
-  return newOrder;
+  return enqueue(() => {
+    const db = readDB();
+    const newOrder: Order = {
+      id: `ord-${Date.now().toString().slice(-5)}${Math.random().toString(36).slice(2, 4)}`,
+      customer_name: data.customer_name || 'Guest Customer',
+      customer_phone: data.customer_phone || '',
+      customer_email: data.customer_email || '',
+      customer_address: data.customer_address || '',
+      items: Array.isArray(data.items) ? data.items : [],
+      total: Number(data.total) || 0,
+      payment_method: data.payment_method || 'Cash on Delivery',
+      status: (data.status as Order['status']) || 'pending',
+      notes: data.notes || '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    db.orders.unshift(newOrder);
+    writeDB(db);
+    return newOrder;
+  });
 }
 
 export async function updateDbOrder(id: string, updates: Partial<Order>): Promise<Order | null> {
-  const db = readDB();
-  const idx = db.orders.findIndex((o) => String(o.id) === String(id));
-  if (idx === -1) return null;
-  db.orders[idx] = {
-    ...db.orders[idx],
-    ...updates,
-    updated_at: new Date().toISOString(),
-  };
-  writeDB(db);
-  return db.orders[idx];
+  return enqueue(() => {
+    const db = readDB();
+    const idx = db.orders.findIndex((o) => String(o.id) === String(id));
+    if (idx === -1) return null;
+    db.orders[idx] = {
+      ...db.orders[idx],
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    writeDB(db);
+    return db.orders[idx];
+  });
 }
 
 export async function deleteDbOrder(id: string): Promise<boolean> {
-  const db = readDB();
-  const initialLen = db.orders.length;
-  db.orders = db.orders.filter((o) => String(o.id) !== String(id));
-  if (db.orders.length !== initialLen) {
-    writeDB(db);
-    return true;
-  }
-  return false;
+  return enqueue(() => {
+    const db = readDB();
+    const initialLen = db.orders.length;
+    db.orders = db.orders.filter((o) => String(o.id) !== String(id));
+    if (db.orders.length !== initialLen) {
+      writeDB(db);
+      return true;
+    }
+    return false;
+  });
 }
 
-// ─── Testimonials ───
+// ----- Testimonials -----
 export async function getDbTestimonials(): Promise<Testimonial[]> {
-  const db = readDB();
-  return db.testimonials.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime());
+  return enqueue(() => {
+    const db = readDB();
+    return db.testimonials.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime());
+  });
 }
 
 export async function createDbTestimonial(data: Partial<Testimonial>): Promise<Testimonial> {
-  const db = readDB();
-  const newT: Testimonial = {
-    id: data.id || `t-${Date.now()}`,
-    name: data.name || 'Anonymous',
-    initials: data.initials || data.name?.slice(0, 2).toUpperCase() || 'JB',
-    role: data.role || 'Verified Customer',
-    text: data.text || '',
-    rating: Number(data.rating) || 5,
-    approved: data.approved !== undefined ? data.approved : true,
-    created_at: new Date().toISOString(),
-  };
-  db.testimonials.unshift(newT);
-  writeDB(db);
-  return newT;
+  return enqueue(() => {
+    const db = readDB();
+    const newT: Testimonial = {
+      id: data.id || `t-${Date.now()}`,
+      name: data.name || 'Anonymous',
+      initials: data.initials || data.name?.slice(0, 2).toUpperCase() || 'JB',
+      role: data.role || 'Verified Customer',
+      text: data.text || '',
+      rating: Number(data.rating) || 5,
+      approved: data.approved !== undefined ? data.approved : true,
+      created_at: new Date().toISOString(),
+    };
+    db.testimonials.unshift(newT);
+    writeDB(db);
+    return newT;
+  });
 }
 
 export async function updateDbTestimonial(id: string, updates: Partial<Testimonial>): Promise<Testimonial | null> {
-  const db = readDB();
-  const idx = db.testimonials.findIndex((t) => String(t.id) === String(id));
-  if (idx === -1) return null;
-  db.testimonials[idx] = {
-    ...db.testimonials[idx],
-    ...updates,
-  };
-  writeDB(db);
-  return db.testimonials[idx];
+  return enqueue(() => {
+    const db = readDB();
+    const idx = db.testimonials.findIndex((t) => String(t.id) === String(id));
+    if (idx === -1) return null;
+    db.testimonials[idx] = {
+      ...db.testimonials[idx],
+      ...updates,
+    };
+    writeDB(db);
+    return db.testimonials[idx];
+  });
 }
 
 export async function deleteDbTestimonial(id: string): Promise<boolean> {
-  const db = readDB();
-  const initialLen = db.testimonials.length;
-  db.testimonials = db.testimonials.filter((t) => String(t.id) !== String(id));
-  if (db.testimonials.length !== initialLen) {
-    writeDB(db);
-    return true;
-  }
-  return false;
+  return enqueue(() => {
+    const db = readDB();
+    const initialLen = db.testimonials.length;
+    db.testimonials = db.testimonials.filter((t) => String(t.id) !== String(id));
+    if (db.testimonials.length !== initialLen) {
+      writeDB(db);
+      return true;
+    }
+    return false;
+  });
 }
 
-// ─── Settings ───
+// ----- Settings -----
 export async function getDbSettings(): Promise<Setting[]> {
-  const db = readDB();
-  return db.settings;
+  return enqueue(() => {
+    const db = readDB();
+    return db.settings;
+  });
 }
 
 export async function updateDbSettings(settingsToUpdate: Array<{ key: string; value: string }>): Promise<Setting[]> {
-  const db = readDB();
-  for (const item of settingsToUpdate) {
-    const idx = db.settings.findIndex((s) => s.key === item.key);
-    if (idx !== -1) {
-      db.settings[idx].value = item.value;
-      db.settings[idx].updated_at = new Date().toISOString();
-    } else {
-      db.settings.push({
-        key: item.key,
-        value: item.value,
-        updated_at: new Date().toISOString(),
-      });
+  return enqueue(() => {
+    const db = readDB();
+    for (const item of settingsToUpdate) {
+      const idx = db.settings.findIndex((s) => s.key === item.key);
+      if (idx !== -1) {
+        db.settings[idx].value = item.value;
+        db.settings[idx].updated_at = new Date().toISOString();
+      } else {
+        db.settings.push({
+          key: item.key,
+          value: item.value,
+          updated_at: new Date().toISOString(),
+        });
+      }
     }
-  }
-  writeDB(db);
-  return db.settings;
+    writeDB(db);
+    return db.settings;
+  });
 }
