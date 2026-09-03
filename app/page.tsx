@@ -735,48 +735,112 @@ function OurStorySection() {
 }
 
 function WeCareSection() {
-  const ref = useReveal();
+  const [dogImage, setDogImage]     = useState('/we care.png');
+  const [dogTitle, setDogTitle]     = useState('5% of Total Sales Goes to Street Dog Charity');
+  const [dogPercent, setDogPercent] = useState('5%');
+  const [dogDesc, setDogDesc]       = useState(
+    'At Jiri Bakes, we believe kindness should be shared with every living being. 5% of all bakery sales directly funds daily nutritious meals, emergency medical aid, vaccines, and shelter for neighborhood street dogs in Lokanthali.'
+  );
+  const [socialUrl, setSocialUrl]   = useState('https://www.instagram.com/jiribakes');
+  const [customQrImg, setCustomQrImg] = useState('');
+
+  useEffect(() => {
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.data && Array.isArray(d.data)) {
+          const map: Record<string, string> = {};
+          d.data.forEach((item: { key: string; value: string }) => { map[item.key] = item.value; });
+          if (map.street_dog_image)      setDogImage(map.street_dog_image);
+          if (map.street_dog_title)      setDogTitle(map.street_dog_title);
+          if (map.street_dog_percent)    setDogPercent(map.street_dog_percent);
+          if (map.street_dog_desc)       setDogDesc(map.street_dog_desc);
+          if (map.street_dog_social_url) setSocialUrl(map.street_dog_social_url);
+          if (map.street_dog_qr_image)   setCustomQrImg(map.street_dog_qr_image);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const autoQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(socialUrl)}`;
+  const qrUrl = customQrImg || autoQrUrl;
 
   return (
-    <section
-      id="we-care"
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        background: 'var(--color-bg)',
-        borderTop: '1px solid var(--color-border)',
-        borderBottom: '1px solid var(--color-border)',
-      }}
-    >
+    <section id="we-care" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
       <style>{`
-        @keyframes vg-swirl-slow {
-          0% { transform: rotate(0deg) scale(1); }
-          50% { transform: rotate(180deg) scale(1.05); }
-          100% { transform: rotate(360deg) scale(1); }
-        }
-        @keyframes vg-brush-float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(2deg); }
-        }
-        @keyframes vg-star-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.25); opacity: 1; }
-        }
-        .wc-banner-img {
-          display: block;
-          width: 100%;
-          height: auto;
-        }
+        @keyframes qr-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+        .wc-banner-img { display:block; width:100%; height:auto; }
       `}</style>
 
-      {/* Text strip disabled for now (banner-only mode). Restore with <WeCareTextContent /> - defined at the bottom of this file. */}
-
-
+      {/* Dynamic banner — admin can change from Settings page */}
       <img
-        src="/we care.png"
-        alt="Van Gogh style impressionist painting of Jiri Bakes feeding and caring for neighborhood street dogs"
+        src={dogImage}
+        alt="Jiri Bakes street dog care initiative"
         className="wc-banner-img"
+        onError={(e) => { (e.target as HTMLImageElement).src = '/we care.png'; }}
       />
+
+      {/* ─── 5% Charity strip + QR Code ─────────────────────────── */}
+      <div style={{ background: 'var(--color-bg)', borderTop: '1.5px solid var(--color-border)', padding: 'clamp(36px,5vw,64px) 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 'clamp(28px,4vw,52px)', alignItems: 'center' }}>
+
+          {/* Left — mission copy */}
+          <div>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 16px', borderRadius:9999, background:'rgba(82,183,136,0.12)', border:'1px solid rgba(82,183,136,0.25)', color:'var(--color-green)', fontSize:'0.82rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:16 }}>
+              <span>🐾 Community Compassion</span>
+              <span style={{opacity:0.4}}>•</span>
+              <span style={{color:'#E87B32'}}>{dogPercent} of Every Sale</span>
+            </div>
+
+            <h2 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(1.6rem,2.5vw,2.2rem)', color:'var(--color-text-primary)', lineHeight:1.25, marginBottom:14 }}>
+              {dogTitle}
+            </h2>
+
+            <p style={{ fontSize:'clamp(0.92rem,1.2vw,1.02rem)', color:'var(--color-text-tertiary)', lineHeight:1.8, marginBottom:26 }}>
+              {dogDesc}
+            </p>
+
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap', marginBottom:28 }}>
+              {[{val:`${dogPercent} Sales`,sub:'Dedicated to Charity',c:'var(--color-green)'},{val:'30+ Daily',sub:'Nutritious Bowls',c:'#E87B32'},{val:'100% Care',sub:'First Aid & Vaccines',c:'#52B4E8'}].map(s => (
+                <div key={s.val} style={{ padding:'12px 18px', borderRadius:12, background:'rgba(255,255,255,0.05)', border:'1px solid var(--color-border)', backdropFilter:'blur(6px)' }}>
+                  <div style={{ fontWeight:800, fontSize:'1.15rem', color:s.c }}>{s.val}</div>
+                  <div style={{ fontSize:'0.72rem', color:'var(--color-text-tertiary)', marginTop:2 }}>{s.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
+              <a href={socialUrl} target="_blank" rel="noopener noreferrer" style={{ padding:'12px 24px', borderRadius:9999, background:'var(--color-green)', color:'#FFFDF5', fontSize:'0.86rem', fontWeight:600, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:8, boxShadow:'0 4px 14px rgba(40,85,28,0.35)' }}>
+                View Contribution Proof ↗
+              </a>
+              <a href="https://wa.me/9779841234567?text=Namaste%20Jiri%20Bakes!%20I%20support%20your%20street%20dog%20charity." target="_blank" rel="noopener noreferrer" style={{ padding:'12px 22px', borderRadius:9999, background:'rgba(255,255,255,0.06)', color:'var(--color-text-primary)', border:'1.5px solid var(--color-border)', fontSize:'0.86rem', fontWeight:600, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6 }}>
+                💬 WhatsApp Us
+              </a>
+            </div>
+          </div>
+
+          {/* Right — scannable QR card */}
+          <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:20, padding:'28px 24px', border:'1.5px solid rgba(245,211,92,0.25)', boxShadow:'0 12px 40px rgba(0,0,0,0.35)', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', position:'relative', animation:'qr-float 6s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
+            <div style={{ position:'absolute', top:-13, background:'linear-gradient(135deg,#E87B32,#F5D35C)', color:'#1a1108', padding:'4px 16px', borderRadius:9999, fontSize:'0.72rem', fontWeight:800, letterSpacing:'0.5px', textTransform:'uppercase', boxShadow:'0 2px 8px rgba(232,123,50,0.4)' }}>
+              ★ Verified Transparency
+            </div>
+
+            <h3 style={{ fontFamily:'var(--font-display)', fontSize:'1.2rem', color:'var(--color-text-primary)', marginTop:10, marginBottom:6 }}>Scan for Proof</h3>
+            <p style={{ fontSize:'0.78rem', color:'var(--color-text-tertiary)', maxWidth:260, lineHeight:1.5, marginBottom:18 }}>
+              Point your phone camera here to see our daily feeding stories &amp; rescue reels on social media.
+            </p>
+
+            <div style={{ padding:12, borderRadius:14, background:'#fff', border:'2px dashed rgba(82,183,136,0.35)', boxShadow:'0 4px 24px rgba(0,0,0,0.3)', marginBottom:14, position:'relative' }}>
+              <img src={qrUrl} alt="QR Code — Jiri Bakes street dog contributions" width={160} height={160} style={{ display:'block', borderRadius:8 }} />
+              <div style={{ position:'absolute', bottom:7, left:'50%', transform:'translateX(-50%)', background:'rgba(40,85,28,0.92)', color:'#FFFDF5', padding:'2px 8px', borderRadius:5, fontSize:'0.62rem', fontWeight:700, whiteSpace:'nowrap' }}>SCAN ME</div>
+            </div>
+
+            <a href={socialUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize:'0.8rem', fontWeight:700, color:'var(--color-green)', textDecoration:'none' }}>
+              {socialUrl.replace(/^https?:\/\/(www\.)?/, '')} ↗
+            </a>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
@@ -1381,11 +1445,11 @@ function VisitUsSection() {
               display: 'flex',
               flexDirection: 'column',
             }}>
-              {/* Real Google Map iframe */}
+              {/* Real Google Map iframe — exact Jiri Bakes pin */}
               <div style={{ width: '100%', height: 320, position: 'relative' }}>
                 <iframe
                   title="Jiri Bakes Location Map"
-                  src="https://maps.google.com/maps?q=Lokanthali%2C+Bhaktapur%2C+Nepal&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  src="https://maps.google.com/maps?q=Jiri+Bakes,+M9J8%2B34Q,+Madhyapur+Thimi,+Bagmati+Province+44600&t=&z=16&ie=UTF8&iwloc=&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0, display: 'block' }}
@@ -1419,12 +1483,12 @@ function VisitUsSection() {
                   </div>
                   <div>
                     <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--color-brown-deep)' }}>Jiri Bakes Bakery</div>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--color-text-tertiary)' }}>Lokanthali, Araniko Highway, Bhaktapur</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--color-text-tertiary)' }}>M9J8+34Q, Madhyapur Thimi, Bagmati Province 44600</div>
                   </div>
                 </div>
 
                 <a
-                  href="https://maps.google.com/?q=Lokanthali,Bhaktapur,Nepal"
+                  href="https://www.google.com/maps/dir//Jiri+Bakes,+M9J8%2B34Q,+Madhyapur+Thimi,+Bagmati+Province+44600/@27.6922368,85.327872,14z/data=!4m8!4m7!1m0!1m5!1m1!1s0x39eb1b0001fa0aff:0xb5d189b9113bca42!2m2!1d85.3654462!2d27.6802657?entry=ttu"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

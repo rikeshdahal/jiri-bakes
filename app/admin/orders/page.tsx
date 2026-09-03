@@ -348,10 +348,51 @@ export default function AdminOrdersPage() {
                               </a>
                             </strong>
                           </div>
-                          <div>
-                            <span style={{ color: 'var(--color-text-tertiary)' }}>Address: </span>
-                            <span style={{ color: '#CBD5E1' }}>{order.customer_address || '—'}</span>
-                          </div>
+                          {(order.delivery_date || order.delivery_time) && (
+                            <div style={{ display:'flex', gap:10, alignItems:'center', background: 'rgba(245, 211, 92, 0.08)', padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(245, 211, 92, 0.15)', marginTop: 4 }}>
+                              <span style={{ color: 'var(--color-text-tertiary)' }}>Delivery Slot: </span>
+                              <span style={{ color: '#F5D35C', fontWeight: 600 }}>
+                                {order.delivery_date} <span style={{ opacity: 0.6, margin: '0 4px' }}>|</span> {order.delivery_time}
+                              </span>
+                            </div>
+                          )}
+
+                          {order.delivery_location && (
+                            <div>
+                              <span style={{ color: 'var(--color-text-tertiary)' }}>Location: </span>
+                              <span style={{ color: '#CBD5E1' }}>{order.delivery_location}</span>
+                            </div>
+                          )}
+                          {!order.delivery_location && (
+                            <div>
+                              <span style={{ color: 'var(--color-text-tertiary)' }}>Address: </span>
+                              <span style={{ color: '#CBD5E1' }}>{order.customer_address || '—'}</span>
+                            </div>
+                          )}
+
+                          {order.variant && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                              <span style={{ color: 'var(--color-text-tertiary)' }}>Dietary Variant: </span>
+                              <span style={{ color: order.variant === 'Eggless' ? '#52B788' : '#e74c3c', fontWeight: 600, background: order.variant === 'Eggless' ? 'rgba(82, 183, 136, 0.1)' : 'rgba(231, 76, 60, 0.1)', padding: '2px 8px', borderRadius: 4 }}>
+                                {order.variant}
+                              </span>
+                            </div>
+                          )}
+
+                          {order.message_on_item && (
+                            <div>
+                              <span style={{ color: 'var(--color-text-tertiary)' }}>Item Message: </span>
+                              <span style={{ color: '#CBD5E1', fontStyle: 'italic' }}>"{order.message_on_item}"</span>
+                            </div>
+                          )}
+
+                          {order.item_note && (
+                            <div>
+                              <span style={{ color: 'var(--color-text-tertiary)' }}>Item Note: </span>
+                              <span style={{ color: '#CBD5E1' }}>{order.item_note}</span>
+                            </div>
+                          )}
+
                           {order.notes && (
                             <div style={{ background: 'rgba(255,255,255,0.04)', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--color-border)', marginTop: 4 }}>
                               <span style={{ color: 'var(--color-text-tertiary)', fontSize: '0.75rem', display: 'block' }}>Special Instructions:</span>

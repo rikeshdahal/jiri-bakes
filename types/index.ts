@@ -69,6 +69,12 @@ export interface Order {
     | 'completed'
     | 'cancelled';
   notes?: string;
+  variant?: string;
+  message_on_item?: string;
+  item_note?: string;
+  delivery_date?: string;
+  delivery_time?: string;
+  delivery_location?: string;
   created_at: string;
   updated_at: string;
 }

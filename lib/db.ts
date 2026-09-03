@@ -1,4 +1,4 @@
-﻿import fs from 'fs';
+import fs from 'fs';
 import path from 'path';
 import type { MenuItem, Order, Testimonial, Setting } from '@/types';
 
@@ -232,6 +232,12 @@ const defaultSettings: Setting[] = [
   { key: 'fresh_bread_time', value: '7:30 AM' },
   { key: 'delivery_fee', value: '100' },
   { key: 'currency_symbol', value: 'NPR' },
+  { key: 'street_dog_image', value: '/we care.png' },
+  { key: 'street_dog_title', value: '5% of Total Sales Goes to Street Dog Charity' },
+  { key: 'street_dog_percent', value: '5%' },
+  { key: 'street_dog_desc', value: 'At Jiri Bakes, we believe kindness should be shared with every living being. 5% of our total sales directly funds daily nutritious meals, medical treatment, vaccines, and shelter for neighborhood street dogs in Lokanthali.' },
+  { key: 'street_dog_social_url', value: 'https://www.instagram.com/jiribakes' },
+  { key: 'street_dog_qr_image', value: '' },
 ];
 
 // â”€â”€â”€ Concurrency-safe file access â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

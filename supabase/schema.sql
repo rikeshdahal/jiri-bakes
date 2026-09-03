@@ -55,10 +55,22 @@ create table if not exists orders (
   total            integer not null default 0,
   status           text not null default 'pending',
   notes            text not null default '',
+  variant          text not null default 'Egg',
+  message_on_item  text not null default '',
+  item_note        text not null default '',
+  delivery_date    text not null default '',
+  delivery_time    text not null default '',
+  delivery_location text not null default '',
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now()
 );
 
+alter table orders add column if not exists variant text not null default 'Egg';
+alter table orders add column if not exists message_on_item text not null default '';
+alter table orders add column if not exists item_note text not null default '';
+alter table orders add column if not exists delivery_date text not null default '';
+alter table orders add column if not exists delivery_time text not null default '';
+alter table orders add column if not exists delivery_location text not null default '';
 alter table orders add column if not exists payment_method text not null default 'Cash on Delivery';
 
 -- Recreate the status check so it covers EVERY status used by the app.
@@ -151,7 +163,13 @@ insert into settings (key, value) values
   ('fresh_bread_time', '7:30 AM'),
   ('hero_headline', 'Baked Like Art.'),
   ('hero_subheadline', 'Handcrafted organic breads, cakes, and morning pastries. Baked fresh daily at dawn in Lokanthali, Nepal.'),
-  ('announcement_banner', 'Fresh organic sourdough available every morning at 7:30 AM!')
+  ('announcement_banner', 'Fresh organic sourdough available every morning at 7:30 AM!'),
+  ('street_dog_image', '/we care.png'),
+  ('street_dog_title', '5% of Total Sales Goes to Street Dog Charity'),
+  ('street_dog_percent', '5%'),
+  ('street_dog_desc', 'At Jiri Bakes, we believe kindness should be shared with every living being. 5% of our total sales directly funds daily nutritious meals, medical treatment, vaccines, and shelter for neighborhood street dogs in Lokanthali.'),
+  ('street_dog_social_url', 'https://www.instagram.com/jiribakes'),
+  ('street_dog_qr_image', '')
 on conflict (key) do nothing;  -- never overwrite live edits on re-run
 
 -- ─── 8. Seed Default Products (duplicate-proof) ──────────────

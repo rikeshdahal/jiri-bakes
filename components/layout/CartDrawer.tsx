@@ -1,7 +1,14 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useCart } from './AppShell';
+import {
+  getRecentOrders,
+  saveRecentOrder,
+  removeRecentOrder,
+  clearRecentOrders,
+  type RecentOrderRecord,
+} from '@/lib/cookies';
 
 type Step = 'cart' | 'checkout' | 'success' | 'track';
 
@@ -31,6 +38,11 @@ export default function CartDrawer() {
   const [customerName, setCustomerName]       = useState('');
   const [customerPhone, setCustomerPhone]     = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+  const [variant, setVariant]                 = useState<'Egg' | 'Eggless'>('Egg');
+  const [messageOnItem, setMessageOnItem]     = useState('');
+  const [itemNote, setItemNote]               = useState('');
+  const [deliveryDate, setDeliveryDate]       = useState('');
+  const [deliveryTime, setDeliveryTime]       = useState('10:00 AM – 01:00 PM');
   const [notes, setNotes]                     = useState('');
   const [paymentMethod, setPaymentMethod]     = useState<'cod' | 'visit'>('cod');
   const [submitting, setSubmitting]           = useState(false);
@@ -42,6 +54,12 @@ export default function CartDrawer() {
   const [tracking, setTracking]               = useState(false);
   const [trackedOrders, setTrackedOrders]     = useState<TrackedOrder[]>([]);
   const [trackError, setTrackError]           = useState('');
+  const [recentOrders, setRecentOrders]       = useState<RecentOrderRecord[]>([]);
+
+  // Load recent orders from cookies on open or step change
+  useEffect(() => {
+    setRecentOrders(getRecentOrders());
+  }, [isOpen, step]);
 
   const deliveryFee = paymentMethod === 'visit' ? 0 : (subtotal >= 2000 || subtotal === 0 ? 0 : 100);
   const grandTotal  = subtotal + deliveryFee;
@@ -49,11 +67,37 @@ export default function CartDrawer() {
   // ─── Place order ───────────────────────────────────────────────────────────
   const handleCheckoutSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!customerName || !customerPhone) { setError('Please provide your name and phone number.'); return; }
-    if (items.length === 0)              { setError('Your cart is empty.');                        return; }
+    if (!customerName || !customerPhone) {
+      setError('Please provide your name and contact number.');
+      return;
+    }
+    if (paymentMethod === 'cod' && !customerAddress.trim()) {
+      setError('Please provide your delivery location.');
+      return;
+    }
+    if (!deliveryDate) {
+      setError('Please select a delivery date.');
+      return;
+    }
+    if (!deliveryTime) {
+      setError('Please select a delivery time slot.');
+      return;
+    }
+    if (items.length === 0) {
+      setError('Your cart is empty.');
+      return;
+    }
 
     setSubmitting(true);
     setError('');
+
+    const formattedNotes = [
+      `Variant: ${variant}`,
+      messageOnItem.trim() ? `Message: "${messageOnItem.trim()}"` : null,
+      itemNote.trim() ? `Note: ${itemNote.trim()}` : null,
+      `Delivery Slot: ${deliveryDate} (${deliveryTime})`,
+      notes.trim() ? `Instructions: ${notes.trim()}` : null,
+    ].filter(Boolean).join(' • ');
 
     try {
       const res = await fetch('/api/orders', {
@@ -63,19 +107,56 @@ export default function CartDrawer() {
           customer_name:    customerName,
           customer_phone:   customerPhone,
           customer_address: paymentMethod === 'visit' ? 'Visit to store – Lokanthali, Bhaktapur' : (customerAddress || 'Lokanthali, Bhaktapur'),
-          items: items.map((i) => ({ product_id: i.id, name: i.name, price: i.price, quantity: i.qty })),
+          variant:          variant,
+          message_on_item:  messageOnItem,
+          item_note:        itemNote,
+          delivery_date:    deliveryDate,
+          delivery_time:    deliveryTime,
+          delivery_location: paymentMethod === 'visit' ? 'Store Visit' : customerAddress,
+          items: items.map((i) => ({
+            product_id: i.id,
+            name: `${i.name} [${variant}]`,
+            price: i.price,
+            quantity: i.qty,
+          })),
           total:            grandTotal,
           payment_method:   paymentMethod === 'cod' ? 'Cash on Delivery' : 'Visit Store / Pay in Person',
-          notes:            notes,
+          notes:            formattedNotes,
         }),
       });
 
       const json = await res.json();
       if (!res.ok) { setError(json.error || 'Failed to place order.'); return; }
 
-      setLastOrderId(json.data?.id || '');
+      const createdOrderId = json.data?.id || '';
+      setLastOrderId(createdOrderId);
+
+      // Save to cookies for persistent tracking
+      if (createdOrderId) {
+        saveRecentOrder({
+          id: createdOrderId,
+          name: customerName,
+          phone: customerPhone,
+          total: grandTotal,
+          payment_method: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Visit Store / Pay in Person',
+          item_count: items.reduce((sum, i) => sum + i.qty, 0),
+          created_at: new Date().toISOString(),
+        });
+        setRecentOrders(getRecentOrders());
+      }
+
       setStep('success');
       clearCart();
+      // Reset form fields
+      setCustomerName('');
+      setCustomerPhone('');
+      setCustomerAddress('');
+      setVariant('Egg');
+      setMessageOnItem('');
+      setItemNote('');
+      setDeliveryDate('');
+      setDeliveryTime('10:00 AM – 01:00 PM');
+      setNotes('');
     } catch {
       setError('Connection error. Please try again or call us directly.');
     } finally {
@@ -84,24 +165,30 @@ export default function CartDrawer() {
   };
 
   // ─── Track order ───────────────────────────────────────────────────────────
-  const handleTrack = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!trackInput.trim()) { setTrackError('Enter your Order ID or phone number.'); return; }
+  const performTrack = async (query: string) => {
+    const q = query.trim();
+    if (!q) { setTrackError('Enter your Order ID or phone number.'); return; }
+    setTrackInput(q);
     setTracking(true);
     setTrackError('');
     setTrackedOrders([]);
     try {
-      const isId = trackInput.trim().startsWith('ord-');
-      const qs   = isId ? `id=${encodeURIComponent(trackInput.trim())}` : `phone=${encodeURIComponent(trackInput.trim())}`;
+      const isId = q.toLowerCase().startsWith('ord-');
+      const qs   = isId ? `id=${encodeURIComponent(q)}` : `phone=${encodeURIComponent(q)}`;
       const res  = await fetch(`/api/track?${qs}`);
       const json = await res.json();
-      if (!res.ok) { setTrackError(json.error || 'Not found.'); return; }
+      if (!res.ok) { setTrackError(json.error || 'No orders found.'); return; }
       setTrackedOrders(json.data || []);
     } catch {
       setTrackError('Connection error. Try again.');
     } finally {
       setTracking(false);
     }
+  };
+
+  const handleTrack = async (e: FormEvent) => {
+    e.preventDefault();
+    performTrack(trackInput);
   };
 
   const handleClose = () => {
@@ -146,7 +233,16 @@ export default function CartDrawer() {
             {/* Tab switcher */}
             <div style={{ display:'flex', gap:6 }}>
               {(['cart','track'] as const).map((t) => (
-                <button key={t} onClick={() => { setStep(t === 'track' ? 'track' : 'cart'); }}
+                <button key={t} onClick={() => {
+                  setStep(t === 'track' ? 'track' : 'cart');
+                  if (t === 'track') {
+                    const recents = getRecentOrders();
+                    setRecentOrders(recents);
+                    if (recents.length > 0 && trackedOrders.length === 0) {
+                      performTrack(recents[0].id);
+                    }
+                  }
+                }}
                   style={{
                     padding:'6px 14px', borderRadius:9999, fontSize:'.75rem', fontWeight:600,
                     fontFamily:'inherit', cursor:'pointer', border:'1px solid transparent', transition:'all .2s',
@@ -212,16 +308,136 @@ export default function CartDrawer() {
                 </div>
               )}
 
-              {/* Name */}
+              {/* Full Name */}
               <div>
-                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>Full Name *</label>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                  Full Name *
+                </label>
                 <input className="drawer-input" type="text" required value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="e.g. Maya Shrestha" />
               </div>
 
-              {/* Phone */}
+              {/* Contact Number */}
               <div>
-                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>Phone Number * (used for order tracking)</label>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                  Contact Number *
+                </label>
                 <input className="drawer-input" type="tel" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="e.g. 9841234567" />
+              </div>
+
+              {/* Choose Variant */}
+              <div>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:8 }}>
+                  Choose Variant ( 24 Hour prior Order For Eggless)
+                </label>
+                <div style={{ display:'flex', gap:10 }}>
+                  {(['Egg', 'Eggless'] as const).map((v) => {
+                    const isSelected = variant === v;
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setVariant(v)}
+                        style={{
+                          padding: '8px 18px',
+                          borderRadius: 8,
+                          border: `1.5px solid ${isSelected ? '#e74c3c' : 'var(--color-border)'}`,
+                          background: isSelected ? 'rgba(231, 76, 60, 0.08)' : 'var(--color-surface-muted)',
+                          color: isSelected ? '#c0392b' : 'var(--color-text-tertiary)',
+                          fontSize: '.85rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          transition: 'all .2s',
+                        }}
+                      >
+                        {isSelected && (
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0392b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                        {v}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Message on top of item */}
+              <div>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                  Message on top of item
+                </label>
+                <input
+                  className="drawer-input"
+                  type="text"
+                  value={messageOnItem}
+                  onChange={(e) => setMessageOnItem(e.target.value)}
+                  placeholder="Happy birthday ...."
+                />
+              </div>
+
+              {/* Note */}
+              <div>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                  Note
+                </label>
+                <input
+                  className="drawer-input"
+                  type="text"
+                  value={itemNote}
+                  onChange={(e) => setItemNote(e.target.value)}
+                  placeholder="e.g. Add birthday candle, slice into pieces"
+                />
+              </div>
+
+              {/* Delivery Location */}
+              <div>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                  Delivery Location {paymentMethod === 'cod' ? '*' : '(Optional for Store Visit)'}
+                </label>
+                <input
+                  className="drawer-input"
+                  type="text"
+                  required={paymentMethod === 'cod'}
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  placeholder="e.g. Lokanthali Chowk, near temple, Bhaktapur"
+                />
+              </div>
+
+              {/* Delivery Date & Delivery Time */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                <div>
+                  <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                    Delivery Date *
+                  </label>
+                  <input
+                    className="drawer-input"
+                    type="date"
+                    required
+                    min={variant === 'Eggless' ? new Date(Date.now() + 864e5).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                    Delivery Time *
+                  </label>
+                  <select
+                    className="drawer-input"
+                    required
+                    value={deliveryTime}
+                    onChange={(e) => setDeliveryTime(e.target.value)}
+                    style={{ height:44 }}
+                  >
+                    <option value="10:00 AM – 01:00 PM">10:00 AM – 01:00 PM</option>
+                    <option value="01:00 PM – 04:00 PM">01:00 PM – 04:00 PM</option>
+                    <option value="04:00 PM – 07:00 PM">04:00 PM – 07:00 PM</option>
+                  </select>
+                </div>
               </div>
 
               {/* ── Payment Method ── */}
@@ -259,19 +475,11 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              {/* Address (only for COD) */}
-              {paymentMethod === 'cod' && (
-                <div>
-                  <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>Delivery Address *</label>
-                  <input className="drawer-input" type="text" required value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} placeholder="e.g. Lokanthali Chowk, near temple, Bhaktapur" />
-                </div>
-              )}
-
-              {/* Notes */}
+              {/* Special Instructions (Optional) */}
               <div>
                 <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>Special Instructions (Optional)</label>
                 <textarea className="drawer-input" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)}
-                  placeholder={paymentMethod === 'visit' ? 'e.g. Pick up at 3PM, write Happy Birthday on cake' : 'e.g. Slice sourdough, write Happy Birthday on cake'} style={{ resize:'none' }} />
+                  placeholder={paymentMethod === 'visit' ? 'e.g. Call before arrival, packaging preferences' : 'e.g. Ring bell, leave with neighbor if unavailable'} style={{ resize:'none' }} />
               </div>
 
               <div style={{ padding:'10px 14px', borderRadius:10, background:'rgba(40,85,28,.07)', border:'1px solid rgba(40,85,28,.15)', fontSize:'.78rem', color:'var(--color-green)', lineHeight:1.5 }}>
@@ -301,7 +509,7 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              <button onClick={() => { setTrackInput(lastOrderId); setStep('track'); }}
+              <button onClick={() => { setStep('track'); performTrack(lastOrderId); }}
                 style={{ width:'100%', padding:'13px', borderRadius:9999, background:'rgba(40,85,28,.1)', color:'var(--color-green)', fontSize:'.88rem', fontWeight:600, border:'1.5px solid rgba(40,85,28,.2)', cursor:'pointer', marginBottom:10, transition:'all .2s' }}>
                 Track My Order
               </button>
@@ -316,17 +524,91 @@ export default function CartDrawer() {
           {step === 'track' && (
             <div>
               <h3 style={{ fontFamily:'var(--font-display)', fontSize:'1.3rem', color:'var(--color-brown-deep)', marginBottom:6 }}>Track Your Order</h3>
-              <p style={{ fontSize:'.82rem', color:'var(--color-text-tertiary)', marginBottom:20, lineHeight:1.6 }}>
+              <p style={{ fontSize:'.82rem', color:'var(--color-text-tertiary)', marginBottom:18, lineHeight:1.6 }}>
                 Enter your <strong>Order ID</strong> (e.g. ord-12345) or the <strong>phone number</strong> used when ordering.
               </p>
 
-              <form onSubmit={handleTrack} style={{ display:'flex', gap:8, marginBottom:22 }}>
+              <form onSubmit={handleTrack} style={{ display:'flex', gap:8, marginBottom:16 }}>
                 <input className="drawer-input" value={trackInput} onChange={(e) => setTrackInput(e.target.value)}
                   placeholder="Order ID or phone number" style={{ flex:1 }} />
                 <button type="submit" disabled={tracking} style={{ padding:'11px 18px', borderRadius:10, background:'var(--color-green)', color:'#FFFDF5', fontWeight:600, fontSize:'.84rem', border:'none', cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap', opacity:tracking?.7:1 }}>
                   {tracking ? '...' : 'Track'}
                 </button>
               </form>
+
+              {/* ── Saved Recent Orders from Cookies ── */}
+              {recentOrders.length > 0 && (
+                <div style={{ marginBottom: 18, padding: '12px 14px', borderRadius: 14, background: 'var(--color-surface-muted)', border: '1px solid var(--color-border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ fontSize: '.74rem', fontWeight: 700, color: 'var(--color-brown-deep)', display: 'flex', alignItems: 'center', gap: 6, letterSpacing: '.4px' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      Recent Orders (Saved in Cookies)
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { clearRecentOrders(); setRecentOrders([]); }}
+                      style={{ fontSize: '.68rem', color: 'var(--color-text-tertiary)', cursor: 'pointer', background: 'none', border: 'none', padding: 0, textDecoration: 'underline' }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {recentOrders.map((rec) => {
+                      const isCurrent = trackedOrders.some((o) => o.id === rec.id);
+                      return (
+                        <div
+                          key={rec.id}
+                          onClick={() => performTrack(rec.id)}
+                          style={{
+                            padding: '9px 12px',
+                            borderRadius: 10,
+                            background: isCurrent ? 'rgba(40,85,28,0.12)' : 'var(--color-card-bg)',
+                            border: `1.5px solid ${isCurrent ? 'var(--color-green)' : 'var(--color-border)'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            transition: 'all .2s',
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '.82rem', color: 'var(--color-brown-deep)' }}>
+                                {rec.id}
+                              </span>
+                              {isCurrent && (
+                                <span style={{ fontSize: '.6rem', fontWeight: 700, color: 'var(--color-green)', background: 'rgba(40,85,28,0.14)', padding: '1px 6px', borderRadius: 9999 }}>
+                                  Viewing
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '.7rem', color: 'var(--color-text-tertiary)' }}>
+                              {new Date(rec.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · NPR {rec.total.toLocaleString()}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: '.72rem', fontWeight: 600, color: 'var(--color-green)', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                              Track →
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeRecentOrder(rec.id);
+                                setRecentOrders(getRecentOrders());
+                              }}
+                              title="Remove from saved"
+                              style={{ background: 'none', border: 'none', color: 'var(--color-text-tertiary)', fontSize: '.75rem', cursor: 'pointer', padding: '2px 4px' }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {trackError && (
                 <div style={{ padding:'10px 14px', borderRadius:8, background:'rgba(192,57,43,.09)', color:'#c0392b', fontSize:'.82rem', border:'1px solid rgba(192,57,43,.2)', marginBottom:16 }}>
