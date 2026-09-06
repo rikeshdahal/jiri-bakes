@@ -160,9 +160,51 @@
         "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop"
       ]
+    },
+    {
+      "id": "p-1788679402917-qaq2",
+      "name": "test",
+      "description": "this is test",
+      "price": 600,
+      "unit": "/piece",
+      "category": "cake",
+      "badge": "Fresh Today",
+      "image": "/uploads/1788679367240-bd472u.png",
+      "images": [
+        "/uploads/1788679367240-bd472u.png",
+        "/uploads/1788679379859-prug6r.jpg",
+        "/uploads/1788679391607-dsqhlh.png"
+      ],
+      "rating": 4,
+      "featured": true,
+      "is_bake_of_week": true,
+      "display_order": 9,
+      "created_at": "2026-09-06T07:23:22.917Z",
+      "updated_at": "2026-09-06T07:23:22.917Z"
     }
   ],
   "orders": [
+    {
+      "id": "ord-90191vi",
+      "customer_name": "manmohan",
+      "customer_phone": "9800714145",
+      "customer_email": "",
+      "customer_address": "Visit to store – Lokanthali, Bhaktapur",
+      "items": [
+        {
+          "product_id": "p-1788679402917-qaq2",
+          "name": "test [Egg]",
+          "price": 600,
+          "quantity": 2
+        }
+      ],
+      "total": 1200,
+      "payment_method": "Visit Store / Pay in Person",
+      "status": "completed",
+      "notes": "Variant: Egg • Message: \"hi cutie\" • Delivery Slot: 2026-09-06 (10:00 AM – 01:00 PM)",
+      "created_at": "2026-09-06T07:24:50.191Z",
+      "updated_at": "2026-09-06T07:25:21.996Z"
+    },
     {
       "id": "ord-7987745",
       "customer_name": "Rikesh Dahal",
