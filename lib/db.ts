@@ -23,6 +23,11 @@ const defaultProducts: MenuItem[] = [
     category: 'cake',
     badge: 'Fresh Today',
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: true,
     display_order: 1,
@@ -38,6 +43,11 @@ const defaultProducts: MenuItem[] = [
     category: 'pastry',
     badge: 'Organic',
     image: 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: true,
     display_order: 2,
@@ -53,6 +63,11 @@ const defaultProducts: MenuItem[] = [
     category: 'bread',
     badge: 'Organic',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: true,
     display_order: 3,
@@ -68,6 +83,11 @@ const defaultProducts: MenuItem[] = [
     category: 'pastry',
     badge: 'Fresh Today',
     image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: false,
     display_order: 4,
@@ -83,6 +103,11 @@ const defaultProducts: MenuItem[] = [
     category: 'pastry',
     badge: 'Seasonal',
     image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=500&fit=crop',
+    ],
     rating: 4,
     featured: false,
     display_order: 5,
@@ -98,6 +123,11 @@ const defaultProducts: MenuItem[] = [
     category: 'pastry',
     badge: 'Popular',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: false,
     display_order: 6,
@@ -113,6 +143,11 @@ const defaultProducts: MenuItem[] = [
     category: 'bread',
     badge: 'Organic',
     image: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: false,
     display_order: 7,
@@ -128,6 +163,11 @@ const defaultProducts: MenuItem[] = [
     category: 'cake',
     badge: 'Best Seller',
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop',
+      'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop',
+    ],
     rating: 5,
     featured: true,
     display_order: 8,
@@ -338,9 +378,16 @@ export async function getDbProductById(id: string): Promise<MenuItem | null> {
   });
 }
 
+function normaliseImages(images: unknown): string[] | undefined {
+  if (!Array.isArray(images)) return undefined;
+  return images.map((i) => String(i).trim()).filter(Boolean);
+}
+
 export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem> {
   return enqueue(() => {
     const db = readDB();
+    const images = normaliseImages(data.images);
+    const fallbackImage = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop';
     const newProduct: MenuItem = {
       id: data.id || `p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: data.name || 'Untitled Product',
@@ -349,7 +396,8 @@ export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem
       unit: data.unit || '/piece',
       category: data.category || 'pastry',
       badge: data.badge || undefined,
-      image: data.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop',
+      image: data.image || images?.[0] || fallbackImage,
+      images: images?.length ? images : (data.image ? [data.image] : undefined),
       rating: Number(data.rating) || 5,
       featured: Boolean(data.featured),
       display_order: Number(data.display_order) || db.products.length + 1,
@@ -367,9 +415,17 @@ export async function updateDbProduct(id: string, updates: Partial<MenuItem>): P
     const db = readDB();
     const idx = db.products.findIndex((p) => String(p.id) === String(id));
     if (idx === -1) return null;
+    const images = normaliseImages(updates.images);
+    const merged: Partial<MenuItem> = { ...updates };
+    if (images) {
+      merged.images = images;
+      if (!updates.image) {
+        merged.image = images[0];
+      }
+    }
     db.products[idx] = {
       ...db.products[idx],
-      ...updates,
+      ...merged,
       updated_at: new Date().toISOString(),
     };
     writeDB(db);

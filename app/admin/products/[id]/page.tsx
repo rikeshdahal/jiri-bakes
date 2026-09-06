@@ -14,6 +14,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [newImageUrl, setNewImageUrl] = useState('');
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -22,6 +23,7 @@ export default function EditProductPage() {
     category: 'pastry',
     badge: '',
     image: '',
+    images: [] as string[],
     rating: '5',
     featured: false,
     is_bake_of_week: false,
@@ -39,6 +41,7 @@ export default function EditProductPage() {
           category: p.category || 'pastry',
           badge: p.badge || '',
           image: p.image || '',
+          images: Array.isArray(p.images) && p.images.length > 0 ? p.images.filter(Boolean) : (p.image ? [p.image] : []),
           rating: String(p.rating || 5),
           featured: p.featured || false,
           is_bake_of_week: p.is_bake_of_week || false,
@@ -50,34 +53,54 @@ export default function EditProductPage() {
 
   const update = (field: string, value: string | boolean) => setForm((prev) => ({ ...prev, [field]: value }));
 
+  const setImages = (images: string[]) => setForm((prev) => ({ ...prev, images }));
+
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     setUploading(true);
     setError('');
+    const newUrls: string[] = [];
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error || 'Failed to upload image');
-        return;
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          setError(json.error || 'Failed to upload image');
+          break;
+        }
+        if (json.data?.url) newUrls.push(json.data.url);
       }
-      if (json.data?.url) {
-        update('image', json.data.url);
-      }
+      if (newUrls.length > 0) setImages([...form.images, ...newUrls]);
     } catch {
-      setError('Error uploading file. Please try again.');
+      setError('Error uploading files. Please try again.');
     } finally {
       setUploading(false);
+      e.currentTarget.value = '';
     }
+  };
+
+  const addImageUrl = () => {
+    const urls = newImageUrl.split(',').map((u) => u.trim()).filter(Boolean);
+    if (urls.length === 0) return;
+    setImages([...form.images, ...urls]);
+    setNewImageUrl('');
+  };
+
+  const makeCover = (idx: number) => {
+    setImages([form.images[idx], ...form.images.filter((_, i) => i !== idx)]);
+  };
+
+  const removeImage = (idx: number) => {
+    setImages(form.images.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -97,6 +120,7 @@ export default function EditProductPage() {
           ...form,
           price: parseInt(form.price) || 0,
           rating: parseInt(form.rating) || 5,
+          image: form.images[0] || form.image,
         }),
       });
       const data = await res.json();
@@ -161,17 +185,88 @@ export default function EditProductPage() {
           <Input label="Badge" value={form.badge} onChange={(e) => update('badge', e.target.value)} />
         </div>
 
-        {/* Image upload + URL */}
+        {/* Multi-image upload + URL */}
         <div>
-          <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-brown-deep)', marginBottom: 6 }}>
-            Product Image
+          <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-brown-deep)', marginBottom: 4 }}>
+            Product Images
           </label>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+          <p style={{ fontSize: '0.74rem', color: 'var(--color-text-tertiary)', marginBottom: 10, lineHeight: 1.5 }}>
+            Add as many photos as you like — <strong style={{ color: 'var(--color-green)' }}>the first image is the cover</strong> shown on the menu.
+          </p>
+
+          {/* Thumbnail grid */}
+          {form.images.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 10, marginBottom: 14 }}>
+              {form.images.map((url, i) => (
+                <div key={i} style={{
+                  position: 'relative',
+                  borderRadius: 'var(--radius-sm)',
+                  overflow: 'hidden',
+                  border: i === 0 ? '2px solid var(--color-green)' : '1px solid var(--color-border)',
+                  aspectRatio: '1/1',
+                  background: 'var(--color-bg)',
+                }}>
+                  <img src={url} alt={`Image ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.2'; }} />
+                  {i === 0 && (
+                    <span style={{
+                      position: 'absolute', top: 6, left: 6,
+                      background: 'var(--color-green)', color: '#FFFDF5',
+                      fontSize: '0.6rem', fontWeight: 700, padding: '2px 8px',
+                      borderRadius: 9999, letterSpacing: '0.3px',
+                    }}>Cover</span>
+                  )}
+                  {i !== 0 && (
+                    <button
+                      type="button"
+                      onClick={() => makeCover(i)}
+                      title="Set as cover"
+                      aria-label={`Set image ${i + 1} as cover`}
+                      style={{
+                        position: 'absolute', top: 6, right: 6,
+                        width: 24, height: 24, borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.92)', border: 'none',
+                        color: '#8A6D3B', fontSize: '0.72rem', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                      }}
+                    >★</button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    title="Remove image"
+                    aria-label={`Remove image ${i + 1}`}
+                    style={{
+                      position: 'absolute', bottom: 6, right: 6,
+                      width: 24, height: 24, borderRadius: '50%',
+                      background: 'rgba(192,57,43,0.92)', border: 'none',
+                      color: '#fff', fontSize: '0.8rem', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                    }}
+                  >✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {form.images.length === 0 && (
+            <div style={{
+              padding: '18px', borderRadius: 'var(--radius-sm)',
+              border: '1.5px dashed var(--color-border)', marginBottom: 14,
+              textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-tertiary)',
+            }}>
+              No images yet — upload photos or paste an image URL below.
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <input
               type="text"
-              value={form.image}
-              onChange={(e) => update('image', e.target.value)}
-              placeholder="Paste URL or upload image below..."
+              value={newImageUrl}
+              onChange={(e) => setNewImageUrl(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImageUrl(); } }}
+              placeholder="Paste image URL (comma-separated works too)..."
               style={{
                 flex: 1,
                 padding: '10px 14px',
@@ -181,24 +276,32 @@ export default function EditProductPage() {
                 fontSize: '0.85rem',
                 fontFamily: 'var(--font-body)',
                 color: 'var(--color-text-primary)',
+                minWidth: 200,
               }}
             />
-            <label style={{
+            <button type="button" onClick={addImageUrl} style={{
               padding: '10px 18px',
               borderRadius: 'var(--radius-sm)',
               background: 'var(--color-surface-muted)',
               border: '1px solid var(--color-border)',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: 'var(--color-brown-deep)',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
+              fontSize: '0.8rem', fontWeight: 600,
+              color: 'var(--color-brown-deep)', cursor: 'pointer',
+              whiteSpace: 'nowrap', fontFamily: 'var(--font-body)',
             }}>
-              <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
-              {uploading ? 'Uploading...' : 'Upload Photo'}
+              Add URL
+            </button>
+            <label style={{
+              padding: '10px 18px',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-green)',
+              color: '#FFFDF5',
+              fontSize: '0.8rem', fontWeight: 600,
+              cursor: 'pointer', whiteSpace: 'nowrap',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontFamily: 'var(--font-body)',
+            }}>
+              <input type="file" accept="image/*" multiple onChange={handleFileUpload} style={{ display: 'none' }} />
+              {uploading ? 'Uploading...' : 'Upload Photos'}
             </label>
           </div>
         </div>
@@ -238,7 +341,7 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {form.image && (
+        {form.images.length === 0 && form.image && (
           <div style={{ borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)', maxHeight: 180, position: 'relative' }}>
             <img src={form.image} alt="Preview" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
           </div>

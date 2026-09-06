@@ -27,6 +27,7 @@ create table if not exists products (
                    check (category in ('cake','pastry','bread','cookie','seasonal')),
   badge            text default '',
   image            text default '',
+  images           jsonb not null default '[]'::jsonb,
   rating           integer not null default 5 check (rating between 1 and 5),
   featured         boolean not null default false,
   is_bake_of_week  boolean not null default false,
@@ -39,6 +40,7 @@ create table if not exists products (
 alter table products add column if not exists is_bake_of_week boolean not null default false;
 alter table products add column if not exists featured boolean not null default false;
 alter table products add column if not exists display_order integer not null default 0;
+alter table products add column if not exists images jsonb not null default '[]'::jsonb;
 
 -- Unique name keeps seeding idempotent (no duplicate products on re-run)
 create unique index if not exists uniq_products_name on products (lower(name));
@@ -173,15 +175,17 @@ insert into settings (key, value) values
 on conflict (key) do nothing;  -- never overwrite live edits on re-run
 
 -- ─── 8. Seed Default Products (duplicate-proof) ──────────────
-insert into products (name, description, price, unit, category, badge, image, rating, featured, is_bake_of_week, display_order) values
-  ('Sunflower Cream Cake', 'A light layered sponge kissed with organic cream and sunflower honey, decorated with seasonal blooms.', 1800, '/whole', 'cake', 'Fresh Today', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80', 5, true, true, 1),
-  ('Chocolate Hazelnut Tart', 'Rich dark chocolate ganache poured into a hand-pressed pastry shell, crowned with roasted hazelnuts.', 950, '/piece', 'pastry', 'Organic', 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop', 5, true, false, 2),
-  ('Heritage Sourdough Loaf', '72-hour cold-fermented sourdough made with heritage wheat and a century-old starter culture.', 650, '/loaf', 'bread', 'Organic', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', 5, true, false, 3),
-  ('Butter Croissant', 'Flaky golden layers of French-style buttery pastry, hand-laminated and baked fresh each morning.', 180, '/piece', 'pastry', 'Fresh Today', 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80', 5, false, false, 4),
-  ('Strawberry Tart', 'Crisp pastry shell filled with vanilla custard and topped with fresh Himalayan strawberries.', 650, '/piece', 'pastry', 'Seasonal', 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop', 4, false, false, 5),
-  ('Cinnamon Roll', 'Soft dough rolled with Ceylon cinnamon and topped with tangy cream cheese glaze.', 220, '/piece', 'pastry', 'Popular', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', 5, false, false, 6),
-  ('Rustic Country Loaf', 'Stone-ground whole wheat with a deep caramelized crust and nutty interior crumb.', 480, '/loaf', 'bread', 'Organic', 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop', 5, false, false, 7),
-  ('Chocolate Hazelnut Cake', 'Dark Belgian chocolate layered with roasted hazelnut praline and velvety ganache.', 2200, '/whole', 'cake', 'Best Seller', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', 5, true, false, 8)
+-- Each product exposes an `images` array (gallery used by the Quick View).
+-- `image` stays as the cover / first image for backwards compatibility.
+insert into products (name, description, price, unit, category, badge, image, images, rating, featured, is_bake_of_week, display_order) values
+  ('Sunflower Cream Cake', 'A light layered sponge kissed with organic cream and sunflower honey, decorated with seasonal blooms.', 1800, '/whole', 'cake', 'Fresh Today', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80', '["https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80","https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&auto=format&fit=crop&q=80","https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&auto=format&fit=crop&q=80"]'::jsonb, 5, true, true, 1),
+  ('Chocolate Hazelnut Tart', 'Rich dark chocolate ganache poured into a hand-pressed pastry shell, crowned with roasted hazelnuts.', 950, '/piece', 'pastry', 'Organic', 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=600&h=500&fit=crop"]'::jsonb, 5, true, false, 2),
+  ('Heritage Sourdough Loaf', '72-hour cold-fermented sourdough made with heritage wheat and a century-old starter culture.', 650, '/loaf', 'bread', 'Organic', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=600&h=500&fit=crop"]'::jsonb, 5, true, false, 3),
+  ('Butter Croissant', 'Flaky golden layers of French-style buttery pastry, hand-laminated and baked fresh each morning.', 180, '/piece', 'pastry', 'Fresh Today', 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80', '["https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80","https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop&q=80","https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&auto=format&fit=crop&q=80"]'::jsonb, 5, false, false, 4),
+  ('Strawberry Tart', 'Crisp pastry shell filled with vanilla custard and topped with fresh Himalayan strawberries.', 650, '/piece', 'pastry', 'Seasonal', 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=500&fit=crop"]'::jsonb, 4, false, false, 5),
+  ('Cinnamon Roll', 'Soft dough rolled with Ceylon cinnamon and topped with tangy cream cheese glaze.', 220, '/piece', 'pastry', 'Popular', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&h=500&fit=crop"]'::jsonb, 5, false, false, 6),
+  ('Rustic Country Loaf', 'Stone-ground whole wheat with a deep caramelized crust and nutty interior crumb.', 480, '/loaf', 'bread', 'Organic', 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop"]'::jsonb, 5, false, false, 7),
+  ('Chocolate Hazelnut Cake', 'Dark Belgian chocolate layered with roasted hazelnut praline and velvety ganache.', 2200, '/whole', 'cake', 'Best Seller', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop"]'::jsonb, 5, true, false, 8)
 on conflict (lower(name)) do nothing;
 
 -- ─── 9. Seed Default Testimonials (only once) ────────────────

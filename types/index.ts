@@ -15,6 +15,7 @@ export interface MenuItem {
   category: 'bread' | 'cake' | 'pastry' | 'cookie' | 'seasonal';
   badge?: string;
   image?: string;
+  images?: string[];
   rating: number;
   featured?: boolean;
   display_order?: number;

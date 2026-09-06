@@ -8,16 +8,17 @@ import { useCart } from '@/components/layout/AppShell';
 import { useWishlist } from '@/components/layout/WishlistContext';
 import HeroSection from '@/components/layout/HeroSection';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import QuickViewModal from '@/components/layout/QuickViewModal';
 
 const fallbackProducts: MenuItem[] = [
-  { id: 'c1', name: 'Sunflower Cream Cake', description: 'A light layered sponge kissed with organic cream and sunflower honey, decorated with seasonal blooms.', price: 1800, unit: '/whole', category: 'cake', badge: 'Fresh Today', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', rating: 5 },
-  { id: 'c2', name: 'Chocolate Hazelnut Tart', description: 'Rich dark chocolate ganache poured into a hand-pressed pastry shell, crowned with roasted hazelnuts.', price: 950, unit: '/piece', category: 'pastry', badge: 'Organic', image: 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop', rating: 5 },
-  { id: 'c3', name: 'Heritage Sourdough Loaf', description: '72-hour cold-fermented sourdough made with heritage wheat and a century-old starter culture.', price: 650, unit: '/loaf', category: 'bread', badge: 'Organic', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', rating: 5 },
-  { id: 'c4', name: 'Butter Croissant', description: 'Flaky golden layers of French-style buttery pastry, hand-laminated and baked fresh each morning.', price: 180, unit: '/piece', category: 'pastry', badge: 'Fresh Today', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop', rating: 5 },
-  { id: 'c5', name: 'Strawberry Tart', description: 'Crisp pastry shell filled with vanilla custard and topped with fresh Himalayan strawberries.', price: 650, unit: '/piece', category: 'pastry', badge: 'Seasonal', image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop', rating: 4 },
-  { id: 'c6', name: 'Cinnamon Roll', description: 'Soft dough rolled with Ceylon cinnamon and topped with tangy cream cheese glaze.', price: 220, unit: '/piece', category: 'pastry', badge: 'Popular', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', rating: 5 },
-  { id: 'c7', name: 'Rustic Country Loaf', description: 'Stone-ground whole wheat with a deep caramelized crust and nutty interior crumb.', price: 480, unit: '/loaf', category: 'bread', badge: 'Organic', image: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop', rating: 5 },
-  { id: 'c8', name: 'Chocolate Hazelnut Cake', description: 'Dark Belgian chocolate layered with roasted hazelnut praline and velvety ganache.', price: 2200, unit: '/whole', category: 'cake', badge: 'Best Seller', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', rating: 5 },
+  { id: 'c1', name: 'Sunflower Cream Cake', description: 'A light layered sponge kissed with organic cream and sunflower honey, decorated with seasonal blooms.', price: 1800, unit: '/whole', category: 'cake', badge: 'Fresh Today', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=500&fit=crop'], rating: 5 },
+  { id: 'c2', name: 'Chocolate Hazelnut Tart', description: 'Rich dark chocolate ganache poured into a hand-pressed pastry shell, crowned with roasted hazelnuts.', price: 950, unit: '/piece', category: 'pastry', badge: 'Organic', image: 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=600&h=500&fit=crop'], rating: 5 },
+  { id: 'c3', name: 'Heritage Sourdough Loaf', description: '72-hour cold-fermented sourdough made with heritage wheat and a century-old starter culture.', price: 650, unit: '/loaf', category: 'bread', badge: 'Organic', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=600&h=500&fit=crop'], rating: 5 },
+  { id: 'c4', name: 'Butter Croissant', description: 'Flaky golden layers of French-style buttery pastry, hand-laminated and baked fresh each morning.', price: 180, unit: '/piece', category: 'pastry', badge: 'Fresh Today', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&h=500&fit=crop'], rating: 5 },
+  { id: 'c5', name: 'Strawberry Tart', description: 'Crisp pastry shell filled with vanilla custard and topped with fresh Himalayan strawberries.', price: 650, unit: '/piece', category: 'pastry', badge: 'Seasonal', image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=500&fit=crop'], rating: 4 },
+  { id: 'c6', name: 'Cinnamon Roll', description: 'Soft dough rolled with Ceylon cinnamon and topped with tangy cream cheese glaze.', price: 220, unit: '/piece', category: 'pastry', badge: 'Popular', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&h=500&fit=crop'], rating: 5 },
+  { id: 'c7', name: 'Rustic Country Loaf', description: 'Stone-ground whole wheat with a deep caramelized crust and nutty interior crumb.', price: 480, unit: '/loaf', category: 'bread', badge: 'Organic', image: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop'], rating: 5 },
+  { id: 'c8', name: 'Chocolate Hazelnut Cake', description: 'Dark Belgian chocolate layered with roasted hazelnut praline and velvety ganache.', price: 2200, unit: '/whole', category: 'cake', badge: 'Best Seller', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', images: ['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop', 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop'], rating: 5 },
 ];
 
 const fallbackTestimonials: Testimonial[] = [
@@ -408,6 +409,7 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
 function CollectionSection({ items }: { items: MenuItem[] }) {
   const [filter, setFilter] = useState('all');
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [quickViewItem, setQuickViewItem] = useState<MenuItem | null>(null);
   const { addItem } = useCart();
 
   const filters = ['all', 'cake', 'pastry', 'bread', 'cookie'];
@@ -415,7 +417,13 @@ function CollectionSection({ items }: { items: MenuItem[] }) {
   const filtered = filter === 'all' ? items : items.filter((m) => m.category === filter);
 
   const handleAdd = (item: MenuItem) => {
-    addItem({ name: item.name, price: item.price, img: item.image || '' });
+    addItem({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      img: item.image || '',
+      unit: item.unit,
+    });
     setAddedId(item.id);
     setTimeout(() => setAddedId(null), 1200);
   };
@@ -497,9 +505,11 @@ function CollectionSection({ items }: { items: MenuItem[] }) {
         maxWidth: 1140, margin: '0 auto', position: 'relative', zIndex: 1,
       }} className="collection-grid">
         {filtered.map((item) => (
-          <CollectionCard key={item.id} item={item} added={addedId === item.id} onAdd={handleAdd} />
+          <CollectionCard key={item.id} item={item} added={addedId === item.id} onAdd={handleAdd} onQuickView={setQuickViewItem} />
         ))}
       </div>
+
+      <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={() => setQuickViewItem(null)} />
 
       <style>{`
         @keyframes fadeCard {
@@ -518,7 +528,7 @@ function CollectionSection({ items }: { items: MenuItem[] }) {
   );
 }
 
-function CollectionCard({ item, added, onAdd }: { item: MenuItem; added: boolean; onAdd: (item: MenuItem) => void }) {
+function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; added: boolean; onAdd: (item: MenuItem) => void; onQuickView: (item: MenuItem) => void }) {
   const [hovered, setHovered] = useState(false);
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isFav = isInWishlist(item.id);
@@ -542,7 +552,7 @@ function CollectionCard({ item, added, onAdd }: { item: MenuItem; added: boolean
       {/* Image */}
       <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
         <img
-          src={item.image}
+          src={item.images?.[0] || item.image}
           alt={item.name}
           loading="lazy"
           style={{
@@ -583,7 +593,7 @@ function CollectionCard({ item, added, onAdd }: { item: MenuItem; added: boolean
             justifyContent: 'center',
             cursor: 'pointer',
             boxShadow: '0 4px 14px rgba(0, 0, 0, 0.18)',
-            zIndex: 4,
+            zIndex: 6,
             transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
             color: isFav ? '#e74c3c' : '#8A7654',
           }}
@@ -613,6 +623,80 @@ function CollectionCard({ item, added, onAdd }: { item: MenuItem; added: boolean
         <svg style={{ position: 'absolute', bottom: 8, left: 8, width: 28, height: 28, opacity: 0.4 }} viewBox="0 0 28 28" fill="none">
           <path d="M26 2 L26 22 Q26 26 22 26 L2 26" stroke="#F5D35C" strokeWidth="1.2" strokeLinecap="round" fill="none" />
         </svg>
+
+        {/* Quick View overlay */}
+        <div
+          onClick={() => onQuickView(item)}
+          onKeyDown={(e) => { if (e.key === 'Enter') onQuickView(item); }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Quick view ${item.name}`}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 5,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            gap: 10,
+            paddingBottom: 18,
+            background: hovered ? 'rgba(20, 14, 8, 0.32)' : 'rgba(20, 14, 8, 0)',
+            opacity: hovered ? 1 : 0,
+            transition: 'opacity 0.3s var(--motion-ease), background 0.3s var(--motion-ease)',
+          }}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); onQuickView(item); }}
+            aria-label={`Quick view ${item.name}`}
+            title="Quick View"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: '50%',
+              background: 'rgba(255, 253, 245, 0.94)',
+              color: 'var(--color-green)',
+              border: '1.5px solid var(--color-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: hovered ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.96)',
+              transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.28)',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAdd(item); }}
+            aria-label={`Add ${item.name} to cart`}
+            title="Add to Cart"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: '50%',
+              background: 'var(--color-green)',
+              color: '#FFFDF5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: hovered ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.96)',
+              transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              boxShadow: '0 6px 20px rgba(40, 85, 28, 0.4)',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Content */}
@@ -686,14 +770,14 @@ function OurStorySection() {
           }}>
             <img src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&h=500&fit=crop" alt="Baker at work" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{
+          <div className="about-overlay-img" style={{
             position: 'absolute', width: '50%', height: '50%', bottom: 0, right: 0,
             borderRadius: 'var(--radius-sm)', overflow: 'hidden',
             border: '3px solid var(--color-cream)', boxShadow: 'var(--shadow-md)',
           }}>
             <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop" alt="Fresh bread" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{
+          <div className="passion-badge" style={{
             position: 'absolute', bottom: '18%', left: -8, background: 'var(--color-green)',
             color: 'var(--color-cream)', borderRadius: 'var(--radius-sm)',
             padding: '14px 18px', textAlign: 'center',
@@ -722,9 +806,10 @@ function OurStorySection() {
       </div>
 
       <style>{`
+        .passion-badge { transition: transform 0.3s ease; }
         @media (max-width: 1024px) {
           #about .reveal { grid-template-columns: 1fr !important; gap: 48px !important; }
-          .about-images { max-width: 420px; margin: 0 auto; }
+          .about-images { display: none !important; }
           .about-content .section-title, .about-content .section-subtitle { text-align: center !important; }
           .about-content { display: flex; flex-direction: column; align-items: center; }
           .about-content p { text-align: center !important; }
@@ -735,14 +820,7 @@ function OurStorySection() {
 }
 
 function WeCareSection() {
-  const [dogImage, setDogImage]     = useState('/we care.png');
-  const [dogTitle, setDogTitle]     = useState('5% of Total Sales Goes to Street Dog Charity');
-  const [dogPercent, setDogPercent] = useState('5%');
-  const [dogDesc, setDogDesc]       = useState(
-    'At Jiri Bakes, we believe kindness should be shared with every living being. 5% of all bakery sales directly funds daily nutritious meals, emergency medical aid, vaccines, and shelter for neighborhood street dogs in Lokanthali.'
-  );
-  const [socialUrl, setSocialUrl]   = useState('https://www.instagram.com/jiribakes');
-  const [customQrImg, setCustomQrImg] = useState('');
+  const [dogImage, setDogImage] = useState('/we care.png');
 
   useEffect(() => {
     fetch('/api/settings', { cache: 'no-store' })
@@ -751,24 +829,15 @@ function WeCareSection() {
         if (d.data && Array.isArray(d.data)) {
           const map: Record<string, string> = {};
           d.data.forEach((item: { key: string; value: string }) => { map[item.key] = item.value; });
-          if (map.street_dog_image)      setDogImage(map.street_dog_image);
-          if (map.street_dog_title)      setDogTitle(map.street_dog_title);
-          if (map.street_dog_percent)    setDogPercent(map.street_dog_percent);
-          if (map.street_dog_desc)       setDogDesc(map.street_dog_desc);
-          if (map.street_dog_social_url) setSocialUrl(map.street_dog_social_url);
-          if (map.street_dog_qr_image)   setCustomQrImg(map.street_dog_qr_image);
+          if (map.street_dog_image) setDogImage(map.street_dog_image);
         }
       })
       .catch(() => {});
   }, []);
 
-  const autoQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(socialUrl)}`;
-  const qrUrl = customQrImg || autoQrUrl;
-
   return (
     <section id="we-care" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
       <style>{`
-        @keyframes qr-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
         .wc-banner-img { display:block; width:100%; height:auto; }
       `}</style>
 
@@ -779,68 +848,6 @@ function WeCareSection() {
         className="wc-banner-img"
         onError={(e) => { (e.target as HTMLImageElement).src = '/we care.png'; }}
       />
-
-      {/* ─── 5% Charity strip + QR Code ─────────────────────────── */}
-      <div style={{ background: 'var(--color-bg)', borderTop: '1.5px solid var(--color-border)', padding: 'clamp(36px,5vw,64px) 24px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 'clamp(28px,4vw,52px)', alignItems: 'center' }}>
-
-          {/* Left — mission copy */}
-          <div>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 16px', borderRadius:9999, background:'rgba(82,183,136,0.12)', border:'1px solid rgba(82,183,136,0.25)', color:'var(--color-green)', fontSize:'0.82rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:16 }}>
-              <span>🐾 Community Compassion</span>
-              <span style={{opacity:0.4}}>•</span>
-              <span style={{color:'#E87B32'}}>{dogPercent} of Every Sale</span>
-            </div>
-
-            <h2 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(1.6rem,2.5vw,2.2rem)', color:'var(--color-text-primary)', lineHeight:1.25, marginBottom:14 }}>
-              {dogTitle}
-            </h2>
-
-            <p style={{ fontSize:'clamp(0.92rem,1.2vw,1.02rem)', color:'var(--color-text-tertiary)', lineHeight:1.8, marginBottom:26 }}>
-              {dogDesc}
-            </p>
-
-            <div style={{ display:'flex', gap:12, flexWrap:'wrap', marginBottom:28 }}>
-              {[{val:`${dogPercent} Sales`,sub:'Dedicated to Charity',c:'var(--color-green)'},{val:'30+ Daily',sub:'Nutritious Bowls',c:'#E87B32'},{val:'100% Care',sub:'First Aid & Vaccines',c:'#52B4E8'}].map(s => (
-                <div key={s.val} style={{ padding:'12px 18px', borderRadius:12, background:'rgba(255,255,255,0.05)', border:'1px solid var(--color-border)', backdropFilter:'blur(6px)' }}>
-                  <div style={{ fontWeight:800, fontSize:'1.15rem', color:s.c }}>{s.val}</div>
-                  <div style={{ fontSize:'0.72rem', color:'var(--color-text-tertiary)', marginTop:2 }}>{s.sub}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
-              <a href={socialUrl} target="_blank" rel="noopener noreferrer" style={{ padding:'12px 24px', borderRadius:9999, background:'var(--color-green)', color:'#FFFDF5', fontSize:'0.86rem', fontWeight:600, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:8, boxShadow:'0 4px 14px rgba(40,85,28,0.35)' }}>
-                View Contribution Proof ↗
-              </a>
-              <a href="https://wa.me/9779841234567?text=Namaste%20Jiri%20Bakes!%20I%20support%20your%20street%20dog%20charity." target="_blank" rel="noopener noreferrer" style={{ padding:'12px 22px', borderRadius:9999, background:'rgba(255,255,255,0.06)', color:'var(--color-text-primary)', border:'1.5px solid var(--color-border)', fontSize:'0.86rem', fontWeight:600, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6 }}>
-                💬 WhatsApp Us
-              </a>
-            </div>
-          </div>
-
-          {/* Right — scannable QR card */}
-          <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:20, padding:'28px 24px', border:'1.5px solid rgba(245,211,92,0.25)', boxShadow:'0 12px 40px rgba(0,0,0,0.35)', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', position:'relative', animation:'qr-float 6s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
-            <div style={{ position:'absolute', top:-13, background:'linear-gradient(135deg,#E87B32,#F5D35C)', color:'#1a1108', padding:'4px 16px', borderRadius:9999, fontSize:'0.72rem', fontWeight:800, letterSpacing:'0.5px', textTransform:'uppercase', boxShadow:'0 2px 8px rgba(232,123,50,0.4)' }}>
-              ★ Verified Transparency
-            </div>
-
-            <h3 style={{ fontFamily:'var(--font-display)', fontSize:'1.2rem', color:'var(--color-text-primary)', marginTop:10, marginBottom:6 }}>Scan for Proof</h3>
-            <p style={{ fontSize:'0.78rem', color:'var(--color-text-tertiary)', maxWidth:260, lineHeight:1.5, marginBottom:18 }}>
-              Point your phone camera here to see our daily feeding stories &amp; rescue reels on social media.
-            </p>
-
-            <div style={{ padding:12, borderRadius:14, background:'#fff', border:'2px dashed rgba(82,183,136,0.35)', boxShadow:'0 4px 24px rgba(0,0,0,0.3)', marginBottom:14, position:'relative' }}>
-              <img src={qrUrl} alt="QR Code — Jiri Bakes street dog contributions" width={160} height={160} style={{ display:'block', borderRadius:8 }} />
-              <div style={{ position:'absolute', bottom:7, left:'50%', transform:'translateX(-50%)', background:'rgba(40,85,28,0.92)', color:'#FFFDF5', padding:'2px 8px', borderRadius:5, fontSize:'0.62rem', fontWeight:700, whiteSpace:'nowrap' }}>SCAN ME</div>
-            </div>
-
-            <a href={socialUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize:'0.8rem', fontWeight:700, color:'var(--color-green)', textDecoration:'none' }}>
-              {socialUrl.replace(/^https?:\/\/(www\.)?/, '')} ↗
-            </a>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
