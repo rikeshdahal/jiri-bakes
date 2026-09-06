@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import type { MenuItem, Testimonial } from '@/types';
 import Button from '@/components/buttons/Button';
 import { useCart } from '@/components/layout/AppShell';
@@ -68,27 +67,6 @@ function useMultiReveal() {
   }, []);
 }
 
-function useCounter(target: number, suffix: string, startOnView: boolean) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const started = useRef(false);
-  useEffect(() => {
-    if (!startOnView) return;
-    const el = ref.current;
-    if (!el || started.current) return;
-    started.current = true;
-    const duration = 2000;
-    const step = Math.max(1, Math.floor(target / 60));
-    let current = 0;
-    const timer = setInterval(() => {
-      current += step;
-      if (current >= target) { current = target; clearInterval(timer); }
-      el.textContent = current.toLocaleString() + suffix;
-    }, duration / 60);
-    return () => clearInterval(timer);
-  }, [target, suffix, startOnView]);
-  return ref;
-}
-
 export default function HomePage() {
   useMultiReveal();
   const [collectionItems, setCollectionItems] = useState<MenuItem[]>(fallbackProducts);
@@ -117,7 +95,7 @@ export default function HomePage() {
   return (
     <>
       {booting && <LoadingScreen hiding={hidingLoader} />}
-      <HeroSection bakeOfTheWeek={collectionItems.find((p) => p.featured) || collectionItems[0]} />
+      <HeroSection bakeOfTheWeek={collectionItems.find((p) => p.is_bake_of_week) || collectionItems.find((p) => p.featured) || collectionItems[0]} />
       <FeaturedCakeSection featured={collectionItems.find((p) => p.featured) || collectionItems[0]} />
       <CollectionSection items={collectionItems} />
       <OurStorySection />

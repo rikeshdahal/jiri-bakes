@@ -11,6 +11,7 @@
       "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
       "rating": 5,
       "featured": true,
+      "is_bake_of_week": true,
       "display_order": 1,
       "created_at": "2026-08-21T09:16:25.713Z",
       "updated_at": "2026-08-21T09:16:25.713Z",
@@ -380,7 +381,7 @@
     },
     {
       "key": "site_title",
-      "value": "Jiri Bakes â€“ Simply Organic Artisan Bakery"
+      "value": "Jiri Bakes – Simply Organic Artisan Bakery"
     },
     {
       "key": "site_tagline",
@@ -389,6 +390,10 @@
     {
       "key": "phone",
       "value": "+977 1-4567890"
+    },
+    {
+      "key": "whatsapp_phone",
+      "value": "9779841234567"
     },
     {
       "key": "email",
@@ -400,15 +405,27 @@
     },
     {
       "key": "hours_weekday",
-      "value": "Mon â€“ Sat: 7:00 AM â€“ 8:00 PM"
+      "value": "Mon – Sat: 7:00 AM – 8:00 PM"
     },
     {
       "key": "hours_sunday",
-      "value": "Sunday: 8:00 AM â€“ 6:00 PM"
+      "value": "Sunday: 8:00 AM – 6:00 PM"
     },
     {
       "key": "fresh_bread_time",
       "value": "7:30 AM"
+    },
+    {
+      "key": "hero_headline",
+      "value": "Baked Like Art."
+    },
+    {
+      "key": "hero_subheadline",
+      "value": "Handcrafted organic breads, cakes, and morning pastries. Baked fresh daily at dawn in Lokanthali, Nepal."
+    },
+    {
+      "key": "announcement_banner",
+      "value": "Fresh organic sourdough available every morning at 7:30 AM!"
     },
     {
       "key": "delivery_fee",

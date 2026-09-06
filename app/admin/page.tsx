@@ -5,11 +5,13 @@ import Link from 'next/link';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#E87B32',
-  baking: '#8A7654',
-  ready: '#28551C',
-  completed: '#27ae60',
+  confirmed: '#2980b9',
+  baking: '#D9A441',
+  preparing: '#9b59b6',
+  ready: '#52B788',
   delivered: '#27ae60',
-  cancelled: '#c0392b',
+  completed: '#27ae60',
+  cancelled: '#e74c3c',
 };
 
 interface DashboardStats {
@@ -70,11 +72,11 @@ export default function AdminDashboard() {
       label: 'Total Products',
       value: stats?.totalProducts || 0,
       subtext: 'Active in catalogue',
-      accent: '#28551C',
-      bgAccent: 'rgba(40, 85, 28, 0.08)',
+      accent: '#52B788',
+      bgAccent: 'rgba(82, 183, 136, 0.14)',
       href: '/admin/products',
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#28551C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#52B788" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
           <line x1="3" y1="6" x2="21" y2="6" />
           <path d="M16 10a4 4 0 0 1-8 0" />
@@ -127,11 +129,13 @@ export default function AdminDashboard() {
 
   const statusColors: Record<string, { bg: string; text: string; border: string }> = {
     pending: { bg: 'rgba(232, 123, 50, 0.12)', text: '#E87B32', border: 'rgba(232, 123, 50, 0.3)' },
-    baking: { bg: 'rgba(245, 211, 92, 0.2)', text: '#8A7654', border: 'rgba(245, 211, 92, 0.4)' },
-    ready: { bg: 'rgba(40, 85, 28, 0.12)', text: '#28551C', border: 'rgba(40, 85, 28, 0.25)' },
+    confirmed: { bg: 'rgba(41, 128, 185, 0.14)', text: '#2980b9', border: 'rgba(41, 128, 185, 0.35)' },
+    baking: { bg: 'rgba(217, 164, 65, 0.14)', text: '#D9A441', border: 'rgba(217, 164, 65, 0.35)' },
+    preparing: { bg: 'rgba(155, 89, 182, 0.16)', text: '#b06fd1', border: 'rgba(155, 89, 182, 0.4)' },
+    ready: { bg: 'rgba(82, 183, 136, 0.14)', text: '#52B788', border: 'rgba(82, 183, 136, 0.35)' },
     completed: { bg: 'rgba(39, 174, 96, 0.12)', text: '#27ae60', border: 'rgba(39, 174, 96, 0.25)' },
     delivered: { bg: 'rgba(39, 174, 96, 0.12)', text: '#27ae60', border: 'rgba(39, 174, 96, 0.25)' },
-    cancelled: { bg: 'rgba(192, 57, 43, 0.1)', text: '#c0392b', border: 'rgba(192, 57, 43, 0.25)' },
+    cancelled: { bg: 'rgba(231, 76, 60, 0.12)', text: '#e74c3c', border: 'rgba(231, 76, 60, 0.3)' },
   };
 
   const isVisitShop = (order: RecentOrder) => {

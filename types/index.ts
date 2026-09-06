@@ -18,6 +18,7 @@ export interface MenuItem {
   images?: string[];
   rating: number;
   featured?: boolean;
+  is_bake_of_week?: boolean;
   display_order?: number;
   created_at?: string;
   updated_at?: string;

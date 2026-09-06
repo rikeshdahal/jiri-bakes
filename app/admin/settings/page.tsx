@@ -220,9 +220,9 @@ export default function AdminSettingsPage() {
             fontSize: '0.85rem',
             fontWeight: 500,
             fontFamily: 'var(--font-body)',
-            background: feedback.type === 'success' ? 'rgba(40,85,28,0.08)' : 'rgba(192,57,43,0.08)',
-            color: feedback.type === 'success' ? 'var(--color-green)' : 'var(--color-error)',
-            border: `1px solid ${feedback.type === 'success' ? 'rgba(40,85,28,0.2)' : 'rgba(192,57,43,0.2)'}`,
+            background: feedback.type === 'success' ? 'rgba(82,183,136,0.12)' : 'rgba(231,76,60,0.12)',
+            color: feedback.type === 'success' ? '#52B788' : 'var(--color-error)',
+            border: `1px solid ${feedback.type === 'success' ? 'rgba(82,183,136,0.3)' : 'rgba(231,76,60,0.3)'}`,
           }}
         >
           {feedback.message}
@@ -240,7 +240,7 @@ export default function AdminSettingsPage() {
               5% of total bakery sales directly supports street dogs. Upload banner images directly from your device and configure your social media proof link.
             </p>
           </div>
-          <span style={{ padding: '4px 12px', borderRadius: 9999, background: 'rgba(82, 183, 136, 0.15)', color: '#28551C', fontSize: '0.75rem', fontWeight: 700 }}>
+          <span style={{ padding: '4px 12px', borderRadius: 9999, background: 'rgba(82, 183, 136, 0.16)', color: '#52B788', fontSize: '0.75rem', fontWeight: 700 }}>
             {values['street_dog_percent'] || '5%'} Sales Contribution
           </span>
         </div>

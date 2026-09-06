@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { Testimonial } from '@/types';
+import type { Testimonial } from '@/types';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -213,14 +213,14 @@ export default function AdminTestimonialsPage() {
                     {'★'.repeat(t.rating || 5)}{'☆'.repeat(5 - (t.rating || 5))}
                   </div>
                 </div>
-                <div style={{ fontSize: '0.82rem', color: '#CBD5E1', lineHeight: 1.5, fontStyle: 'italic' }}>"{t.text}"</div>
+                <div style={{ fontSize: '0.82rem', color: '#CBD5E1', lineHeight: 1.5, fontStyle: 'italic' }}>&ldquo;{t.text}&rdquo;</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
                   <span style={{ fontSize: '0.72rem', color: t.approved ? '#27ae60' : '#E87B32', fontWeight: 600 }}>{t.approved ? 'Approved' : 'Pending'}</span>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => toggleApproved(t)} style={{ padding: '6px 12px', borderRadius: 6, background: t.approved ? 'rgba(232,123,50,0.15)' : 'rgba(39,174,96,0.15)', color: t.approved ? '#E87B32' : '#27ae60', fontSize: '0.72rem', fontWeight: 600, border: `1px solid ${t.approved ? 'rgba(232,123,50,0.3)' : 'rgba(39,174,96,0.3)'}`, cursor: 'pointer', minHeight: 36 }}>
                       {t.approved ? 'Unapprove' : 'Approve'}
                     </button>
-                    <button onClick={() => { if (t.id && confirm('Delete this testimonial?')) handleDelete(t.id); }} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(192,57,43,0.15)', color: '#e74c3c', fontSize: '0.72rem', fontWeight: 600, border: '1px solid rgba(192,57,43,0.25)', cursor: 'pointer', minHeight: 36 }}>
+                    <button onClick={() => t.id && setDeletingId(t.id)} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(192,57,43,0.15)', color: '#e74c3c', fontSize: '0.72rem', fontWeight: 600, border: '1px solid rgba(192,57,43,0.25)', cursor: 'pointer', minHeight: 36 }}>
                       Delete
                     </button>
                   </div>

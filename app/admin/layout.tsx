@@ -16,9 +16,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const [userEmail, setUserEmail] = useState('admin@jiribakes.com');
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  // Close the drawer when navigating to a different admin page (render-phase
+  // adjustment keeps the sidebar state in sync without an extra effect).
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setSidebarOpen(false);
+  }
 
   // If on login page, render clean full-page layout without sidebar
   const isLoginPage = pathname === '/admin/login';
@@ -49,10 +57,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/admin/login');
   }, [router]);
-
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
 
   if (isLoginPage) {
     return <div data-theme="night" className="admin-root-dark">{children}</div>;

@@ -5,14 +5,16 @@ import type { Order } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#E87B32',
-  baking: '#8A7654',
-  ready: '#28551C',
-  completed: '#27ae60',
+  confirmed: '#2980b9',
+  baking: '#D9A441',
+  preparing: '#9b59b6',
+  ready: '#52B788',
   delivered: '#27ae60',
-  cancelled: '#c0392b',
+  completed: '#27ae60',
+  cancelled: '#e74c3c',
 };
 
-const ALL_STATUSES = ['pending', 'baking', 'ready', 'completed', 'cancelled'] as const;
+const ALL_STATUSES = ['pending', 'confirmed', 'baking', 'preparing', 'ready', 'delivered', 'completed', 'cancelled'] as const;
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -382,7 +384,7 @@ export default function AdminOrdersPage() {
                           {order.message_on_item && (
                             <div>
                               <span style={{ color: 'var(--color-text-tertiary)' }}>Item Message: </span>
-                              <span style={{ color: '#CBD5E1', fontStyle: 'italic' }}>"{order.message_on_item}"</span>
+                              <span style={{ color: '#CBD5E1', fontStyle: 'italic' }}>&ldquo;{order.message_on_item}&rdquo;</span>
                             </div>
                           )}
 

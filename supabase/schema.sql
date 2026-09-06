@@ -153,9 +153,13 @@ create trigger trg_settings_updated_at
   for each row execute function update_updated_at();
 
 -- ─── 7. Seed Default Settings ────────────────────────────────
+-- Full set of keys used by the app (admin Settings page + file backend),
+-- so Supabase and a fresh db.json always start with identical values.
 insert into settings (key, value) values
   ('site_name', 'Jiri Bakes'),
   ('tagline', 'Simply Organic'),
+  ('site_title', 'Jiri Bakes – Simply Organic Artisan Bakery'),
+  ('site_tagline', 'Where Flour Meets Feeling'),
   ('phone', '+977 1-4567890'),
   ('whatsapp_phone', '9779841234567'),
   ('email', 'hello@jiribakes.com.np'),
@@ -163,6 +167,8 @@ insert into settings (key, value) values
   ('hours_weekday', 'Mon – Sat: 7:00 AM – 8:00 PM'),
   ('hours_sunday', 'Sunday: 8:00 AM – 6:00 PM'),
   ('fresh_bread_time', '7:30 AM'),
+  ('delivery_fee', '100'),
+  ('currency_symbol', 'NPR'),
   ('hero_headline', 'Baked Like Art.'),
   ('hero_subheadline', 'Handcrafted organic breads, cakes, and morning pastries. Baked fresh daily at dawn in Lokanthali, Nepal.'),
   ('announcement_banner', 'Fresh organic sourdough available every morning at 7:30 AM!'),

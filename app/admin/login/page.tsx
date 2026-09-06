@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Input from '@/components/forms/Input';
 
 export default function AdminLoginPage() {
@@ -142,7 +143,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div style={{ textAlign: 'center', marginTop: 28, paddingTop: 18, borderTop: '1px solid rgba(245, 211, 92, 0.2)' }}>
-          <a
+          <Link
             href="/"
             style={{
               fontSize: '0.82rem',
@@ -156,7 +157,7 @@ export default function AdminLoginPage() {
           >
             <span>←</span>
             <span>Return to Bakery Website</span>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
