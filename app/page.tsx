@@ -73,6 +73,7 @@ export default function HomePage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>(fallbackTestimonials);
   const [booting, setBooting] = useState(true);
   const [hidingLoader, setHidingLoader] = useState(false);
+  const [quickViewItem, setQuickViewItem] = useState<MenuItem | null>(null);
 
   useEffect(() => {
     const productsP = fetch('/api/products').then((r) => r.json()).then((d) => {
@@ -95,9 +96,9 @@ export default function HomePage() {
   return (
     <>
       {booting && <LoadingScreen hiding={hidingLoader} />}
-      <HeroSection bakeOfTheWeek={collectionItems.find((p) => p.is_bake_of_week) || collectionItems.find((p) => p.featured) || collectionItems[0]} />
+      <HeroSection bakeOfTheWeek={collectionItems.find((p) => p.is_bake_of_week) || collectionItems.find((p) => p.featured) || collectionItems[0]} onQuickView={setQuickViewItem} />
       <FeaturedCakeSection featured={collectionItems.find((p) => p.featured) || collectionItems[0]} />
-      <CollectionSection items={collectionItems} />
+      <CollectionSection items={collectionItems} quickViewItem={quickViewItem} onQuickView={setQuickViewItem} onCloseQuickView={() => setQuickViewItem(null)} />
       <OurStorySection />
       <WeCareSection />
       <TestimonialsSection items={testimonials} />
@@ -332,7 +333,7 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(245, 211, 92, 0.3)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(245, 211, 92, 0.2)'; }}
               >
-                {ordered ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:4}}><polyline points="20 6 9 17 4 12"/></svg> Added to Bag</> : 'Order Now'}
+                {ordered ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}><polyline points="20 6 9 17 4 12" /></svg> Added to Bag</> : 'Order Now'}
               </button>
 
               <button
@@ -384,10 +385,9 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
   );
 }
 
-function CollectionSection({ items }: { items: MenuItem[] }) {
+function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView }: { items: MenuItem[]; quickViewItem: MenuItem | null; onQuickView: (item: MenuItem) => void; onCloseQuickView: () => void }) {
   const [filter, setFilter] = useState('all');
   const [addedId, setAddedId] = useState<string | null>(null);
-  const [quickViewItem, setQuickViewItem] = useState<MenuItem | null>(null);
   const { addItem } = useCart();
 
   const filters = ['all', 'cake', 'pastry', 'bread', 'cookie'];
@@ -483,11 +483,11 @@ function CollectionSection({ items }: { items: MenuItem[] }) {
         maxWidth: 1140, margin: '0 auto', position: 'relative', zIndex: 1,
       }} className="collection-grid">
         {filtered.map((item) => (
-          <CollectionCard key={item.id} item={item} added={addedId === item.id} onAdd={handleAdd} onQuickView={setQuickViewItem} />
+          <CollectionCard key={item.id} item={item} added={addedId === item.id} onAdd={handleAdd} onQuickView={onQuickView} />
         ))}
       </div>
 
-      <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={() => setQuickViewItem(null)} />
+      <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={onCloseQuickView} />
 
       <style>{`
         @keyframes fadeCard {
@@ -810,13 +810,48 @@ function WeCareSection() {
           if (map.street_dog_image) setDogImage(map.street_dog_image);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   return (
     <section id="we-care" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
       <style>{`
         .wc-banner-img { display:block; width:100%; height:auto; }
+        .wc-ig-badge {
+          position: absolute;
+          bottom: 20px;
+          right: 20px;
+          z-index: 10;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 20px;
+          border-radius: 9999px;
+          background: rgba(255, 253, 245, 0.95);
+          border: 1.5px solid #F5D35C;
+          box-shadow: 0 10px 28px rgba(43, 29, 16, 0.22);
+          backdrop-filter: blur(12px);
+          text-decoration: none;
+          color: #2B1D10;
+          font-size: 0.84rem;
+          font-weight: 700;
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .wc-ig-badge:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(43, 29, 16, 0.28); }
+        .wc-ig-icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        @media (max-width: 480px) {
+          .wc-ig-badge { bottom: 14px !important; right: 14px !important; padding: 10px 14px !important; }
+          .wc-ig-badge > span + span { font-size: 0.8rem !important; }
+        }
       `}</style>
 
       {/* Dynamic banner — admin can change from Settings page */}
@@ -826,387 +861,24 @@ function WeCareSection() {
         className="wc-banner-img"
         onError={(e) => { (e.target as HTMLImageElement).src = '/we care.png'; }}
       />
+
+      {/* Bottom-left Instagram link, clickable on top of image */}
+      <a
+        href="https://www.instagram.com/jiri_bakes"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Follow Jiri Bakes on Instagram"
+        className="wc-ig-badge"
+      >
+        <span className="wc-ig-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFDF5"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.71 3.71 0 01-1.38-.9 3.71 3.71 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.13.63c-.79.3-1.47.71-2.14 1.37A5.63 5.63 0 00.62 4.13C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.92.3.79.71 1.47 1.37 2.14.66.66 1.34 1.06 2.13 1.37.77.3 1.65.5 2.92.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.92-.56a5.9 5.9 0 002.13-1.37c.66-.66 1.06-1.34 1.37-2.13.3-.77.5-1.65.56-2.92.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.92a5.9 5.9 0 00-1.37-2.13A5.9 5.9 0 0019.87.63c-.77-.3-1.65-.5-2.92-.56C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm6.41-10.85a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z" /></svg>
+        </span>
+        <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+          <span style={{ fontSize: '0.74rem', color: '#8A7654', fontWeight: 600 }}>Follow our journey</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#DD2A7B' }}>@jiri_bakes</span>
+        </span>
+      </a>
     </section>
-  );
-}
-
-function WeCareTextContent() {
-  const ref = useReveal();
-
-  return (
-    <div style={{ position: 'relative' }}>
-
-      {/* ─── Van Gogh Impressionist Painted Sky Background (Swirls, Brush Strokes, Halos) ─── */}
-      {/* 1. Large Starry Night Swirl Center Right */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '-15%',
-          right: '-5%',
-          width: 580,
-          height: 580,
-          borderRadius: '50%',
-          border: '2.5px dashed rgba(245, 211, 92, 0.28)',
-          animation: 'vg-swirl-slow 50s linear infinite',
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            inset: 30,
-            borderRadius: '50%',
-            border: '2px solid rgba(82, 183, 136, 0.18)',
-            borderLeftColor: '#F5D35C',
-            borderRightColor: '#E87B32',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 70,
-            borderRadius: '50%',
-            border: '1.8px dashed rgba(245, 211, 92, 0.22)',
-          }}
-        />
-      </div>
-
-      {/* 2. Van Gogh Celestial Impasto Wave Strokes (Top Background) */}
-      <svg
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: 180,
-          opacity: 0.25,
-          pointerEvents: 'none',
-        }}
-        viewBox="0 0 1200 180"
-        fill="none"
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M0 40 C 200 100, 400 0, 600 60 C 800 120, 1000 20, 1200 70"
-          stroke="#F5D35C"
-          strokeWidth="3.5"
-          strokeDasharray="14 10"
-          strokeLinecap="round"
-        />
-        <path
-          d="M0 80 C 250 140, 450 30, 700 90 C 950 150, 1100 40, 1200 100"
-          stroke="#28551C"
-          strokeWidth="2.5"
-          strokeDasharray="18 12"
-          strokeLinecap="round"
-        />
-        <path
-          d="M0 120 C 180 60, 500 160, 800 80 C 1000 20, 1150 110, 1200 130"
-          stroke="#E87B32"
-          strokeWidth="2"
-          strokeDasharray="8 8"
-          strokeLinecap="round"
-        />
-      </svg>
-
-      {/* 3. Van Gogh Glowing Halo Orbs & Twinkling Celestial Stars */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '18%',
-          left: '8%',
-          width: 220,
-          height: 220,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(245, 211, 92, 0.16) 0%, rgba(232, 123, 50, 0.05) 50%, transparent 75%)',
-          filter: 'blur(8px)',
-          animation: 'vg-brush-float 6s ease-in-out infinite',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: '12%',
-          right: '18%',
-          width: 280,
-          height: 280,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(82, 183, 136, 0.14) 0%, rgba(245, 211, 92, 0.04) 55%, transparent 75%)',
-          filter: 'blur(12px)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* 4. Impressionist Stars */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '25%',
-          left: '42%',
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          background: '#F5D35C',
-          boxShadow: '0 0 14px 4px rgba(245, 211, 92, 0.8)',
-          animation: 'vg-star-pulse 3s infinite ease-in-out',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: '22%',
-          left: '12%',
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: '#FFFDF5',
-          boxShadow: '0 0 10px 3px rgba(245, 211, 92, 0.6)',
-          animation: 'vg-star-pulse 4s infinite ease-in-out 1s',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '12%',
-          right: '28%',
-          width: 7,
-          height: 7,
-          borderRadius: '50%',
-          background: '#FF9E00',
-          boxShadow: '0 0 12px 3px rgba(255, 158, 0, 0.7)',
-          animation: 'vg-star-pulse 3.5s infinite ease-in-out 0.5s',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* 5. Bottom Canvas Wave Curves */}
-      <svg
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          height: 120,
-          opacity: 0.2,
-          pointerEvents: 'none',
-        }}
-        viewBox="0 0 1200 120"
-        fill="none"
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M0 80 C 300 20, 600 110, 900 40 C 1050 10, 1150 70, 1200 50"
-          stroke="#F5D35C"
-          strokeWidth="3"
-          strokeDasharray="16 10"
-          strokeLinecap="round"
-        />
-      </svg>
-
-      <div
-        ref={ref}
-        className="reveal"
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          maxWidth: 'var(--max-width, 1240px)',
-          margin: '0 auto',
-          padding: 'clamp(72px, 9vw, 110px) clamp(24px, 5vw, 80px) clamp(44px, 6vw, 64px)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-        }}
-      >
-        {/* ════════════ LEFT: Story & Community Kindness ════════════ */}
-        <div>
-          {/* Pill Badge */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 20px',
-              borderRadius: 9999,
-              background: 'rgba(245, 211, 92, 0.18)',
-              border: '1.5px solid rgba(245, 211, 92, 0.45)',
-              marginBottom: 24,
-              boxShadow: '0 2px 12px rgba(245, 211, 92, 0.16)',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--color-brown-deep)" style={{opacity:0.7}}><ellipse cx="8" cy="6" rx="2.5" ry="3"/><ellipse cx="16" cy="6" rx="2.5" ry="3"/><ellipse cx="4" cy="12" rx="2" ry="2.5"/><ellipse cx="20" cy="12" rx="2" ry="2.5"/><path d="M8 17c0-2 2-3.5 4-3.5s4 1.5 4 3.5c0 1-1 2.5-4 2.5S8 18 8 17z"/></svg>
-            <span
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                color: 'var(--color-brown-deep)',
-                letterSpacing: '0.6px',
-                textTransform: 'uppercase',
-              }}
-            >
-              Community & Kindness · We Care Initiative
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2.3rem, 4.8vw, 3.6rem)',
-              color: 'var(--color-brown-deep)',
-              lineHeight: 1.12,
-              marginBottom: 10,
-              letterSpacing: '-0.5px',
-            }}
-          >
-            Baking Warmth,{' '}
-            <span style={{ color: 'var(--color-green)', display: 'inline-block' }}>
-              For Every Stray Soul.
-            </span>
-          </h2>
-
-          {/* Hand-Drawn Golden Wave Underline */}
-          <div style={{ width: 140, height: 10, marginBottom: 24 }}>
-            <svg width="100%" height="10" viewBox="0 0 140 10" fill="none">
-              <path
-                d="M2 6 C 30 1, 60 9, 90 4 S 130 8, 138 5"
-                stroke="#F5D35C"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-
-          {/* Paragraph */}
-          <p
-            style={{
-              color: 'var(--color-text-tertiary)',
-              fontSize: 'clamp(0.95rem, 1.3vw, 1.05rem)',
-              lineHeight: 1.85,
-              marginBottom: 32,
-              maxWidth: 640,
-            }}
-          >
-            At Jiri Bakes, we believe kindness should be shared with every living being. Every morning in Lokanthali, we provide fresh, dog-safe meals and clean water for our neighborhood street dogs.
-          </p>
-
-          {/* 3 Impact Stat Cards */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: 14,
-              marginBottom: 36,
-              width: '100%',
-              maxWidth: 720,
-            }}
-          >
-              <div
-                style={{
-                  padding: '16px',
-                  borderRadius: 16,
-                  background: 'var(--color-surface-raised, #FFFDF5)',
-                  border: '1.5px solid var(--color-border)',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
-                }}
-              >
-              <div style={{ marginBottom: 4 }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#28551C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18c0 4.4-4 8-9 8s-9-3.6-9-8z"/><path d="M12 4v4"/><path d="M8 4h8"/></svg></div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--color-green)', fontWeight: 700, lineHeight: 1 }}>
-                30+ Daily
-              </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: 4, fontWeight: 500 }}>
-                Wholesome Warm Bowls
-              </div>
-            </div>
-
-              <div
-                style={{
-                  padding: '16px',
-                  borderRadius: 16,
-                  background: 'var(--color-surface-raised, #FFFDF5)',
-                  border: '1.5px solid var(--color-border)',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
-                }}
-              >
-              <div style={{ marginBottom: 4 }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E87B32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21V7a2 2 0 012-2h14a2 2 0 012 2v14"/><path d="M9 8h6"/><path d="M12 5v6"/><path d="M5 21h14"/><path d="M9 21v-4h6v4"/></svg></div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: '#E87B32', fontWeight: 700, lineHeight: 1 }}>
-                100% Care
-              </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: 4, fontWeight: 500 }}>
-                Vaccines & First Aid
-              </div>
-            </div>
-
-              <div
-                style={{
-                  padding: '16px',
-                  borderRadius: 16,
-                  background: 'var(--color-surface-raised, #FFFDF5)',
-                  border: '1.5px solid var(--color-border)',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
-                }}
-              >
-              <div style={{ marginBottom: 4 }}><svg width="24" height="24" viewBox="0 0 24 24" fill="#F5D35C" stroke="#F5D35C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: '#F5D35C', fontWeight: 700, lineHeight: 1 }}>
-                Lokanthali
-              </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: 4, fontWeight: 500 }}>
-                Community Protection
-              </div>
-            </div>
-          </div>
-
-          {/* Action Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <a
-              href="https://wa.me/9779841234567?text=Namaste%20Jiri%20Bakes!%20I%20love%20your%20We%20Care%20street%20dog%20initiative%20and%20would%20love%20to%20support."
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                padding: '14px 32px',
-                borderRadius: 9999,
-                background: 'var(--color-green)',
-                color: '#FFFDF5',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                boxShadow: '0 4px 16px rgba(40, 85, 28, 0.25)',
-                transition: 'all 0.25s ease',
-              }}
-            >
-              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFDF5" stroke="#FFFDF5" strokeWidth="1.5" style={{verticalAlign:'-2px',marginRight:4}}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> Join Our Compassion Drive</span>
-            </a>
-
-            <a
-              href="#about"
-              style={{
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: 'var(--color-brown-deep)',
-                textDecoration: 'underline',
-                textUnderlineOffset: 4,
-              }}
-            >
-              Read Our Full Story &rarr;
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -1693,11 +1365,11 @@ function FooterSection() {
               Lokanthali Store
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: '0.84rem', color: 'rgba(255, 253, 245, 0.75)' }}>
-              <div style={{display:'flex',alignItems:'center',gap:8}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Lokanthali, Bhaktapur, Nepal</div>
-              <div style={{display:'flex',alignItems:'center',gap:8}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> +977 1-4567890</div>
-              <div style={{display:'flex',alignItems:'center',gap:8}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> hello@jiribakes.com.np</div>
-              <div style={{display:'flex',alignItems:'center',gap:8}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Mon – Sat: 7:00 AM – 8:00 PM</div>
-              <div style={{display:'flex',alignItems:'center',gap:8}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Sunday: 8:00 AM – 6:00 PM</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg> Lokanthali, Bhaktapur, Nepal</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" /></svg> +977 1-4567890</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg> hello@jiribakes.com.np</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> Mon – Sat: 7:00 AM – 8:00 PM</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> Sunday: 8:00 AM – 6:00 PM</div>
             </div>
           </div>
         </div>
@@ -1716,7 +1388,10 @@ function FooterSection() {
         }}>
           <div>&copy; {new Date().getFullYear()} Jiri Bakes. All rights reserved. Handcrafted in Nepal.</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <span style={{ color: 'rgba(255,253,245,0.45)', fontSize: '0.76rem', display:'inline-flex', alignItems:'center', gap:4 }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 019.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg> Where flour meets feeling</span>
+            <span style={{ color: 'rgba(255,253,245,0.45)', fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 019.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg> Where flour meets feeling</span>
+            <span style={{ color: 'rgba(255,253,245,0.6)', fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              Designed by <a href="https://inloopnepal.com" target="_blank" rel="noopener noreferrer" style={{ color: '#F5D35C', textDecoration: 'none', fontWeight: 700 }} onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}>InLoop Nepal</a>
+            </span>
           </div>
         </div>
       </div>

@@ -62,7 +62,7 @@ export default function LoadingScreen({ hiding = false }: { hiding?: boolean }) 
 
         .jb-cookie {
           left: 62.5%;
-          top: 25%;
+          top: 23.4%;
           width: 14.167%;
           animation: jbSwingB 2.3s ease-in-out infinite;
           animation-delay: .15s;

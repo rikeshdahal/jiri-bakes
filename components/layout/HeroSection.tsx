@@ -29,18 +29,22 @@ function useReveal() {
 
 interface HeroSectionProps {
   bakeOfTheWeek?: MenuItem | null;
+  onQuickView: (item: MenuItem) => void;
 }
 
-export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
+export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionProps) {
   const ref = useReveal();
   const { theme } = useTheme();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isNight = theme === 'night';
 
-  const cakeItem = bakeOfTheWeek || {
+  const cakeItem: MenuItem = bakeOfTheWeek || {
     id: 'c1',
     name: 'Sunflower Cream Cake',
     price: 1800,
+    unit: '/whole',
+    category: 'cake',
+    rating: 5,
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80',
     description: 'A light layered sponge kissed with organic cream and sunflower honey.',
   };
@@ -416,6 +420,16 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
             {/* Main Artisan Showcase Card */}
             <div
               className="hero-main-img-wrap"
+              onClick={() => onQuickView(cakeItem)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Quick view ${cakeItem.name}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onQuickView(cakeItem);
+                }
+              }}
               style={{
                 width: '88%',
                 aspectRatio: '4 / 4.4',
@@ -425,6 +439,7 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
                 boxShadow: isNight ? '0 16px 48px rgba(0, 0, 0, 0.55)' : '0 14px 44px rgba(43, 29, 16, 0.14)',
                 border: '2.5px solid #F5D35C',
                 zIndex: 3,
+                cursor: 'pointer',
               }}
             >
               <img
