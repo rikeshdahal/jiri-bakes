@@ -29,22 +29,18 @@ function useReveal() {
 
 interface HeroSectionProps {
   bakeOfTheWeek?: MenuItem | null;
-  onQuickView: (item: MenuItem) => void;
 }
 
-export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionProps) {
+export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
   const ref = useReveal();
   const { theme } = useTheme();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isNight = theme === 'night';
 
-  const cakeItem: MenuItem = bakeOfTheWeek || {
+  const cakeItem = bakeOfTheWeek || {
     id: 'c1',
     name: 'Sunflower Cream Cake',
     price: 1800,
-    unit: '/whole',
-    category: 'cake',
-    rating: 5,
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80',
     description: 'A light layered sponge kissed with organic cream and sunflower honey.',
   };
@@ -403,14 +399,14 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
             >
               <svg width="320" height="320" viewBox="0 0 320 320" fill="none">
                 <g stroke="#F5D35C" strokeWidth="1.6" strokeLinecap="round" opacity="0.7">
-                  <line x1="160" y1="20"  x2="160" y2="70"  />
+                  <line x1="160" y1="20" x2="160" y2="70" />
                   <line x1="160" y1="250" x2="160" y2="300" />
-                  <line x1="20"  y1="160" x2="70"  y2="160" />
+                  <line x1="20" y1="160" x2="70" y2="160" />
                   <line x1="250" y1="160" x2="300" y2="160" />
-                  <line x1="61"  y1="61"  x2="96"  y2="96"  />
+                  <line x1="61" y1="61" x2="96" y2="96" />
                   <line x1="224" y1="224" x2="259" y2="259" />
-                  <line x1="259" y1="61"  x2="224" y2="96"  />
-                  <line x1="96"  y1="224" x2="61"  y2="259" />
+                  <line x1="259" y1="61" x2="224" y2="96" />
+                  <line x1="96" y1="224" x2="61" y2="259" />
                 </g>
                 <circle cx="160" cy="160" r="80" stroke="#F5D35C" strokeWidth="1.2" strokeDasharray="5 7" opacity="0.45" />
                 <circle cx="160" cy="160" r="110" stroke="#F5D35C" strokeWidth="0.8" strokeDasharray="3 9" opacity="0.3" />
@@ -420,16 +416,6 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
             {/* Main Artisan Showcase Card */}
             <div
               className="hero-main-img-wrap"
-              onClick={() => onQuickView(cakeItem)}
-              role="button"
-              tabIndex={0}
-              aria-label={`Quick view ${cakeItem.name}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onQuickView(cakeItem);
-                }
-              }}
               style={{
                 width: '88%',
                 aspectRatio: '4 / 4.4',
@@ -439,7 +425,6 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
                 boxShadow: isNight ? '0 16px 48px rgba(0, 0, 0, 0.55)' : '0 14px 44px rgba(43, 29, 16, 0.14)',
                 border: '2.5px solid #F5D35C',
                 zIndex: 3,
-                cursor: 'pointer',
               }}
             >
               <img
