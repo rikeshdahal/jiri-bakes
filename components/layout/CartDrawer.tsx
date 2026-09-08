@@ -37,6 +37,7 @@ export default function CartDrawer() {
   const [step, setStep] = useState<Step>('cart');
   const [customerName, setCustomerName]       = useState('');
   const [customerPhone, setCustomerPhone]     = useState('');
+  const [customerEmail, setCustomerEmail]     = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [variant, setVariant]                 = useState<'Egg' | 'Eggless'>('Egg');
   const [messageOnItem, setMessageOnItem]     = useState('');
@@ -47,6 +48,7 @@ export default function CartDrawer() {
   const [paymentMethod, setPaymentMethod]     = useState<'cod' | 'visit'>('cod');
   const [submitting, setSubmitting]           = useState(false);
   const [lastOrderId, setLastOrderId]         = useState('');
+  const [mailSent, setMailSent]               = useState(false);
   const [error, setError]                     = useState('');
 
   // Track order state
@@ -87,6 +89,10 @@ export default function CartDrawer() {
       setError('Your cart is empty.');
       return;
     }
+    if (customerEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail.trim())) {
+      setError('Please enter a valid email address (or leave it empty).');
+      return;
+    }
 
     setSubmitting(true);
     setError('');
@@ -106,6 +112,7 @@ export default function CartDrawer() {
         body: JSON.stringify({
           customer_name:    customerName,
           customer_phone:   customerPhone,
+          customer_email:   customerEmail.trim(),
           customer_address: paymentMethod === 'visit' ? 'Visit to store – Lokanthali, Bhaktapur' : (customerAddress || 'Lokanthali, Bhaktapur'),
           variant:          variant,
           message_on_item:  messageOnItem,
@@ -130,6 +137,7 @@ export default function CartDrawer() {
 
       const createdOrderId = json.data?.id || '';
       setLastOrderId(createdOrderId);
+      setMailSent(Boolean(json.mail?.customer));
 
       // Save to cookies for persistent tracking
       if (createdOrderId) {
@@ -150,6 +158,7 @@ export default function CartDrawer() {
       // Reset form fields
       setCustomerName('');
       setCustomerPhone('');
+      setCustomerEmail('');
       setCustomerAddress('');
       setVariant('Egg');
       setMessageOnItem('');
@@ -173,10 +182,24 @@ export default function CartDrawer() {
     setTrackError('');
     setTrackedOrders([]);
     try {
-      const isId = q.toLowerCase().startsWith('ord-');
-      const qs   = isId ? `id=${encodeURIComponent(q)}` : `phone=${encodeURIComponent(q)}`;
-      const res  = await fetch(`/api/track?${qs}`);
-      const json = await res.json();
+      // Order IDs look like ord-xxxxx or JB-2026-XXXXXX; anything with a
+      // letter/dash is tried as an ID first, then falls back to phone lookup.
+      const looksLikeId = /[a-z]/i.test(q) || q.includes('-');
+      const tryFetch = async (qs: string) => {
+        const res = await fetch(`/api/track?${qs}`);
+        const json = await res.json().catch(() => ({}));
+        return { res, json };
+      };
+      if (looksLikeId) {
+        const first = await tryFetch(`id=${encodeURIComponent(q)}`);
+        if (first.res.ok) { setTrackedOrders(first.json.data || []); return; }
+        // Fall back to phone search (user may have pasted a phone with dashes).
+        const second = await tryFetch(`phone=${encodeURIComponent(q)}`);
+        if (!second.res.ok) { setTrackError(second.json.error || first.json.error || 'No orders found.'); return; }
+        setTrackedOrders(second.json.data || []);
+        return;
+      }
+      const { res, json } = await tryFetch(`phone=${encodeURIComponent(q)}`);
       if (!res.ok) { setTrackError(json.error || 'No orders found.'); return; }
       setTrackedOrders(json.data || []);
     } catch {
@@ -322,6 +345,14 @@ export default function CartDrawer() {
                   Contact Number *
                 </label>
                 <input className="drawer-input" type="tel" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="e.g. 9841234567" />
+              </div>
+
+              {/* Email (for order confirmation) */}
+              <div>
+                <label style={{ display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--color-brown-deep)', marginBottom:5 }}>
+                  Email <span style={{ fontWeight:400, color:'var(--color-text-tertiary)' }}>(for order confirmation)</span>
+                </label>
+                <input className="drawer-input" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="you@example.com" />
               </div>
 
               {/* Choose Variant */}
@@ -496,6 +527,7 @@ export default function CartDrawer() {
               <p style={{ fontSize:'.85rem', color:'var(--color-text-tertiary)', marginBottom:22, lineHeight:1.65 }}>
                 Thank you, <strong>{customerName}</strong>!
                 {paymentMethod === 'cod' ? ' Our bakers are preparing your fresh artisan treats for delivery.' : ' Your order is reserved — please visit us at Lokanthali Bakery.'}
+                {mailSent ? ' A confirmation email is on its way.' : ' Add your email next time to receive an order confirmation.'}
               </p>
 
               <div style={{ padding:'16px 20px', borderRadius:14, background:'var(--color-card-bg)', border:'1px solid var(--color-border)', marginBottom:22, textAlign:'left', display:'flex', flexDirection:'column', gap:10 }}>
@@ -525,7 +557,7 @@ export default function CartDrawer() {
             <div>
               <h3 style={{ fontFamily:'var(--font-display)', fontSize:'1.3rem', color:'var(--color-brown-deep)', marginBottom:6 }}>Track Your Order</h3>
               <p style={{ fontSize:'.82rem', color:'var(--color-text-tertiary)', marginBottom:18, lineHeight:1.6 }}>
-                Enter your <strong>Order ID</strong> (e.g. ord-12345) or the <strong>phone number</strong> used when ordering.
+                Enter your <strong>Order ID</strong> (e.g. JB-2026-XXXXXX) or the <strong>phone number</strong> used when ordering.
               </p>
 
               <form onSubmit={handleTrack} style={{ display:'flex', gap:8, marginBottom:16 }}>

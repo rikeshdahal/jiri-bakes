@@ -12,6 +12,7 @@ const navLinks = [
   { id: 'collection', label: 'Shop', href: '#collection' },
   { id: 'about', label: 'About Us', href: '#about' },
   { id: 'contact', label: 'Contact', href: '#contact' },
+  { id: 'track', label: 'Track Order', href: '/track' },
 ];
 
 export default function Header() {
@@ -387,7 +388,20 @@ export default function Header() {
             className="nav-links-desktop"
           >
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
+              const isActive = activeSection === link.id || (link.id === 'track' && pathname === '/track');
+              if (link.href.startsWith('/')) {
+                return (
+                  <li key={link.id}>
+                    <Link
+                      ref={(el) => { linkRefs.current[link.id] = el as unknown as HTMLAnchorElement; }}
+                      href={link.href}
+                      className={`vg-nav-link ${isActive ? 'active' : ''}`}
+                    >
+                      <span>{link.label}</span>
+                    </Link>
+                  </li>
+                );
+              }
               return (
                 <li key={link.id}>
                   <a
@@ -575,24 +589,46 @@ export default function Header() {
               overflowY: 'auto',
             }}
           >
-            {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href, link.id)}
-                className={activeSection === link.id ? 'active' : ''}
-                style={{
-                  fontSize: '1rem',
-                  fontWeight: activeSection === link.id ? 700 : 500,
-                  color: activeSection === link.id ? '#F5D35C' : 'var(--color-text-primary)',
-                  padding: '12px 0',
-                  textDecoration: 'none',
-                  borderBottom: '1px solid var(--color-border)',
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.id || (link.id === 'track' && pathname === '/track');
+              if (link.href.startsWith('/')) {
+                return (
+                  <Link
+                    key={link.id}
+                    href={link.href}
+                    className={isActive ? 'active' : ''}
+                    style={{
+                      fontSize: '1rem',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? '#F5D35C' : 'var(--color-text-primary)',
+                      padding: '12px 0',
+                      textDecoration: 'none',
+                      borderBottom: '1px solid var(--color-border)',
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              }
+              return (
+                <a
+                  key={link.id}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href, link.id)}
+                  className={isActive ? 'active' : ''}
+                  style={{
+                    fontSize: '1rem',
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? '#F5D35C' : 'var(--color-text-primary)',
+                    padding: '12px 0',
+                    textDecoration: 'none',
+                    borderBottom: '1px solid var(--color-border)',
+                  }}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
           </div>
         )}
       </nav>

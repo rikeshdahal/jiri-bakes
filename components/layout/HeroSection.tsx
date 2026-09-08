@@ -29,9 +29,10 @@ function useReveal() {
 
 interface HeroSectionProps {
   bakeOfTheWeek?: MenuItem | null;
+  onQuickView?: () => void;
 }
 
-export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
+export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionProps) {
   const ref = useReveal();
   const { theme } = useTheme();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -197,6 +198,7 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
           .hero-visual-col { max-width: 320px !important; }
           .hero-grid { padding-top: 100px !important; padding-bottom: 48px !important; }
           .hero-btn-primary, .hero-btn-outline { padding: 13px 28px !important; font-size: 0.85rem !important; }
+          .hero-qv-pill { padding: 7px 14px !important; font-size: 0.7rem !important; bottom: 10px !important; }
         }
       `}</style>
 
@@ -397,25 +399,18 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
                 animation: 'hero-subtlePulse 4s ease-in-out infinite',
               }}
             >
-              <svg width="320" height="320" viewBox="0 0 320 320" fill="none">
-                <g stroke="#F5D35C" strokeWidth="1.6" strokeLinecap="round" opacity="0.7">
-                  <line x1="160" y1="20" x2="160" y2="70" />
-                  <line x1="160" y1="250" x2="160" y2="300" />
-                  <line x1="20" y1="160" x2="70" y2="160" />
-                  <line x1="250" y1="160" x2="300" y2="160" />
-                  <line x1="61" y1="61" x2="96" y2="96" />
-                  <line x1="224" y1="224" x2="259" y2="259" />
-                  <line x1="259" y1="61" x2="224" y2="96" />
-                  <line x1="96" y1="224" x2="61" y2="259" />
-                </g>
-                <circle cx="160" cy="160" r="80" stroke="#F5D35C" strokeWidth="1.2" strokeDasharray="5 7" opacity="0.45" />
-                <circle cx="160" cy="160" r="110" stroke="#F5D35C" strokeWidth="0.8" strokeDasharray="3 9" opacity="0.3" />
-              </svg>
+              <svg className="absolute -top-8 -right-8 w-64 h-64 float-animate opacity-80" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="345" cy="200" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(0 345 200)"></ellipse><ellipse cx="333.96253221413656" cy="255.489097692938" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(22.5 333.96253221413656 255.489097692938)"></ellipse><ellipse cx="302.5304832720494" cy="302.5304832720494" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(45 302.5304832720494 302.5304832720494)"></ellipse><ellipse cx="255.48909769293803" cy="333.96253221413656" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(67.5 255.48909769293803 333.96253221413656)"></ellipse><ellipse cx="200" cy="345" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(90 200 345)"></ellipse><ellipse cx="144.510902307062" cy="333.96253221413656" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(112.5 144.510902307062 333.96253221413656)"></ellipse><ellipse cx="97.46951672795062" cy="302.5304832720494" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(135 97.46951672795062 302.5304832720494)"></ellipse><ellipse cx="66.03746778586343" cy="255.48909769293803" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(157.5 66.03746778586343 255.48909769293803)"></ellipse><ellipse cx="55" cy="200.00000000000003" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(180 55 200.00000000000003)"></ellipse><ellipse cx="66.03746778586338" cy="144.51090230706205" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(202.5 66.03746778586338 144.51090230706205)"></ellipse><ellipse cx="97.46951672795058" cy="97.46951672795062" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(225 97.46951672795058 97.46951672795062)"></ellipse><ellipse cx="144.51090230706203" cy="66.03746778586341" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(247.5 144.51090230706203 66.03746778586341)"></ellipse><ellipse cx="199.99999999999997" cy="55" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(270 199.99999999999997 55)"></ellipse><ellipse cx="255.48909769293806" cy="66.03746778586344" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(292.5 255.48909769293806 66.03746778586344)"></ellipse><ellipse cx="302.53048327204937" cy="97.46951672795058" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(315 302.53048327204937 97.46951672795058)"></ellipse><ellipse cx="333.96253221413656" cy="144.51090230706203" rx="18" ry="9" fill="#f5c842" opacity="0.55" transform="rotate(337.5 333.96253221413656 144.51090230706203)"></ellipse><circle cx="200" cy="200" r="115" fill="#f5c842" opacity="0.18"></circle><circle cx="200" cy="200" r="90" fill="#f5c842" opacity="0.22"></circle><circle cx="200" cy="200" r="65" fill="#f5c842" opacity="0.30"></circle><circle cx="200" cy="200" r="40" fill="#e8843a" opacity="0.35"></circle></svg>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none swirl-animate opacity-80" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="400" cy="400" r="300" stroke="#f5c842" strokeWidth="2" opacity="0.08"></circle><circle cx="400" cy="400" r="250" stroke="#f5c842" strokeWidth="1.5" opacity="0.06"></circle><path d="M400 100 C550 200, 700 350, 600 500 C500 650, 250 700, 150 550 C50 400, 100 180, 280 130 C380 100, 450 180, 500 280" stroke="#2d5016" strokeWidth="3" fill="none" opacity="0.07"></path><path d="M200 200 C320 150, 520 200, 600 350 C680 500, 580 680, 420 700 C260 720, 100 580, 120 420 C140 280, 260 230, 350 250" stroke="#2d5016" strokeWidth="2" fill="none" opacity="0.05"></path><path d="M300 80 C500 120, 650 300, 620 480 C590 660, 400 750, 220 680 C40 610, 40 380, 150 250 C220 170, 350 80, 400 100" stroke="#e8843a" strokeWidth="2" fill="none" opacity="0.06"></path><ellipse cx="160" cy="180" rx="60" ry="35" stroke="#f5c842" strokeWidth="2" fill="none" opacity="0.1" transform="rotate(-30 160 180)"></ellipse><ellipse cx="640" cy="600" rx="70" ry="40" stroke="#f5c842" strokeWidth="2" fill="none" opacity="0.08" transform="rotate(15 640 600)"></ellipse><path d="M120 400 C150 350, 200 380, 180 430 C160 480, 100 460, 120 400Z" fill="#2d5016" opacity="0.04"></path><path d="M620 200 C650 150, 700 180, 680 230 C660 280, 600 260, 620 200Z" fill="#f5c842" opacity="0.06"></path></svg>
             </div>
 
-            {/* Main Artisan Showcase Card */}
+            {/* Main Artisan Showcase Card — click opens full quick view */}
             <div
               className="hero-main-img-wrap"
+              role={onQuickView ? 'button' : undefined}
+              tabIndex={onQuickView ? 0 : undefined}
+              aria-label={onQuickView ? `Quick view ${cakeItem.name}` : undefined}
+              onClick={onQuickView}
+              onKeyDown={onQuickView ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onQuickView(); } } : undefined}
               style={{
                 width: '88%',
                 aspectRatio: '4 / 4.4',
@@ -425,6 +420,8 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
                 boxShadow: isNight ? '0 16px 48px rgba(0, 0, 0, 0.55)' : '0 14px 44px rgba(43, 29, 16, 0.14)',
                 border: '2.5px solid #F5D35C',
                 zIndex: 3,
+                cursor: onQuickView ? 'pointer' : 'default',
+                outline: 'none',
               }}
             >
               <img
@@ -441,6 +438,35 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
               <svg aria-hidden="true" style={{ position: 'absolute', bottom: 12, right: 12, width: 32, height: 32, opacity: 0.85 }} viewBox="0 0 32 32" fill="none">
                 <path d="M30 2 L30 26 Q30 30 26 30 L2 30" stroke="#F5D35C" strokeWidth="2.2" strokeLinecap="round" fill="none" />
               </svg>
+
+              {/* Quick View pill */}
+              {onQuickView && (
+                <span
+                  className="hero-qv-pill"
+                  style={{
+                    position: 'absolute',
+                    bottom: 14,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 7,
+                    padding: '9px 18px',
+                    borderRadius: 9999,
+                    background: 'rgba(255, 253, 245, 0.95)',
+                    border: '1.5px solid #F5D35C',
+                    boxShadow: '0 6px 18px rgba(43, 29, 16, 0.25)',
+                    color: 'var(--color-brown-deep, #2B1D10)',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.3px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Quick View
+                </span>
+              )}
             </div>
 
             {/* Overlapping Tilted Croissant Photo */}
@@ -469,8 +495,13 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
               />
             </div>
 
-            {/* Floating Dynamic "Bake of the Week" Card with Wishlist Button */}
+            {/* Floating Dynamic "Bake of the Week" Card with Wishlist Button — click opens full quick view */}
             <div
+              role={onQuickView ? 'button' : undefined}
+              tabIndex={onQuickView ? 0 : undefined}
+              aria-label={onQuickView ? `Quick view ${cakeItem.name}` : undefined}
+              onClick={onQuickView}
+              onKeyDown={onQuickView ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onQuickView(); } } : undefined}
               style={{
                 position: 'absolute',
                 top: '-4%',
@@ -484,6 +515,8 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
                 zIndex: 6,
                 animation: 'hero-floatUp 5s ease-in-out infinite',
                 minWidth: 200,
+                cursor: onQuickView ? 'pointer' : 'default',
+                outline: 'none',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -498,7 +531,7 @@ export default function HeroSection({ bakeOfTheWeek }: HeroSectionProps) {
                 </div>
 
                 <button
-                  onClick={() => toggleWishlist({ id: cakeItem.id, name: cakeItem.name, price: cakeItem.price, img: cakeItem.image || '' })}
+                  onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: cakeItem.id, name: cakeItem.name, price: cakeItem.price, img: cakeItem.image || '' }); }}
                   title={isFav ? 'Remove from Wishlist' : 'Add to Wishlist'}
                   style={{
                     background: 'none',

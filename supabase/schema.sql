@@ -1,16 +1,12 @@
 -- ============================================================
 -- Jiri Bakes — Complete Production Database Schema for Supabase
--- v2 — Fully idempotent & error-free.
+-- v5 — Fully idempotent & error-free.
 -- Safe to run multiple times (re-running NEVER duplicates data
 -- and NEVER throws). Copy & Run in Supabase SQL Editor.
 --
--- Fixes vs v1:
---   * Removed deprecated auth.role() (errors on new projects)
---   * Fixed insecure "or true" RLS policies
---   * Order status now accepts every status the app uses
---     (pending / confirmed / baking / preparing / ready /
---      delivered / completed / cancelled)
---   * Seeds are duplicate-proof (unique name + guard clauses)
+-- Fixes vs v2:
+--   * New `bake_of_week` table (admin-managed hero card)
+--   * v5: street_dog_* charity keys removed (seeds deleted + cleanup delete)
 -- ============================================================
 
 -- Enable UUID generation
@@ -45,9 +41,34 @@ alter table products add column if not exists images jsonb not null default '[]'
 -- Unique name keeps seeding idempotent (no duplicate products on re-run)
 create unique index if not exists uniq_products_name on products (lower(name));
 
--- ─── 2. Orders Table ─────────────────────────────────────────
+-- ─── 2. Bake of Week Table (admin-managed hero card) ─────────
+create table if not exists bake_of_week (
+  id          uuid primary key default uuid_generate_v4(),
+  product_id  uuid references products (id) on delete set null,
+  title       text not null,
+  subtitle    text not null default 'Bake of the Week',
+  price       integer not null default 0,
+  unit        text not null default '/whole',
+  image       text default '',
+  description text default '',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+-- Ensure columns exist on older installs
+alter table bake_of_week add column if not exists product_id uuid references products (id) on delete set null;
+alter table bake_of_week add column if not exists subtitle text not null default 'Bake of the Week';
+alter table bake_of_week add column if not exists description text default '';
+alter table bake_of_week add column if not exists active boolean not null default true;
+
+create index if not exists idx_bake_of_week_active on bake_of_week(active);
+
+-- ─── 3. Orders Table ─────────────────────────────────────────
+-- NOTE (v4): `id` is TEXT so the app can use readable references
+-- like JB-2026-XXXXXX ( emailed to customers + used for tracking).
 create table if not exists orders (
-  id               uuid primary key default uuid_generate_v4(),
+  id               text primary key,
   customer_name    text not null,
   customer_phone   text not null default '',
   customer_email   text not null default '',
@@ -100,7 +121,7 @@ end $$;
 alter table orders add constraint orders_status_check
   check (status in ('pending','confirmed','baking','preparing','ready','delivered','completed','cancelled'));
 
--- ─── 3. Testimonials Table ───────────────────────────────────
+-- ─── 4. Testimonials Table ───────────────────────────────────
 create table if not exists testimonials (
   id         uuid primary key default uuid_generate_v4(),
   name       text not null,
@@ -112,14 +133,14 @@ create table if not exists testimonials (
   created_at timestamptz not null default now()
 );
 
--- ─── 4. Site Settings Table ──────────────────────────────────
+-- ─── 5. Site Settings Table ──────────────────────────────────
 create table if not exists settings (
   key        text primary key,
   value      text not null default '',
   updated_at timestamptz not null default now()
 );
 
--- ─── 5. Indexes for Performance ──────────────────────────────
+-- ─── 6. Indexes for Performance ──────────────────────────────
 create index if not exists idx_products_category     on products(category);
 create index if not exists idx_products_featured     on products(featured);
 create index if not exists idx_products_bake_of_week on products(is_bake_of_week);
@@ -128,7 +149,7 @@ create index if not exists idx_orders_created        on orders(created_at desc);
 create index if not exists idx_orders_phone          on orders(customer_phone);
 create index if not exists idx_testimonials_approved on testimonials(approved);
 
--- ─── 6. Updated_at Trigger Function ──────────────────────────
+-- ─── 7. Updated_at Trigger Function ──────────────────────────
 create or replace function update_updated_at()
 returns trigger as $$
 begin
@@ -152,7 +173,12 @@ create trigger trg_settings_updated_at
   before update on settings
   for each row execute function update_updated_at();
 
--- ─── 7. Seed Default Settings ────────────────────────────────
+drop trigger if exists trg_bake_of_week_updated_at on bake_of_week;
+create trigger trg_bake_of_week_updated_at
+  before update on bake_of_week
+  for each row execute function update_updated_at();
+
+-- ─── 8. Seed Default Settings ────────────────────────────────
 -- Full set of keys used by the app (admin Settings page + file backend),
 -- so Supabase and a fresh db.json always start with identical values.
 insert into settings (key, value) values
@@ -172,15 +198,14 @@ insert into settings (key, value) values
   ('hero_headline', 'Baked Like Art.'),
   ('hero_subheadline', 'Handcrafted organic breads, cakes, and morning pastries. Baked fresh daily at dawn in Lokanthali, Nepal.'),
   ('announcement_banner', 'Fresh organic sourdough available every morning at 7:30 AM!'),
-  ('street_dog_image', '/we care.png'),
-  ('street_dog_title', '5% of Total Sales Goes to Street Dog Charity'),
-  ('street_dog_percent', '5%'),
-  ('street_dog_desc', 'At Jiri Bakes, we believe kindness should be shared with every living being. 5% of our total sales directly funds daily nutritious meals, medical treatment, vaccines, and shelter for neighborhood street dogs in Lokanthali.'),
-  ('street_dog_social_url', 'https://www.instagram.com/jiribakes'),
-  ('street_dog_qr_image', '')
+  ('we_care_image', '/we care.png')
 on conflict (key) do nothing;  -- never overwrite live edits on re-run
 
--- ─── 8. Seed Default Products (duplicate-proof) ──────────────
+-- v5: Street Dog Charity removed from the app — delete any leftover keys
+-- from older installs so they never reappear in admin or API responses.
+delete from settings where key like 'street_dog\_%' escape '\';
+
+-- ─── 9. Seed Default Products (duplicate-proof) ──────────────
 -- Each product exposes an `images` array (gallery used by the Quick View).
 -- `image` stays as the cover / first image for backwards compatibility.
 insert into products (name, description, price, unit, category, badge, image, images, rating, featured, is_bake_of_week, display_order) values
@@ -194,7 +219,14 @@ insert into products (name, description, price, unit, category, badge, image, im
   ('Chocolate Hazelnut Cake', 'Dark Belgian chocolate layered with roasted hazelnut praline and velvety ganache.', 2200, '/whole', 'cake', 'Best Seller', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop', '["https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop","https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop"]'::jsonb, 5, true, false, 8)
 on conflict (lower(name)) do nothing;
 
--- ─── 9. Seed Default Testimonials (only once) ────────────────
+-- ─── 10. Seed Default Bake of Week (duplicate-proof) ─────────
+insert into bake_of_week (product_id, title, subtitle, price, unit, image, description, active)
+select p.id, p.name, 'Bake of the Week', p.price, p.unit, p.image, p.description, true
+from products p
+where p.name = 'Sunflower Cream Cake'
+  and not exists (select 1 from bake_of_week where title = p.name);
+
+-- ─── 11. Seed Default Testimonials (only once) ────────────────
 insert into testimonials (name, initials, role, text, rating, approved)
 select * from (values
   ('Anita Shrestha', 'AS', 'Regular Customer', 'The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture — absolute perfection every single time.', 5, true),
@@ -203,11 +235,12 @@ select * from (values
 ) as seed(name, initials, role, text, rating, approved)
 where not exists (select 1 from testimonials limit 1);
 
--- ─── 10. Row Level Security (RLS) ───────────────────────────
+-- ─── 12. Row Level Security (RLS) ───────────────────────────
 alter table products     enable row level security;
 alter table orders       enable row level security;
 alter table testimonials enable row level security;
 alter table settings     enable row level security;
+alter table bake_of_week enable row level security;
 
 -- Clean up ALL old policies first (v1 had broken/insecure ones),
 -- then recreate correct ones. Safe to re-run.
@@ -218,7 +251,7 @@ begin
     select schemaname, tablename, policyname
     from pg_policies
     where schemaname = 'public'
-      and tablename in ('products','orders','testimonials','settings')
+      and tablename in ('products','orders','testimonials','settings','bake_of_week')
   loop
     execute format('drop policy if exists %I on %I.%I;', pol.policyname, pol.schemaname, pol.tablename);
   end loop;
@@ -232,6 +265,9 @@ create policy "public_read_approved_testimonials" on testimonials
   for select using (approved = true);
 
 create policy "public_read_settings" on settings
+  for select using (true);
+
+create policy "public_read_bake_of_week" on bake_of_week
   for select using (true);
 
 -- Public can place orders, but never read/modify others' orders directly
@@ -254,3 +290,24 @@ create policy "admin_all_testimonials" on testimonials
 create policy "admin_all_settings" on settings
   for all using ((select auth.uid()) is not null)
   with check ((select auth.uid()) is not null);
+
+create policy "admin_all_bake_of_week" on bake_of_week
+  for all using ((select auth.uid()) is not null)
+  with check ((select auth.uid()) is not null);
+
+-- ─── 13. v4 Migration: orders.id uuid → text ────────────────────
+-- Older installs created orders.id as uuid with a random default.
+-- The app inserts readable string IDs (JB-2026-XXXXXX), so convert the
+-- column once. Idempotent: only runs when the column is still uuid.
+-- Existing rows are preserved (uuid values cast to text).
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'orders'
+      and column_name = 'id' and data_type = 'uuid'
+  ) then
+    alter table orders alter column id drop default;
+    alter table orders alter column id type text using id::text;
+  end if;
+end $$;

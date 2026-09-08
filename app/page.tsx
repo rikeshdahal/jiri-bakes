@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { MenuItem, Testimonial } from '@/types';
+import type { BakeOfWeek, MenuItem, Testimonial } from '@/types';
 import Button from '@/components/buttons/Button';
 import { useCart } from '@/components/layout/AppShell';
 import { useWishlist } from '@/components/layout/WishlistContext';
@@ -74,6 +74,7 @@ export default function HomePage() {
   const [booting, setBooting] = useState(true);
   const [hidingLoader, setHidingLoader] = useState(false);
   const [quickViewItem, setQuickViewItem] = useState<MenuItem | null>(null);
+  const [bakeOfWeek, setBakeOfWeek] = useState<BakeOfWeek | null>(null);
 
   useEffect(() => {
     const productsP = fetch('/api/products').then((r) => r.json()).then((d) => {
@@ -85,18 +86,52 @@ export default function HomePage() {
         if (approved.length > 0) setTestimonials(approved);
       }
     }).catch(() => { });
+    const bakeOfWeekP = fetch('/api/bake-of-week').then((r) => r.json()).then((d) => {
+      const active = (d.data || []).find((b: BakeOfWeek) => b.active);
+      if (active) setBakeOfWeek(active);
+    }).catch(() => { });
     // keep the loader visible long enough for the intro animation to play
     const minDelay = new Promise((res) => setTimeout(res, 1500));
-    Promise.all([productsP, testimonialsP, minDelay]).finally(() => {
+    Promise.all([productsP, testimonialsP, bakeOfWeekP, minDelay]).finally(() => {
       setHidingLoader(true);
       setTimeout(() => setBooting(false), 500);
     });
   }, []);
 
+  const heroBakeOfWeek: MenuItem | null = bakeOfWeek
+    ? {
+        id: bakeOfWeek.product_id || bakeOfWeek.id,
+        name: bakeOfWeek.title,
+        description: bakeOfWeek.description || '',
+        price: bakeOfWeek.price,
+        unit: bakeOfWeek.unit,
+        category: 'cake',
+        badge: bakeOfWeek.subtitle || 'Bake of the Week',
+        image: bakeOfWeek.image,
+        images: bakeOfWeek.image ? [bakeOfWeek.image] : undefined,
+        rating: 5,
+      }
+    : null;
+
+  // Full product for the hero quick-view modal: prefer the real product
+  // behind this week's pick (gallery, rating, category), so the modal
+  // opens with the same rich details as collection quick views.
+  const heroQuickViewItem: MenuItem | undefined =
+    (bakeOfWeek?.product_id
+      ? collectionItems.find((p) => String(p.id) === String(bakeOfWeek.product_id))
+      : undefined) ??
+    heroBakeOfWeek ??
+    collectionItems.find((p) => p.is_bake_of_week) ??
+    collectionItems.find((p) => p.featured) ??
+    collectionItems[0];
+
   return (
     <>
       {booting && <LoadingScreen hiding={hidingLoader} />}
-      <HeroSection bakeOfTheWeek={collectionItems.find((p) => p.is_bake_of_week) || collectionItems.find((p) => p.featured) || collectionItems[0]} onQuickView={setQuickViewItem} />
+      <HeroSection
+        bakeOfTheWeek={heroBakeOfWeek || collectionItems.find((p) => p.is_bake_of_week) || collectionItems.find((p) => p.featured) || collectionItems[0]}
+        onQuickView={heroQuickViewItem ? () => setQuickViewItem(heroQuickViewItem) : undefined}
+      />
       <FeaturedCakeSection featured={collectionItems.find((p) => p.featured) || collectionItems[0]} />
       <CollectionSection items={collectionItems} quickViewItem={quickViewItem} onQuickView={setQuickViewItem} onCloseQuickView={() => setQuickViewItem(null)} />
       <OurStorySection />
@@ -385,14 +420,37 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
   );
 }
 
+const COLLECTION_PAGE_SIZE = 9; // max 9 cards (3 lines of 3) per page
+
 function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView }: { items: MenuItem[]; quickViewItem: MenuItem | null; onQuickView: (item: MenuItem) => void; onCloseQuickView: () => void }) {
   const [filter, setFilter] = useState('all');
+  const [page, setPage] = useState(1);
   const [addedId, setAddedId] = useState<string | null>(null);
   const { addItem } = useCart();
 
   const filters = ['all', 'cake', 'pastry', 'bread', 'cookie'];
   const filterLabels: Record<string, string> = { all: 'All', cake: 'Cakes', pastry: 'Pastries', bread: 'Breads', cookie: 'Cookies' };
   const filtered = filter === 'all' ? items : items.filter((m) => m.category === filter);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / COLLECTION_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * COLLECTION_PAGE_SIZE, safePage * COLLECTION_PAGE_SIZE);
+
+  const goToPage = (p: number) => {
+    const next = Math.min(Math.max(1, p), totalPages);
+    setPage(next);
+    // Scroll back to the top of the collection grid on page change
+    const el = document.getElementById('collection');
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
+  const pickFilter = (f: string) => {
+    setFilter(f);
+    setPage(1);
+  };
 
   const handleAdd = (item: MenuItem) => {
     addItem({
@@ -442,7 +500,7 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
         {filters.map((f) => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => pickFilter(f)}
             style={{
               padding: '10px 26px',
               borderRadius: 'var(--radius-full)',
@@ -482,10 +540,81 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24,
         maxWidth: 1140, margin: '0 auto', position: 'relative', zIndex: 1,
       }} className="collection-grid">
-        {filtered.map((item) => (
+        {paged.map((item) => (
           <CollectionCard key={item.id} item={item} added={addedId === item.id} onAdd={handleAdd} onQuickView={onQuickView} />
         ))}
       </div>
+
+      {/* ── Pagination (max 9 cards per page) ── */}
+      {totalPages > 1 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 8, marginTop: 44, flexWrap: 'wrap', position: 'relative', zIndex: 1,
+        }}>
+          <button
+            onClick={() => goToPage(safePage - 1)}
+            disabled={safePage === 1}
+            aria-label="Previous page"
+            style={{
+              minWidth: 44, height: 44, padding: '0 16px', borderRadius: 9999,
+              fontSize: '0.85rem', fontWeight: 600, fontFamily: 'var(--font-body)',
+              cursor: safePage === 1 ? 'not-allowed' : 'pointer',
+              border: '1.5px solid var(--color-border)',
+              background: 'transparent',
+              color: safePage === 1 ? 'var(--color-text-tertiary)' : 'var(--color-brown-deep)',
+              opacity: safePage === 1 ? 0.5 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            ← Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => goToPage(p)}
+              aria-label={`Page ${p}`}
+              aria-current={p === safePage ? 'page' : undefined}
+              style={{
+                minWidth: 44, height: 44, borderRadius: '50%',
+                fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-body)',
+                cursor: 'pointer',
+                border: `1.5px solid ${p === safePage ? 'var(--color-green)' : 'var(--color-border)'}`,
+                background: p === safePage ? 'var(--color-green)' : 'transparent',
+                color: p === safePage ? '#FFFDF5' : 'var(--color-brown-deep)',
+                boxShadow: p === safePage ? '0 4px 14px rgba(40,85,28,0.25)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {p}
+            </button>
+          ))}
+
+          <button
+            onClick={() => goToPage(safePage + 1)}
+            disabled={safePage === totalPages}
+            aria-label="Next page"
+            style={{
+              minWidth: 44, height: 44, padding: '0 16px', borderRadius: 9999,
+              fontSize: '0.85rem', fontWeight: 600, fontFamily: 'var(--font-body)',
+              cursor: safePage === totalPages ? 'not-allowed' : 'pointer',
+              border: '1.5px solid var(--color-border)',
+              background: 'transparent',
+              color: safePage === totalPages ? 'var(--color-text-tertiary)' : 'var(--color-brown-deep)',
+              opacity: safePage === totalPages ? 0.5 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            Next →
+          </button>
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+        <p style={{ textAlign: 'center', fontSize: '0.76rem', color: 'var(--color-text-tertiary)', marginTop: totalPages > 1 ? 14 : 28 }}>
+          Showing {(safePage - 1) * COLLECTION_PAGE_SIZE + 1}–{Math.min(safePage * COLLECTION_PAGE_SIZE, filtered.length)} of {filtered.length} treats
+        </p>
+      )}
 
       <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={onCloseQuickView} />
 
@@ -807,7 +936,8 @@ function WeCareSection() {
         if (d.data && Array.isArray(d.data)) {
           const map: Record<string, string> = {};
           d.data.forEach((item: { key: string; value: string }) => { map[item.key] = item.value; });
-          if (map.street_dog_image) setDogImage(map.street_dog_image);
+          if (map.we_care_image) setDogImage(map.we_care_image);
+          else if (map.street_dog_image) setDogImage(map.street_dog_image);
         }
       })
       .catch(() => { });
@@ -849,8 +979,11 @@ function WeCareSection() {
           justify-content: center;
         }
         @media (max-width: 480px) {
-          .wc-ig-badge { bottom: 14px !important; right: 14px !important; padding: 10px 14px !important; }
-          .wc-ig-badge > span + span { font-size: 0.8rem !important; }
+          .wc-ig-badge { bottom: 10px !important; right: 10px !important; padding: 8px 12px !important; gap: 6px !important; }
+          .wc-ig-icon { width: 26px !important; height: 26px !important; }
+          .wc-ig-icon svg { width: 14px !important; height: 14px !important; }
+          .wc-ig-label { font-size: 0.7rem !important; }
+          .wc-ig-handle { font-size: 0.78rem !important; }
         }
       `}</style>
 
@@ -874,8 +1007,8 @@ function WeCareSection() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFDF5"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.71 3.71 0 01-1.38-.9 3.71 3.71 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.13.63c-.79.3-1.47.71-2.14 1.37A5.63 5.63 0 00.62 4.13C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.92.3.79.71 1.47 1.37 2.14.66.66 1.34 1.06 2.13 1.37.77.3 1.65.5 2.92.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.92-.56a5.9 5.9 0 002.13-1.37c.66-.66 1.06-1.34 1.37-2.13.3-.77.5-1.65.56-2.92.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.92a5.9 5.9 0 00-1.37-2.13A5.9 5.9 0 0019.87.63c-.77-.3-1.65-.5-2.92-.56C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm6.41-10.85a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z" /></svg>
         </span>
         <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-          <span style={{ fontSize: '0.74rem', color: '#8A7654', fontWeight: 600 }}>Follow our journey</span>
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#DD2A7B' }}>@jiri_bakes</span>
+          <span className="wc-ig-label" style={{ fontSize: '0.74rem', color: '#8A7654', fontWeight: 600 }}>Follow our journey</span>
+          <span className="wc-ig-handle" style={{ fontSize: '0.9rem', fontWeight: 800, color: '#DD2A7B' }}>@jiri_bakes</span>
         </span>
       </a>
     </section>

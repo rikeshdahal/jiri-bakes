@@ -87,6 +87,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       ),
     },
     {
+      label: 'Bake of Week',
+      href: '/admin/bake-of-week',
+      icon: (active) => (
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={active ? '#F5D35C' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      ),
+    },
+    {
       label: 'Orders',
       href: '/admin/orders',
       badge: pendingOrdersCount > 0 ? String(pendingOrdersCount) : undefined,

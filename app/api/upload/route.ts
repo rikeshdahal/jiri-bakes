@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { requireAdmin } from '@/lib/auth/admin';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(request: Request) {
   try {
+    if (!(await requireAdmin())) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
@@ -45,6 +49,15 @@ export async function POST(request: Request) {
       },
     });
   } catch (err: unknown) {
+    // Serverless hosts (Vercel) have a read-only filesystem — uploads can't
+    // persist there. Surface a clear message instead of a raw EROFS dump.
+    const code = (err as { code?: unknown })?.code;
+    if (code === 'EROFS' || code === 'EACCES' || code === 'EPERM') {
+      return NextResponse.json(
+        { error: 'File uploads are not available on this hosting. Paste an image URL instead.' },
+        { status: 503 },
+      );
+    }
     const msg = err instanceof Error ? err.message : 'Upload failed';
     return NextResponse.json({ error: msg }, { status: 500 });
   }

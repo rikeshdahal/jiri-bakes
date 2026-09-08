@@ -23,6 +23,8 @@ export default function AdminOrdersPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'cod' | 'visit'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [resendMsg, setResendMsg] = useState<string>('');
 
   const fetchOrders = () => {
     fetch('/api/orders')
@@ -52,11 +54,35 @@ export default function AdminOrdersPage() {
         setOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, status: newStatus as Order['status'] } : o))
         );
+        const json = await res.json().catch(() => ({}));
+        if (json.mailSent) {
+          setResendMsg(`Status email sent to customer for ${orderId}.`);
+          setTimeout(() => setResendMsg(''), 4000);
+        }
       }
     } catch {
       // ignore
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleResend = async (orderId: string, kind: 'confirmation' | 'status') => {
+    setResendingId(`${orderId}:${kind}`);
+    setResendMsg('');
+    try {
+      const res = await fetch(`/api/orders/${orderId}/resend?kind=${kind}`, { method: 'POST' });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setResendMsg(`Email re-sent for ${orderId} (${kind}).`);
+      } else {
+        setResendMsg(json.error || `Failed to resend email for ${orderId}.`);
+      }
+    } catch {
+      setResendMsg(`Failed to resend email for ${orderId}.`);
+    } finally {
+      setResendingId(null);
+      setTimeout(() => setResendMsg(''), 4000);
     }
   };
 
@@ -108,6 +134,9 @@ export default function AdminOrdersPage() {
           <p style={{ fontSize: '0.84rem', color: 'var(--color-text-tertiary)' }}>
             Real-time management for Cash on Delivery & Store Pickup orders ({orders.length} total)
           </p>
+          {resendMsg && (
+            <p style={{ fontSize: '0.8rem', color: '#52B788', marginTop: 6 }}>{resendMsg}</p>
+          )}
         </div>
 
         <button
@@ -350,6 +379,16 @@ export default function AdminOrdersPage() {
                               </a>
                             </strong>
                           </div>
+                          <div>
+                            <span style={{ color: 'var(--color-text-tertiary)' }}>Email: </span>
+                            {order.customer_email ? (
+                              <a href={`mailto:${order.customer_email}`} style={{ color: 'var(--color-green)', textDecoration: 'none' }}>
+                                {order.customer_email}
+                              </a>
+                            ) : (
+                              <span style={{ color: '#CBD5E1' }}>— (no email, no confirmation sent)</span>
+                            )}
+                          </div>
                           {(order.delivery_date || order.delivery_time) && (
                             <div style={{ display:'flex', gap:10, alignItems:'center', background: 'rgba(245, 211, 92, 0.08)', padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(245, 211, 92, 0.15)', marginTop: 4 }}>
                               <span style={{ color: 'var(--color-text-tertiary)' }}>Delivery Slot: </span>
@@ -422,10 +461,38 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
 
-                    {/* Status Workflow Action Buttons */}
-                    <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                    {/* Resend email actions */}
+                    <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-tertiary)' }}>
-                        Update Order Status:
+                        Emails:
+                      </span>
+                      {(['confirmation', 'status'] as const).map((kind) => (
+                        <button
+                          key={kind}
+                          disabled={resendingId === `${order.id}:${kind}` || !order.customer_email}
+                          onClick={() => handleResend(order.id, kind)}
+                          title={!order.customer_email ? 'No customer email on this order' : `Resend ${kind} email`}
+                          style={{
+                            padding: '8px 14px',
+                            borderRadius: 9999,
+                            fontSize: '0.74rem',
+                            fontWeight: 600,
+                            cursor: !order.customer_email ? 'not-allowed' : 'pointer',
+                            border: '1px solid var(--color-border)',
+                            background: 'rgba(255,255,255,0.06)',
+                            color: '#CBD5E1',
+                            opacity: resendingId === `${order.id}:${kind}` ? 0.6 : 1,
+                          }}
+                        >
+                          {resendingId === `${order.id}:${kind}` ? 'Sending…' : `Resend ${kind}`}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Status Workflow Action Buttons */}
+                    <div style={{ marginTop: 12, paddingTop: 16, borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-tertiary)' }}>
+                        Update Order Status (emails customer automatically):
                       </span>
 
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

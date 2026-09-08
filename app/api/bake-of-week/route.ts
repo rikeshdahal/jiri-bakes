@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getDbTestimonials, createDbTestimonial } from '@/lib/db';
+import { getDbBakeOfWeek, createDbBakeOfWeek } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth/admin';
 
 export async function GET() {
   try {
-    const isAdmin = await requireAdmin();
-    const all = await getDbTestimonials();
-    // Public visitors only see approved reviews; admins see everything.
-    const data = isAdmin ? all : all.filter((t) => t.approved !== false);
+    const data = await getDbBakeOfWeek();
     return NextResponse.json({ data });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Internal server error';
@@ -21,12 +18,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const body = await request.json();
-    if (!body.name || !body.text) {
-      return NextResponse.json({ error: 'Name and text are required' }, { status: 400 });
+    if (!body || !body.title || body.price == null) {
+      return NextResponse.json({ error: 'Title and price are required.' }, { status: 400 });
     }
-    const data = await createDbTestimonial(body);
-    return NextResponse.json({ data }, { status: 201 });
-  } catch (err: unknown) {
+    const item = await createDbBakeOfWeek(body);
+    return NextResponse.json({ data: item }, { status: 201 });
+  } catch (err) {
     const msg = err instanceof Error ? err.message : 'Internal server error';
     return NextResponse.json({ error: msg }, { status: 500 });
   }

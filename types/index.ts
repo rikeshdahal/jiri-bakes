@@ -87,6 +87,20 @@ export interface Setting {
   updated_at?: string;
 }
 
+export interface BakeOfWeek {
+  id: string;
+  product_id?: string;
+  title: string;
+  subtitle: string;
+  price: number;
+  unit: string;
+  image: string;
+  description: string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export type ToastType = 'success' | 'error' | 'info';
 
 export type ProductCategory = 'cake' | 'pastry' | 'bread' | 'cookie' | 'seasonal';

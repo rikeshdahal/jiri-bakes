@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbProducts, createDbProduct } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth/admin';
 
 export async function GET() {
   try {
@@ -13,6 +14,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!(await requireAdmin())) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     let body;
     try {
       body = await request.json();
