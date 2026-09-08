@@ -944,7 +944,7 @@ function WeCareSection() {
   }, []);
 
   return (
-    <section id="we-care" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+    <section id="we-care" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 80px)' }}>
       <style>{`
         .wc-banner-img { display:block; width:100%; height:auto; }
         .wc-ig-badge {
@@ -987,22 +987,24 @@ function WeCareSection() {
         }
       `}</style>
 
-      {/* Dynamic banner — admin can change from Settings page */}
-      <img
-        src={dogImage}
-        alt="Jiri Bakes street dog care initiative"
-        className="wc-banner-img"
-        onError={(e) => { (e.target as HTMLImageElement).src = '/we care.png'; }}
-      />
+      {/* Rounded frame — full image, never cropped */}
+      <div style={{ position: 'relative', maxWidth: 'var(--max-width)', margin: '0 auto', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--color-border)', boxShadow: '0 14px 44px rgba(43, 29, 16, 0.12)' }}>
+        {/* Dynamic banner — admin can change from Settings page */}
+        <img
+          src={dogImage}
+          alt="Jiri Bakes street dog care initiative"
+          className="wc-banner-img"
+          onError={(e) => { (e.target as HTMLImageElement).src = '/we care.png'; }}
+        />
 
-      {/* Bottom-left Instagram link, clickable on top of image */}
-      <a
-        href="https://www.instagram.com/jiri_bakes"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Follow Jiri Bakes on Instagram"
-        className="wc-ig-badge"
-      >
+        {/* Bottom-right Instagram link, clickable on top of image */}
+        <a
+          href="https://www.instagram.com/jiri_bakes"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Follow Jiri Bakes on Instagram"
+          className="wc-ig-badge"
+        >
         <span className="wc-ig-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFDF5"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.71 3.71 0 01-1.38-.9 3.71 3.71 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.13.63c-.79.3-1.47.71-2.14 1.37A5.63 5.63 0 00.62 4.13C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.92.3.79.71 1.47 1.37 2.14.66.66 1.34 1.06 2.13 1.37.77.3 1.65.5 2.92.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.92-.56a5.9 5.9 0 002.13-1.37c.66-.66 1.06-1.34 1.37-2.13.3-.77.5-1.65.56-2.92.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.92a5.9 5.9 0 00-1.37-2.13A5.9 5.9 0 0019.87.63c-.77-.3-1.65-.5-2.92-.56C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm6.41-10.85a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z" /></svg>
         </span>
@@ -1010,7 +1012,8 @@ function WeCareSection() {
           <span className="wc-ig-label" style={{ fontSize: '0.74rem', color: '#8A7654', fontWeight: 600 }}>Follow our journey</span>
           <span className="wc-ig-handle" style={{ fontSize: '0.9rem', fontWeight: 800, color: '#DD2A7B' }}>@jiri_bakes</span>
         </span>
-      </a>
+        </a>
+      </div>
     </section>
   );
 }

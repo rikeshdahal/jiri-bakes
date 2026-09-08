@@ -198,7 +198,6 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
           .hero-visual-col { max-width: 320px !important; }
           .hero-grid { padding-top: 100px !important; padding-bottom: 48px !important; }
           .hero-btn-primary, .hero-btn-outline { padding: 13px 28px !important; font-size: 0.85rem !important; }
-          .hero-qv-pill { padding: 7px 14px !important; font-size: 0.7rem !important; bottom: 10px !important; }
         }
       `}</style>
 
@@ -439,34 +438,6 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
                 <path d="M30 2 L30 26 Q30 30 26 30 L2 30" stroke="#F5D35C" strokeWidth="2.2" strokeLinecap="round" fill="none" />
               </svg>
 
-              {/* Quick View pill */}
-              {onQuickView && (
-                <span
-                  className="hero-qv-pill"
-                  style={{
-                    position: 'absolute',
-                    bottom: 14,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 7,
-                    padding: '9px 18px',
-                    borderRadius: 9999,
-                    background: 'rgba(255, 253, 245, 0.95)',
-                    border: '1.5px solid #F5D35C',
-                    boxShadow: '0 6px 18px rgba(43, 29, 16, 0.25)',
-                    color: 'var(--color-brown-deep, #2B1D10)',
-                    fontSize: '0.76rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.3px',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  Quick View
-                </span>
-              )}
             </div>
 
             {/* Overlapping Tilted Croissant Photo */}
