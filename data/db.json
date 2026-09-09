@@ -9,17 +9,17 @@
       "category": "cake",
       "badge": "Fresh Today",
       "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": true,
-      "is_bake_of_week": true,
-      "display_order": 1,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 5,
+      "featured": true,
+      "is_bake_of_week": true,
+      "display_order": 1,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c2",
@@ -30,16 +30,16 @@
       "category": "pastry",
       "badge": "Organic",
       "image": "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": true,
-      "display_order": 2,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 5,
+      "featured": true,
+      "display_order": 2,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c3",
@@ -50,16 +50,16 @@
       "category": "bread",
       "badge": "Organic",
       "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": true,
-      "display_order": 3,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 5,
+      "featured": true,
+      "display_order": 3,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c4",
@@ -70,16 +70,16 @@
       "category": "pastry",
       "badge": "Fresh Today",
       "image": "https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": false,
-      "display_order": 4,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1623334044303-241021148842?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&h=500&fit=crop"
-      ]
+        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop"
+      ],
+      "rating": 5,
+      "featured": false,
+      "display_order": 4,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c5",
@@ -90,16 +90,16 @@
       "category": "pastry",
       "badge": "Seasonal",
       "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop",
-      "rating": 4,
-      "featured": false,
-      "display_order": 5,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 4,
+      "featured": false,
+      "display_order": 5,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c6",
@@ -110,16 +110,16 @@
       "category": "pastry",
       "badge": "Popular",
       "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": false,
-      "display_order": 6,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 5,
+      "featured": false,
+      "display_order": 6,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c7",
@@ -130,16 +130,16 @@
       "category": "bread",
       "badge": "Organic",
       "image": "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": false,
-      "display_order": 7,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 5,
+      "featured": false,
+      "display_order": 7,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "c8",
@@ -150,162 +150,90 @@
       "category": "cake",
       "badge": "Best Seller",
       "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
-      "rating": 5,
-      "featured": true,
-      "display_order": 8,
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z",
       "images": [
         "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop",
         "https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop"
-      ]
+      ],
+      "rating": 5,
+      "featured": true,
+      "display_order": 8,
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
-      "id": "p-1788679402917-qaq2",
-      "name": "test",
-      "description": "this is test",
-      "price": 600,
+      "id": "p-1788933253428-27n3",
+      "name": "Testeeee",
+      "description": "tewsesdrf",
+      "price": 100,
       "unit": "/piece",
-      "category": "cake",
-      "badge": "Fresh Today",
-      "image": "/uploads/1788679367240-bd472u.png",
+      "category": "pastry",
+      "image": "/uploads/1788933248275-1nlggl.png",
       "images": [
-        "/uploads/1788679367240-bd472u.png",
-        "/uploads/1788679379859-prug6r.jpg",
-        "/uploads/1788679391607-dsqhlh.png"
+        "/uploads/1788933248275-1nlggl.png"
       ],
-      "rating": 4,
-      "featured": true,
-      "is_bake_of_week": true,
+      "rating": 5,
+      "featured": false,
+      "is_bake_of_week": false,
       "display_order": 9,
-      "created_at": "2026-09-06T07:23:22.917Z",
-      "updated_at": "2026-09-06T07:23:22.917Z"
+      "created_at": "2026-09-09T05:54:13.428Z",
+      "updated_at": "2026-09-09T05:54:13.428Z"
     }
   ],
   "orders": [
     {
-      "id": "ord-90191vi",
-      "customer_name": "manmohan",
-      "customer_phone": "9800714145",
-      "customer_email": "",
-      "customer_address": "Visit to store – Lokanthali, Bhaktapur",
+      "id": "JB-2026-U7XZZD",
+      "customer_name": "Ram",
+      "customer_phone": "9841255549",
+      "customer_email": "rikeshhacker747@gmail.com",
+      "customer_address": "sinamangal pipal bot",
       "items": [
         {
-          "product_id": "p-1788679402917-qaq2",
-          "name": "test [Egg]",
-          "price": 600,
+          "product_id": "p-1788851340893-hoq0",
+          "name": "Test [Eggless]",
+          "price": 300,
           "quantity": 2
         }
       ],
-      "total": 1200,
-      "payment_method": "Visit Store / Pay in Person",
+      "total": 700,
+      "payment_method": "Cash on Delivery",
       "status": "completed",
-      "notes": "Variant: Egg • Message: \"hi cutie\" • Delivery Slot: 2026-09-06 (10:00 AM – 01:00 PM)",
-      "created_at": "2026-09-06T07:24:50.191Z",
-      "updated_at": "2026-09-06T07:25:21.996Z"
+      "notes": "Variant: Eggless • Message: \"coco\" • Delivery Slot: 2026-09-10 (10:00 AM – 01:00 PM) • Instructions: Variant: Eggless • Message: \"coco\" • Delivery Slot: 2026-09-10 (10:00 AM – 01:00 PM)",
+      "variant": "Eggless",
+      "message_on_item": "coco",
+      "item_note": "",
+      "delivery_date": "2026-09-10",
+      "delivery_time": "10:00 AM – 01:00 PM",
+      "delivery_location": "sinamangal pipal bot",
+      "created_at": "2026-09-08T07:10:13.207Z",
+      "updated_at": "2026-09-08T07:12:13.300Z"
     },
     {
-      "id": "ord-7987745",
+      "id": "JB-2026-C5G4XC",
       "customer_name": "Rikesh Dahal",
       "customer_phone": "9841255549",
-      "customer_email": "",
+      "customer_email": "rikeshdahal0526@gmail.com",
       "customer_address": "Visit to store – Lokanthali, Bhaktapur",
       "items": [
         {
-          "product_id": "sunflower-cream-cake",
-          "name": "Sunflower Cream Cake",
+          "product_id": "c1",
+          "name": "Sunflower Cream Cake [Eggless]",
           "price": 1800,
           "quantity": 1
         }
       ],
       "total": 1800,
       "payment_method": "Visit Store / Pay in Person",
-      "status": "ready",
-      "notes": "",
-      "created_at": "2026-09-03T09:59:39.877Z",
-      "updated_at": "2026-09-03T10:02:14.425Z"
-    },
-    {
-      "id": "ord-82808xg",
-      "customer_name": "Rikesh Dahal",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Sinamangal",
-      "items": [
-        {
-          "product_id": "strawberry-tart",
-          "name": "Strawberry Tart",
-          "price": 650,
-          "quantity": 3
-        },
-        {
-          "product_id": "c1",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
-          "quantity": 2
-        }
-      ],
-      "total": 5550,
-      "payment_method": "Cash on Delivery",
-      "status": "pending",
-      "notes": "",
-      "created_at": "2026-09-03T09:54:42.808Z",
-      "updated_at": "2026-09-03T09:54:42.808Z"
-    },
-    {
-      "id": "ord-20962ek",
-      "customer_name": "Rikesh Hacker",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Sinamangal",
-      "items": [
-        {
-          "product_id": "c6",
-          "name": "Cinnamon Roll",
-          "price": 220,
-          "quantity": 1
-        },
-        {
-          "product_id": "c2",
-          "name": "Chocolate Hazelnut Tart",
-          "price": 950,
-          "quantity": 1
-        }
-      ],
-      "total": 1270,
-      "payment_method": "Cash on Delivery",
-      "status": "completed",
-      "notes": "pickup at 4 pm",
-      "created_at": "2026-08-21T10:38:40.962Z",
-      "updated_at": "2026-08-21T10:38:55.502Z"
-    },
-    {
-      "id": "ord-57814cu",
-      "customer_name": "Rikesh Hacker",
-      "customer_phone": "9841255549",
-      "customer_email": "",
-      "customer_address": "Sinamangal",
-      "items": [
-        {
-          "product_id": "chocolate-hazelnut-tart",
-          "name": "Chocolate Hazelnut Tart",
-          "price": 950,
-          "quantity": 1
-        },
-        {
-          "product_id": "sunflower-cream-cake",
-          "name": "Sunflower Cream Cake",
-          "price": 1800,
-          "quantity": 1
-        }
-      ],
-      "total": 2750,
-      "payment_method": "Cash on Delivery",
-      "status": "completed",
-      "notes": "pickup at 4 pm",
-      "created_at": "2026-08-21T09:17:37.814Z",
-      "updated_at": "2026-08-21T09:18:59.796Z"
+      "status": "delivered",
+      "notes": "Variant: Eggless • Message: \"rikesh\" • Delivery Slot: 2026-09-10 (10:00 AM – 01:00 PM) • Instructions: Variant: Eggless • Message: \"rikesh\" • Delivery Slot: 2026-09-10 (10:00 AM – 01:00 PM)",
+      "variant": "Eggless",
+      "message_on_item": "rikesh",
+      "item_note": "",
+      "delivery_date": "2026-09-10",
+      "delivery_time": "10:00 AM – 01:00 PM",
+      "delivery_location": "Store Visit",
+      "created_at": "2026-09-08T06:23:53.577Z",
+      "updated_at": "2026-09-08T06:31:14.728Z"
     },
     {
       "id": "ord-101",
@@ -330,8 +258,8 @@
       "total": 2520,
       "status": "completed",
       "notes": "Please add birthday candles and write Happy Birthday Pooja.",
-      "created_at": "2026-08-21T05:16:25.713Z",
-      "updated_at": "2026-08-21T07:16:25.713Z"
+      "created_at": "2026-09-08T02:22:34.612Z",
+      "updated_at": "2026-09-08T04:22:34.612Z"
     },
     {
       "id": "ord-102",
@@ -356,8 +284,8 @@
       "total": 3200,
       "status": "baking",
       "notes": "Please slice the sourdough loaf.",
-      "created_at": "2026-08-21T08:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z"
+      "created_at": "2026-09-08T05:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     },
     {
       "id": "ord-103",
@@ -376,8 +304,8 @@
       "total": 2200,
       "status": "pending",
       "notes": "Delivery by 4 PM today please.",
-      "created_at": "2026-08-21T09:16:25.713Z",
-      "updated_at": "2026-08-21T09:16:25.713Z"
+      "created_at": "2026-09-08T06:22:34.612Z",
+      "updated_at": "2026-09-08T06:22:34.612Z"
     }
   ],
   "testimonials": [
@@ -386,10 +314,10 @@
       "name": "Anita Shrestha",
       "initials": "AS",
       "role": "Regular Customer",
-      "text": "The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture â€” absolute perfection every single time.",
+      "text": "The sourdough here is on another level. I drive 30 minutes just for their bread. The crust, the flavor, the texture — absolute perfection every single time.",
       "rating": 5,
       "approved": true,
-      "created_at": "2026-08-18T09:16:25.713Z"
+      "created_at": "2026-09-05T06:22:34.612Z"
     },
     {
       "id": "t2",
@@ -399,7 +327,7 @@
       "text": "Ordered a custom birthday cake and it was stunning. Not only did it look beautiful, but every slice was moist and delicious. Everyone at the party was amazed.",
       "rating": 5,
       "approved": true,
-      "created_at": "2026-08-16T09:16:25.713Z"
+      "created_at": "2026-09-03T06:22:34.612Z"
     },
     {
       "id": "t3",
@@ -409,17 +337,19 @@
       "text": "Their croissants remind me of the ones I had in Paris. Flaky, buttery, and absolutely heavenly. Jiri Bakes has become my weekend ritual.",
       "rating": 5,
       "approved": true,
-      "created_at": "2026-08-13T09:16:25.713Z"
+      "created_at": "2026-08-31T06:22:34.612Z"
     }
   ],
   "settings": [
     {
       "key": "site_name",
-      "value": "Jiri Bakes"
+      "value": "Jiri Bakes",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "tagline",
-      "value": "Simply Organic Artisan Bakery"
+      "value": "Simply Organic",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "site_title",
@@ -431,43 +361,38 @@
     },
     {
       "key": "phone",
-      "value": "+977 1-4567890"
+      "value": "+977 1-4567890",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "whatsapp_phone",
-      "value": "9779841234567"
+      "value": "9779841234567",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "email",
-      "value": "hello@jiribakes.com.np"
+      "value": "hello@jiribakes.com.np",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "address",
-      "value": "Lokanthali, Bhaktapur, Nepal"
+      "value": "Lokanthali, Araniko Highway, Bhaktapur, Nepal",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "hours_weekday",
-      "value": "Mon – Sat: 7:00 AM – 8:00 PM"
+      "value": "Mon – Sat: 7:00 AM – 8:00 PM",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "hours_sunday",
-      "value": "Sunday: 8:00 AM – 6:00 PM"
+      "value": "Sunday: 8:00 AM – 6:00 PM",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "fresh_bread_time",
-      "value": "7:30 AM"
-    },
-    {
-      "key": "hero_headline",
-      "value": "Baked Like Art."
-    },
-    {
-      "key": "hero_subheadline",
-      "value": "Handcrafted organic breads, cakes, and morning pastries. Baked fresh daily at dawn in Lokanthali, Nepal."
-    },
-    {
-      "key": "announcement_banner",
-      "value": "Fresh organic sourdough available every morning at 7:30 AM!"
+      "value": "7:30 AM",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
       "key": "delivery_fee",
@@ -478,28 +403,39 @@
       "value": "NPR"
     },
     {
-      "key": "street_dog_image",
-      "value": "/we care.png"
+      "key": "hero_headline",
+      "value": "Baked Like Art.",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
-      "key": "street_dog_title",
-      "value": "5% of Total Sales Goes to Street Dog Charity"
+      "key": "hero_subheadline",
+      "value": "Handcrafted organic breads, cakes, and morning pastries. Baked fresh daily at dawn in Lokanthali, Nepal.",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
-      "key": "street_dog_percent",
-      "value": "5%"
+      "key": "announcement_banner",
+      "value": "Fresh organic sourdough available every morning at 7:30 AM!",
+      "updated_at": "2026-09-08T08:21:55.414Z"
     },
     {
-      "key": "street_dog_desc",
-      "value": "At Jiri Bakes, we believe kindness should be shared with every living being. 5% of our total sales directly funds daily nutritious meals, emergency medical aid, vaccines, and shelter for neighborhood street dogs in Lokanthali."
-    },
+      "key": "we_care_image",
+      "value": "/we care.png",
+      "updated_at": "2026-09-08T08:21:55.414Z"
+    }
+  ],
+  "bake_of_week": [
     {
-      "key": "street_dog_social_url",
-      "value": "https://www.instagram.com/jiri_bakes"
-    },
-    {
-      "key": "street_dog_qr_image",
-      "value": ""
+      "id": "bow-1788849723649-3u02",
+      "product_id": "c1",
+      "title": "Sunflower Cream Cake",
+      "subtitle": "Bake Of The Week",
+      "price": 1800,
+      "unit": "/whole",
+      "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
+      "description": "",
+      "active": true,
+      "created_at": "2026-09-08T06:42:03.650Z",
+      "updated_at": "2026-09-08T06:53:00.561Z"
     }
   ]
 }

@@ -420,12 +420,28 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
   );
 }
 
-const COLLECTION_PAGE_SIZE = 9; // max 9 cards (3 lines of 3) per page
+const COLLECTION_PAGE_SIZE = 9; // max 9 cards (3 lines of 3) per page on desktop
+const MOBILE_INITIAL_COUNT = 4; // mobile: show 4 cards, rest behind "View All"
+
+// ── Detect mobile viewport (<= breakpoint) for View All behaviour ──
+function useIsMobile(breakpoint = 600) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView }: { items: MenuItem[]; quickViewItem: MenuItem | null; onQuickView: (item: MenuItem) => void; onCloseQuickView: () => void }) {
   const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
+  const isMobile = useIsMobile(600);
   const { addItem } = useCart();
 
   const filters = ['all', 'cake', 'pastry', 'bread', 'cookie'];
@@ -435,6 +451,13 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
   const totalPages = Math.max(1, Math.ceil(filtered.length / COLLECTION_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * COLLECTION_PAGE_SIZE, safePage * COLLECTION_PAGE_SIZE);
+
+  // Mobile: 4 cards initially, "View All" reveals the rest (no pagination).
+  // Desktop: paginated 9 per page.
+  const visibleItems = isMobile
+    ? (mobileExpanded ? filtered : filtered.slice(0, MOBILE_INITIAL_COUNT))
+    : paged;
+  const mobileHiddenCount = filtered.length - MOBILE_INITIAL_COUNT;
 
   const goToPage = (p: number) => {
     const next = Math.min(Math.max(1, p), totalPages);
@@ -450,6 +473,7 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
   const pickFilter = (f: string) => {
     setFilter(f);
     setPage(1);
+    setMobileExpanded(false);
   };
 
   const handleAdd = (item: MenuItem) => {
@@ -540,13 +564,40 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24,
         maxWidth: 1140, margin: '0 auto', position: 'relative', zIndex: 1,
       }} className="collection-grid">
-        {paged.map((item) => (
-          <CollectionCard key={item.id} item={item} added={addedId === item.id} onAdd={handleAdd} onQuickView={onQuickView} />
+        {visibleItems.map((item) => (
+          <CollectionCard key={`${filter}-${item.id}`} item={item} added={addedId === item.id} onAdd={handleAdd} onQuickView={onQuickView} />
         ))}
       </div>
 
-      {/* ── Pagination (max 9 cards per page) ── */}
-      {totalPages > 1 && (
+      {/* ── Mobile: View All / Show Less (shows 4 first, rest on expand) ── */}
+      {isMobile && filtered.length > MOBILE_INITIAL_COUNT && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, position: 'relative', zIndex: 1 }}>
+          <button
+            onClick={() => setMobileExpanded((v) => !v)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '12px 28px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-body)',
+              letterSpacing: '0.3px',
+              background: mobileExpanded ? 'transparent' : 'var(--color-green)',
+              color: mobileExpanded ? 'var(--color-green)' : '#FFFDF5',
+              border: '1.5px solid var(--color-green)',
+              boxShadow: mobileExpanded ? 'none' : '0 6px 20px rgba(40,85,28,0.28)',
+              cursor: 'pointer',
+            }}
+          >
+            {mobileExpanded ? (
+              <>Show Less <span aria-hidden>↑</span></>
+            ) : (
+              <>View All ({mobileHiddenCount} more) <span aria-hidden>↓</span></>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* ── Desktop pagination (max 9 cards per page, hidden on mobile) ── */}
+      {!isMobile && totalPages > 1 && (
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           gap: 8, marginTop: 44, flexWrap: 'wrap', position: 'relative', zIndex: 1,
@@ -611,8 +662,12 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
       )}
 
       {filtered.length > 0 && (
-        <p style={{ textAlign: 'center', fontSize: '0.76rem', color: 'var(--color-text-tertiary)', marginTop: totalPages > 1 ? 14 : 28 }}>
-          Showing {(safePage - 1) * COLLECTION_PAGE_SIZE + 1}–{Math.min(safePage * COLLECTION_PAGE_SIZE, filtered.length)} of {filtered.length} treats
+        <p style={{ textAlign: 'center', fontSize: '0.76rem', color: 'var(--color-text-tertiary)', marginTop: (!isMobile && totalPages > 1) ? 14 : 20 }}>
+          {isMobile
+            ? (mobileExpanded
+                ? `Showing all ${filtered.length} treats`
+                : `Showing ${Math.min(MOBILE_INITIAL_COUNT, filtered.length)} of ${filtered.length} treats`)
+            : `Showing ${(safePage - 1) * COLLECTION_PAGE_SIZE + 1}–${Math.min(safePage * COLLECTION_PAGE_SIZE, filtered.length)} of ${filtered.length} treats`}
         </p>
       )}
 
@@ -628,7 +683,19 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
           .collection-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
         @media (max-width: 600px) {
-          .collection-grid { grid-template-columns: 1fr !important; max-width: 400px !important; }
+          /* Compact 2-col grid on phones so 4 cards ≈ 2 rows, rest behind View All */
+          .collection-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .collection-card { border-radius: 12px !important; }
+          .collection-card-img { height: 150px !important; }
+          .collection-card-body { padding: 12px 12px 14px !important; }
+          .collection-card-cat { font-size: 0.52rem !important; letter-spacing: 1.4px !important; margin-bottom: 4px !important; }
+          .collection-card-title { font-size: 0.88rem !important; margin-bottom: 4px !important; line-height: 1.3 !important; }
+          .collection-card-desc {
+            font-size: 0.7rem !important; line-height: 1.5 !important; margin-bottom: 10px !important;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+          }
+          .collection-card-price { font-size: 0.92rem !important; }
+          .collection-card-add { padding: 7px 14px !important; font-size: 0.7rem !important; }
         }
       `}</style>
     </section>
@@ -657,7 +724,7 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
       }}
     >
       {/* Image */}
-      <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
+      <div className="collection-card-img" onClick={() => onQuickView(item)} style={{ position: 'relative', height: 260, overflow: 'hidden', cursor: 'pointer' }}>
         <img
           src={item.images?.[0] || item.image}
           alt={item.name}
@@ -807,31 +874,32 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
       </div>
 
       {/* Content */}
-      <div style={{ padding: '20px 22px 22px' }}>
-        <div style={{
+      <div className="collection-card-body" style={{ padding: '20px 22px 22px' }}>
+        <div className="collection-card-cat" style={{
           fontSize: '0.6rem', fontWeight: 600, letterSpacing: '2px',
           textTransform: 'uppercase' as const, color: 'var(--color-brown)',
           marginBottom: 8,
         }}>{item.category === 'cake' ? 'CAKES' : item.category === 'pastry' ? 'PASTRIES' : item.category === 'bread' ? 'BREADS' : 'COOKIES'}</div>
 
-        <h3 style={{
+        <h3 className="collection-card-title" style={{
           fontFamily: 'var(--font-display)', fontSize: '1.2rem',
           color: 'var(--color-brown-deep)', marginBottom: 8, lineHeight: 1.25,
         }}>{item.name}</h3>
 
-        <p style={{
+        <p className="collection-card-desc" style={{
           color: 'var(--color-text-tertiary)', fontSize: '0.82rem',
           lineHeight: 1.65, marginBottom: 18,
         }}>{item.description}</p>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{
+          <span className="collection-card-price" style={{
             fontFamily: 'var(--font-display)', fontSize: '1.2rem',
             color: 'var(--color-green)', fontWeight: 400,
           }}>
             NPR {item.price.toLocaleString()}
           </span>
           <button
+            className="collection-card-add"
             onClick={() => onAdd(item)}
             style={{
               padding: '9px 22px',
