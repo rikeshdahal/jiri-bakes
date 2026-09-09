@@ -1,10 +1,51 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/auth/admin';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+function shouldUseSupabaseStorage() {
+  return process.env.USE_SUPABASE_DB === 'true';
+}
+
+function newFileName(file: File) {
+  const fileExt = file.name.split('.').pop() || 'jpg';
+  const cleanExt = fileExt.replace(/[^a-zA-Z0-9]/g, '');
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${cleanExt}`;
+}
+
+async function saveToSupabase(file: File): Promise<string> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnon) {
+    throw new Error('Supabase is not configured for file uploads');
+  }
+
+  const key = SERVICE_ROLE_KEY || supabaseAnon;
+  const supabase = createClient(supabaseUrl, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const fileName = newFileName(file);
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(fileName, buffer, {
+    contentType: file.type,
+    cacheControl: '3600',
+    upsert: false,
+  });
+  if (error) throw error;
+
+  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+  return data.publicUrl;
+}
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +65,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File too large. Maximum size is 5 MB.' }, { status: 400 });
     }
 
+    // On serverless hosts (Vercel) the filesystem is read-only, so upload
+    // directly to Supabase Storage instead of writing to disk.
+    if (shouldUseSupabaseStorage()) {
+      const publicUrl = await saveToSupabase(file);
+      return NextResponse.json({
+        data: {
+          url: publicUrl,
+          path: publicUrl,
+          fileName: publicUrl.split('/').pop(),
+        },
+      });
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -32,9 +86,7 @@ export async function POST(request: Request) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const cleanExt = fileExt.replace(/[^a-zA-Z0-9]/g, '');
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${cleanExt}`;
+    const fileName = newFileName(file);
     const filePath = path.join(uploadsDir, fileName);
 
     fs.writeFileSync(filePath, buffer);
@@ -62,3 +114,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+

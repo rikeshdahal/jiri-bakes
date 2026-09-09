@@ -311,3 +311,43 @@ begin
     alter table orders alter column id type text using id::text;
   end if;
 end $$;
+
+-- ─── 14. Storage bucket for device image uploads ────────────────
+-- Used by /api/upload when USE_SUPABASE_DB=true (Vercel, read-only fs).
+-- Creates a PUBLIC bucket named "uploads" (matching SUPABASE_STORAGE_BUCKET
+-- default) plus insert policies so admin uploads work with the anon key.
+-- Idempotent: safe to run repeatedly.
+do $$
+begin
+  -- Create the bucket if it does not exist yet.
+  if not exists (
+    select 1 from storage.buckets where name = 'uploads'
+  ) then
+    insert into storage.buckets (id, name, public)
+    values ('uploads', 'uploads', true);
+  end if;
+
+  -- Allow anonymous + authenticated uploads into this bucket.
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects'
+      and policyname = 'public_uploads_insert'
+  ) then
+    create policy "public_uploads_insert" on storage.objects
+      for insert
+      to anon, authenticated
+      with check (bucket_id = 'uploads');
+  end if;
+
+  -- Allow public reads (so uploaded images display anywhere).
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects'
+      and policyname = 'public_uploads_select'
+  ) then
+    create policy "public_uploads_select" on storage.objects
+      for select
+      to anon, authenticated
+      using (bucket_id = 'uploads');
+  end if;
+end $$;
