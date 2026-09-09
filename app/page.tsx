@@ -1022,9 +1022,11 @@ function WeCareSection() {
           z-index: 10;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 10px;
           padding: 12px 20px;
           border-radius: 9999px;
+          white-space: nowrap;
           background: rgba(255, 253, 245, 0.95);
           border: 1.5px solid #F5D35C;
           box-shadow: 0 10px 28px rgba(43, 29, 16, 0.22);
@@ -1046,12 +1048,12 @@ function WeCareSection() {
           align-items: center;
           justify-content: center;
         }
-        @media (max-width: 480px) {
-          .wc-ig-badge { bottom: 10px !important; right: 10px !important; padding: 8px 12px !important; gap: 6px !important; }
-          .wc-ig-icon { width: 26px !important; height: 26px !important; }
-          .wc-ig-icon svg { width: 14px !important; height: 14px !important; }
-          .wc-ig-label { font-size: 0.7rem !important; }
-          .wc-ig-handle { font-size: 0.78rem !important; }
+        @media (max-width: 640px) {
+          .wc-ig-badge { bottom: 8px !important; right: 10px !important; left: auto !important; transform: none !important; padding: 2px 6px !important; gap: 3px !important; max-width: 92% !important; }
+          .wc-ig-icon { width: 12px !important; height: 12px !important; }
+          .wc-ig-icon svg { width: 7px !important; height: 7px !important; }
+          .wc-ig-label { font-size: 0.46rem !important; }
+          .wc-ig-handle { font-size: 0.54rem !important; }
         }
       `}</style>
 
