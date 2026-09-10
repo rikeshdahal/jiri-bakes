@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import AppShell from '@/components/layout/AppShell';
 import Header from '@/components/navigation/Header';
-import CherryCursor from '@/components/layout/CherryCursor';
 
 export const metadata: Metadata = {
   title: {
@@ -25,7 +24,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <CherryCursor />
         <AppShell>
           <Header />
           <main>{children}</main>
