@@ -12,7 +12,6 @@ const navLinks = [
   { id: 'collection', label: 'Shop', href: '#collection' },
   { id: 'about', label: 'About Us', href: '#about' },
   { id: 'contact', label: 'Contact', href: '#contact' },
-  { id: 'track', label: 'Track Order', href: '/track' },
 ];
 
 export default function Header() {
@@ -388,7 +387,7 @@ export default function Header() {
             className="nav-links-desktop"
           >
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id || (link.id === 'track' && pathname === '/track');
+              const isActive = activeSection === link.id;
               if (link.href.startsWith('/')) {
                 return (
                   <li key={link.id}>
@@ -590,7 +589,7 @@ export default function Header() {
             }}
           >
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id || (link.id === 'track' && pathname === '/track');
+              const isActive = activeSection === link.id;
               if (link.href.startsWith('/')) {
                 return (
                   <Link
