@@ -362,7 +362,7 @@ export default function Header() {
             style={{ display: 'flex', alignItems: 'center' }}
           >
             <img
-              src="/main logo.png"
+              src="/main-logo.png"
               alt="Jiri Bakes"
               style={{
                 height: 52,

@@ -1448,7 +1448,7 @@ function FooterSection() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <img
-                src="/main logo.png"
+                src="/main-logo.png"
                 alt="Jiri Bakes"
                 style={{
                   height: 48,

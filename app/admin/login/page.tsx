@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
             display: 'flex',
             justifyContent: 'center',
           }}>
-            <img src="/main logo.png" alt="Jiri Bakes" style={{ height: 60, width: 'auto', objectFit: 'contain' }} />
+            <img src="/main-logo.png" alt="Jiri Bakes" style={{ height: 60, width: 'auto', objectFit: 'contain' }} />
           </div>
           <h1 style={{
             fontFamily: 'var(--font-display)',

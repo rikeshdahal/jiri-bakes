@@ -202,7 +202,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: 13, textDecoration: 'none' }}>
             <div style={{ position: 'relative' }}>
               <img
-                src="/main logo.png"
+                src="/main-logo.png"
                 alt="Jiri Bakes"
                 style={{
                   height: 42,
