@@ -95,6 +95,7 @@ export interface BakeOfWeek {
   price: number;
   unit: string;
   image: string;
+  secondary_image?: string;
   description: string;
   active: boolean;
   created_at: string;

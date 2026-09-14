@@ -384,6 +384,11 @@ export async function getDbBakeOfWeekById(id: string): Promise<BakeOfWeek | null
 export async function createDbBakeOfWeek(data: Partial<BakeOfWeek>): Promise<BakeOfWeek> {
   return enqueue(() => {
     const db = readDB();
+    if (data.active) {
+      db.bake_of_week.forEach((b) => {
+        b.active = false;
+      });
+    }
     const newItem: BakeOfWeek = {
       id: data.id || `bow-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       product_id: data.product_id || undefined,
@@ -392,6 +397,7 @@ export async function createDbBakeOfWeek(data: Partial<BakeOfWeek>): Promise<Bak
       price: Number(data.price) || 0,
       unit: data.unit || '/whole',
       image: data.image || '',
+      secondary_image: data.secondary_image !== undefined ? data.secondary_image : 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80',
       description: data.description || '',
       active: data.active !== false,
       created_at: new Date().toISOString(),
@@ -408,6 +414,11 @@ export async function updateDbBakeOfWeek(id: string, updates: Partial<BakeOfWeek
     const db = readDB();
     const idx = db.bake_of_week.findIndex((b) => String(b.id) === String(id));
     if (idx === -1) return null;
+    if (updates.active) {
+      db.bake_of_week.forEach((b) => {
+        if (String(b.id) !== String(id)) b.active = false;
+      });
+    }
     db.bake_of_week[idx] = {
       ...db.bake_of_week[idx],
       ...updates,

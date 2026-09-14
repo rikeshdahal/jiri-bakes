@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { CSSProperties } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import type { CSSProperties, ChangeEvent } from 'react';
 import type { BakeOfWeek, MenuItem } from '@/types';
+
+const DEFAULT_CROISSANT_URL = 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80';
 
 interface ProductOption {
   id: string;
@@ -10,6 +12,7 @@ interface ProductOption {
   price: number;
   image?: string;
   unit?: string;
+  description?: string;
 }
 
 export default function AdminBakeOfWeekPage() {
@@ -28,9 +31,17 @@ export default function AdminBakeOfWeekPage() {
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('');
   const [image, setImage] = useState('');
+  const [secondaryImage, setSecondaryImage] = useState(DEFAULT_CROISSANT_URL);
   const [description, setDescription] = useState('');
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Uploading states
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingSecondary, setUploadingSecondary] = useState(false);
+
+  const mainFileInputRef = useRef<HTMLInputElement>(null);
+  const secondaryFileInputRef = useRef<HTMLInputElement>(null);
 
   const load = () => {
     fetch('/api/bake-of-week')
@@ -51,6 +62,7 @@ export default function AdminBakeOfWeekPage() {
           price: p.price,
           image: p.image,
           unit: p.unit,
+          description: p.description,
         })));
       })
       .catch(() => {});
@@ -69,10 +81,11 @@ export default function AdminBakeOfWeekPage() {
     setEditingId(null);
     setProductId('');
     setTitle('');
-    setSubtitle('');
+    setSubtitle('Bake of the Week');
     setPrice('');
     setUnit('/whole');
     setImage('');
+    setSecondaryImage(DEFAULT_CROISSANT_URL);
     setDescription('');
     setActive(true);
     setFormOpen(true);
@@ -85,8 +98,13 @@ export default function AdminBakeOfWeekPage() {
     setSubtitle(item.subtitle);
     setPrice(String(item.price));
     setUnit(item.unit);
-    setImage(item.image);
-    setDescription(item.description);
+    setImage(item.image || '');
+    setSecondaryImage(
+      item.secondary_image !== undefined && item.secondary_image !== null
+        ? item.secondary_image
+        : DEFAULT_CROISSANT_URL
+    );
+    setDescription(item.description || '');
     setActive(Boolean(item.active));
     setFormOpen(true);
   };
@@ -99,6 +117,41 @@ export default function AdminBakeOfWeekPage() {
       setPrice(String(p.price));
       setUnit(p.unit || '/whole');
       if (p.image) setImage(p.image);
+      if (p.description) setDescription(p.description);
+    }
+  };
+
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, target: 'main' | 'secondary') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (target === 'main') setUploadingMain(true);
+    else setUploadingSecondary(true);
+
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        flash('error', data.error || 'Failed to upload image');
+        return;
+      }
+      if (target === 'main') {
+        setImage(data.url);
+      } else {
+        setSecondaryImage(data.url);
+      }
+      flash('success', `${target === 'main' ? 'Main' : 'Croissant'} image uploaded.`);
+    } catch {
+      flash('error', 'Error uploading image.');
+    } finally {
+      if (target === 'main') setUploadingMain(false);
+      else setUploadingSecondary(false);
+      e.target.value = '';
     }
   };
 
@@ -114,7 +167,8 @@ export default function AdminBakeOfWeekPage() {
       subtitle: subtitle.trim(),
       price: Number(price),
       unit: unit || '/whole',
-      image: image.trim() || undefined,
+      image: image.trim(),
+      secondary_image: secondaryImage.trim(),
       description: description.trim(),
       active,
     };
@@ -203,7 +257,7 @@ export default function AdminBakeOfWeekPage() {
           position: 'fixed',
           top: 80,
           right: 24,
-          zIndex: 999,
+          zIndex: 9999,
           padding: '14px 22px',
           borderRadius: 12,
           fontSize: '0.85rem',
@@ -224,7 +278,7 @@ export default function AdminBakeOfWeekPage() {
             Bake of the Week
           </h1>
           <p style={{ fontSize: '0.84rem', color: 'var(--color-text-tertiary)' }}>
-            Manage the hero floating card shown on the homepage ({items.length} total)
+            Manage the hero floating card and featured showcase shown on the homepage ({items.length} total)
           </p>
         </div>
         <button
@@ -268,8 +322,8 @@ export default function AdminBakeOfWeekPage() {
         }}>
           <div style={{
             width: '100%',
-            maxWidth: 640,
-            maxHeight: '90vh',
+            maxWidth: 680,
+            maxHeight: '92vh',
             overflowY: 'auto',
             background: '#0F1A32',
             borderRadius: 20,
@@ -287,7 +341,7 @@ export default function AdminBakeOfWeekPage() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
                 <label style={labelStyle}>Or pick from existing product (auto-fill)</label>
                 <select style={inputStyle} value={productId} onChange={(e) => handleProductSelect(e.target.value)}>
@@ -304,8 +358,37 @@ export default function AdminBakeOfWeekPage() {
               </div>
 
               <div>
-                <label style={labelStyle}>Subtitle</label>
-                <input style={inputStyle} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Bake of the Week" />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Event / Badge Tag (e.g. Teej Special Offer)</label>
+                  <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>Shown on Hero Card &amp; Homepage Section</span>
+                </div>
+                <input
+                  style={inputStyle}
+                  value={subtitle}
+                  onChange={(e) => setSubtitle(e.target.value)}
+                  placeholder="e.g. Teej Special Offer, Bake of the Week, Festive Deal"
+                />
+                <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                  {['Bake of the Week', 'Teej Special Offer', 'Dashain Special', 'Festive Offer', "Chef's Special", 'Weekend Deal'].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setSubtitle(preset)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 9999,
+                        fontSize: '0.72rem',
+                        background: subtitle === preset ? 'rgba(245, 211, 92, 0.25)' : 'rgba(255, 255, 255, 0.06)',
+                        color: subtitle === preset ? '#F5D35C' : 'rgba(255, 253, 245, 0.75)',
+                        border: subtitle === preset ? '1px solid #F5D35C' : '1px solid var(--color-border)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -323,19 +406,195 @@ export default function AdminBakeOfWeekPage() {
                 </div>
               </div>
 
-              <div>
-                <label style={labelStyle}>Image URL</label>
-                <input style={inputStyle} value={image} onChange={(e) => setImage(e.target.value)} placeholder="https://..." />
-                {image && (
-                  <div style={{ marginTop: 10, width: 120, height: 120, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-                    <img src={image} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {/* ─── Main Cake Image Section ─── */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: 14,
+                padding: 16,
+                border: '1px solid rgba(245, 211, 92, 0.15)',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0, color: '#F5D35C' }}>
+                    1. Main Cake Photo (Hero Floating Card & Homepage Section)
+                  </label>
+                  {image && (
+                    <button
+                      type="button"
+                      onClick={() => setImage('')}
+                      style={{ background: 'none', border: 'none', color: '#e74c3c', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      Delete Image
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  <div style={{
+                    width: 110,
+                    height: 110,
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    border: '1.5px solid rgba(245, 211, 92, 0.3)',
+                    background: 'rgba(0,0,0,0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    {image ? (
+                      <img src={image} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8', textAlign: 'center', padding: 8 }}>No image</span>
+                    )}
                   </div>
-                )}
+
+                  <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        ref={mainFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'main')}
+                        style={{ display: 'none' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => mainFileInputRef.current?.click()}
+                        disabled={uploadingMain}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: 9999,
+                          background: 'rgba(245, 211, 92, 0.15)',
+                          color: '#F5D35C',
+                          border: '1px solid rgba(245, 211, 92, 0.4)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        📁 {uploadingMain ? 'Uploading...' : 'Upload From Device'}
+                      </button>
+                    </div>
+
+                    <input
+                      style={{ ...inputStyle, padding: '9px 12px', fontSize: '0.82rem' }}
+                      value={image}
+                      onChange={(e) => setImage(e.target.value)}
+                      placeholder="Or paste cake image URL (https://...)"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── Hero Croissant Wrap (Secondary Accent) Photo Section ─── */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: 14,
+                padding: 16,
+                border: '1px solid rgba(245, 211, 92, 0.15)',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0, color: '#F5D35C' }}>
+                    2. Overlapping Tilted Photo (hero-croissant-wrap)
+                  </label>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      type="button"
+                      onClick={() => setSecondaryImage(DEFAULT_CROISSANT_URL)}
+                      style={{ background: 'none', border: 'none', color: '#52B788', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      Reset Default Croissant
+                    </button>
+                    {secondaryImage && (
+                      <button
+                        type="button"
+                        onClick={() => setSecondaryImage('')}
+                        style={{ background: 'none', border: 'none', color: '#e74c3c', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        Delete / Hide Accent
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.76rem', color: '#94A3B8', marginBottom: 12, lineHeight: 1.4 }}>
+                  This photo appears inside the tilted frame (<code>hero-croissant-wrap</code>) overlapping the main hero photo. Upload your own accent image, paste a link, or delete it to hide the wrap on the homepage.
+                </p>
+
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  <div style={{
+                    width: 110,
+                    height: 110,
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    border: '2.5px solid #FFFFFF',
+                    transform: 'rotate(-4deg)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                    background: '#FAF6EE',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    {secondaryImage ? (
+                      <img src={secondaryImage} alt="croissant accent preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ fontSize: '0.72rem', color: '#94A3B8', textAlign: 'center', padding: 8 }}>Hidden (Deleted)</span>
+                    )}
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        ref={secondaryFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'secondary')}
+                        style={{ display: 'none' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => secondaryFileInputRef.current?.click()}
+                        disabled={uploadingSecondary}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: 9999,
+                          background: 'rgba(245, 211, 92, 0.15)',
+                          color: '#F5D35C',
+                          border: '1px solid rgba(245, 211, 92, 0.4)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        🥐 {uploadingSecondary ? 'Uploading...' : 'Upload Croissant / Accent Photo'}
+                      </button>
+                    </div>
+
+                    <input
+                      style={{ ...inputStyle, padding: '9px 12px', fontSize: '0.82rem' }}
+                      value={secondaryImage}
+                      onChange={(e) => setSecondaryImage(e.target.value)}
+                      placeholder="Or paste accent image URL (https://...)"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label style={labelStyle}>Description</label>
-                <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <label style={labelStyle}>Description (Shown on Homepage Bake of Week Section)</label>
+                <textarea
+                  style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe this week's bake, delicate layers, cream, flavors..."
+                />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -347,21 +606,23 @@ export default function AdminBakeOfWeekPage() {
                   style={{ width: 18, height: 18, cursor: 'pointer' }}
                 />
                 <label htmlFor="bow-active" style={{ fontSize: '0.85rem', color: '#FFFDF5', cursor: 'pointer' }}>
-                  Active (shown on homepage hero)
+                  Active (shown as this week&apos;s spotlight pick on the homepage)
                 </label>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 26 }}>
               <button
+                type="button"
                 onClick={() => setFormOpen(false)}
                 style={{ padding: '12px 24px', borderRadius: 9999, fontSize: '0.85rem', fontWeight: 600, fontFamily: 'var(--font-body)', border: '1px solid var(--color-border)', background: 'transparent', color: '#FFFDF5', cursor: 'pointer' }}
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || uploadingMain || uploadingSecondary}
                 style={{ padding: '12px 24px', borderRadius: 9999, fontSize: '0.85rem', fontWeight: 600, fontFamily: 'var(--font-body)', border: 'none', background: 'var(--color-green)', color: '#FFFDF5', cursor: 'pointer' }}
               >
                 {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Create'}
@@ -397,7 +658,7 @@ export default function AdminBakeOfWeekPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(255, 255, 255, 0.03)', borderBottom: '1px solid var(--color-border)' }}>
-                  {['Item', 'Price', 'Status', 'Active', 'Actions'].map((h) => (
+                  {['Main Item', 'Croissant Wrap', 'Price', 'Status', 'Active', 'Actions'].map((h) => (
                     <th key={h} style={{
                       padding: '14px 24px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700,
                       letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--color-text-tertiary)',
@@ -410,6 +671,7 @@ export default function AdminBakeOfWeekPage() {
               <tbody>
                 {items.map((i) => (
                   <tr key={i.id} style={{ borderBottom: '1px solid rgba(245, 211, 92, 0.1)' }}>
+                    {/* Main Item */}
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                         <div style={{ width: 48, height: 48, borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--color-border)', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
@@ -425,9 +687,39 @@ export default function AdminBakeOfWeekPage() {
                         </div>
                       </div>
                     </td>
+
+                    {/* Croissant Wrap Thumbnail */}
+                    <td style={{ padding: '16px 24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: 10,
+                          overflow: 'hidden',
+                          border: '1.5px solid rgba(245, 211, 92, 0.3)',
+                          flexShrink: 0,
+                          background: 'rgba(255,255,255,0.05)',
+                        }}>
+                          {i.secondary_image ? (
+                            <img src={i.secondary_image} alt="croissant wrap" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#94A3B8' }}>
+                              None
+                            </div>
+                          )}
+                        </div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
+                          {i.secondary_image ? 'Custom' : 'Hidden'}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Price */}
                     <td style={{ padding: '16px 24px', fontSize: '0.92rem', fontFamily: 'var(--font-display)', color: 'var(--color-brown-deep)', fontWeight: 600 }}>
                       NPR {i.price.toLocaleString()} <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-body)', fontWeight: 400 }}>{i.unit}</span>
                     </td>
+
+                    {/* Status */}
                     <td style={{ padding: '16px 24px' }}>
                       {i.active ? (
                         <span style={{ padding: '4px 12px', borderRadius: 9999, fontSize: '0.7rem', fontWeight: 700, background: 'rgba(39, 174, 96, 0.18)', color: '#52B788', border: '1px solid rgba(39, 174, 96, 0.4)' }}>
@@ -439,6 +731,8 @@ export default function AdminBakeOfWeekPage() {
                         </span>
                       )}
                     </td>
+
+                    {/* Active toggle */}
                     <td style={{ padding: '16px 24px' }}>
                       <button
                         onClick={async () => {
@@ -457,6 +751,8 @@ export default function AdminBakeOfWeekPage() {
                         {i.active ? 'Deactivate' : 'Activate'}
                       </button>
                     </td>
+
+                    {/* Actions */}
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button
@@ -481,17 +777,24 @@ export default function AdminBakeOfWeekPage() {
           </div>
 
           {/* Mobile cards */}
-          <div className="bow-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: 12 }}>
+          <div className="bow-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: 12, padding: 12 }}>
             {items.map((i) => (
-              <div key={i.id} style={{ background: '#111C38', borderRadius: 12, border: '1px solid rgba(245,211,92,0.15)', padding: 16 }}>
-                <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
-                  <div style={{ width: 52, height: 52, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#1a2744' }}>
-                    {i.image ? <img src={i.image} alt={i.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>🍰</div>
+              <div key={i.id} style={{ background: '#111C38', borderRadius: 14, border: '1px solid rgba(245,211,92,0.15)', padding: 16 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ position: 'relative', width: 56, height: 56 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: 10, overflow: 'hidden', background: '#1a2744' }}>
+                      {i.image ? <img src={i.image} alt={i.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>🍰</div>
+                      )}
+                    </div>
+                    {i.secondary_image && (
+                      <div style={{ position: 'absolute', bottom: -2, right: -2, width: 26, height: 26, borderRadius: 6, overflow: 'hidden', border: '1.5px solid #fff' }}>
+                        <img src={i.secondary_image} alt="accent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#FFFDF5' }}>{i.title}</div>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#FFFDF5' }}>{i.title}</div>
                     <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: 2 }}>{i.subtitle || 'Bake of the Week'}</div>
                     <div style={{ fontFamily: 'var(--font-display)', color: '#F5D35C', fontWeight: 600, marginTop: 4 }}>NPR {i.price.toLocaleString()}</div>
                   </div>
@@ -501,7 +804,7 @@ export default function AdminBakeOfWeekPage() {
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={() => openEdit(i)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'rgba(245,211,92,0.12)', color: '#F5D35C', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(245,211,92,0.2)', cursor: 'pointer' }}>Edit</button>
-                  <button onClick={() => { if (confirm('Delete this item?')) handleDelete(i.id); }} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'rgba(192,57,43,0.15)', color: '#e74c3c', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(192,57,43,0.25)', cursor: 'pointer' }}>Delete</button>
+                  <button onClick={() => handleDelete(i.id)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'rgba(192,57,43,0.15)', color: '#e74c3c', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(192,57,43,0.25)', cursor: 'pointer' }}>Delete</button>
                 </div>
               </div>
             ))}

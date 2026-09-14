@@ -432,6 +432,7 @@
       "price": 1800,
       "unit": "/whole",
       "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
+      "secondary_image": "https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80",
       "description": "",
       "active": true,
       "created_at": "2026-09-08T06:42:03.650Z",

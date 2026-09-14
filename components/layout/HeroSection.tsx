@@ -28,15 +28,23 @@ function useReveal() {
 }
 
 interface HeroSectionProps {
-  bakeOfTheWeek?: MenuItem | null;
+  bakeOfTheWeek?: (MenuItem & { secondary_image?: string }) | null;
+  secondaryImage?: string;
   onQuickView?: () => void;
 }
 
-export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionProps) {
+const DEFAULT_CROISSANT = 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80';
+
+export default function HeroSection({ bakeOfTheWeek, secondaryImage, onQuickView }: HeroSectionProps) {
   const ref = useReveal();
   const { theme } = useTheme();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isNight = theme === 'night';
+
+  const rawSecondary = secondaryImage !== undefined ? secondaryImage : bakeOfTheWeek?.secondary_image;
+  const croissantSrc = rawSecondary !== undefined
+    ? (rawSecondary && rawSecondary.trim() ? rawSecondary.trim() : null)
+    : DEFAULT_CROISSANT;
 
   const cakeItem = bakeOfTheWeek || {
     id: 'c1',
@@ -44,6 +52,7 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
     price: 1800,
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80',
     description: 'A light layered sponge kissed with organic cream and sunflower honey.',
+    badge: 'Bake of the Week',
   };
 
   const isFav = isInWishlist(cakeItem.id);
@@ -190,6 +199,13 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
             margin: 0 auto;
             min-height: auto !important;
           }
+          .hero-croissant-wrap {
+            width: 38% !important;
+            bottom: -5% !important;
+            right: -2% !important;
+            border-radius: 16px !important;
+            border-width: 3px !important;
+          }
           .hero-cta-row { justify-content: center !important; }
           .hero-stats-row { justify-content: center !important; }
         }
@@ -198,6 +214,13 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
           .hero-visual-col { max-width: 320px !important; }
           .hero-grid { padding-top: 100px !important; padding-bottom: 48px !important; }
           .hero-btn-primary, .hero-btn-outline { padding: 13px 28px !important; font-size: 0.85rem !important; }
+          .hero-croissant-wrap {
+            width: 36% !important;
+            bottom: -4% !important;
+            right: -1% !important;
+            border-radius: 12px !important;
+            border-width: 2.5px !important;
+          }
         }
       `}</style>
 
@@ -441,30 +464,32 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
             </div>
 
             {/* Overlapping Tilted Croissant Photo */}
-            <div
-              className="hero-croissant-wrap"
-              style={{
-                position: 'absolute',
-                bottom: '-6%',
-                right: '-4%',
-                width: '42%',
-                aspectRatio: '1',
-                borderRadius: 20,
-                overflow: 'hidden',
-                border: '3.5px solid #FFFFFF',
-                boxShadow: '0 14px 36px rgba(43, 29, 16, 0.22)',
-                transform: 'rotate(-7deg)',
-                zIndex: 5,
-                background: '#FAF6EE',
-                cursor: 'pointer',
-              }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80"
-                alt="Hand-laminated flaky French butter croissant"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
+            {croissantSrc && (
+              <div
+                className="hero-croissant-wrap"
+                style={{
+                  position: 'absolute',
+                  bottom: '-6%',
+                  right: '-4%',
+                  width: '42%',
+                  aspectRatio: '1',
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  border: '3.5px solid #FFFFFF',
+                  boxShadow: '0 14px 36px rgba(43, 29, 16, 0.22)',
+                  transform: 'rotate(-7deg)',
+                  zIndex: 5,
+                  background: '#FAF6EE',
+                  cursor: 'pointer',
+                }}
+              >
+                <img
+                  src={croissantSrc}
+                  alt={cakeItem.name ? `${cakeItem.name} accent` : 'Hand-laminated flaky French butter croissant'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+            )}
 
             {/* Floating Dynamic "Bake of the Week" Card with Wishlist Button — click opens full quick view */}
             <div
@@ -498,7 +523,7 @@ export default function HeroSection({ bakeOfTheWeek, onQuickView }: HeroSectionP
                   color: isNight ? '#F5D35C' : 'var(--color-green, #28551C)',
                   fontWeight: 700,
                 }}>
-                  Bake of the Week
+                  {cakeItem.badge || 'Bake of the Week'}
                 </div>
 
                 <button

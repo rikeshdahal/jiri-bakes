@@ -98,20 +98,32 @@ export default function HomePage() {
     });
   }, []);
 
-  const heroBakeOfWeek: MenuItem | null = bakeOfWeek
+  const linkedProduct = bakeOfWeek?.product_id
+    ? collectionItems.find((p) => String(p.id) === String(bakeOfWeek.product_id))
+    : undefined;
+
+  const currentBakeOfWeek: (MenuItem & { secondary_image?: string }) | null = bakeOfWeek
     ? {
         id: bakeOfWeek.product_id || bakeOfWeek.id,
-        name: bakeOfWeek.title,
-        description: bakeOfWeek.description || '',
-        price: bakeOfWeek.price,
-        unit: bakeOfWeek.unit,
-        category: 'cake',
+        name: bakeOfWeek.title || linkedProduct?.name || '',
+        description: bakeOfWeek.description || linkedProduct?.description || '',
+        price: bakeOfWeek.price ?? linkedProduct?.price ?? 0,
+        unit: bakeOfWeek.unit || linkedProduct?.unit || '/whole',
+        category: linkedProduct?.category || 'cake',
         badge: bakeOfWeek.subtitle || 'Bake of the Week',
-        image: bakeOfWeek.image,
-        images: bakeOfWeek.image ? [bakeOfWeek.image] : undefined,
-        rating: 5,
+        image: bakeOfWeek.image || linkedProduct?.image || '',
+        secondary_image: bakeOfWeek.secondary_image,
+        images: bakeOfWeek.image ? [bakeOfWeek.image] : (linkedProduct?.images || (linkedProduct?.image ? [linkedProduct.image] : undefined)),
+        rating: linkedProduct?.rating || 5,
+        is_bake_of_week: true,
       }
     : null;
+
+  const activeBakeItem: MenuItem & { secondary_image?: string } =
+    currentBakeOfWeek ||
+    collectionItems.find((p) => p.is_bake_of_week) ||
+    collectionItems.find((p) => p.featured) ||
+    collectionItems[0];
 
   // Full product for the hero quick-view modal: prefer the real product
   // behind this week's pick (gallery, rating, category), so the modal
@@ -120,19 +132,17 @@ export default function HomePage() {
     (bakeOfWeek?.product_id
       ? collectionItems.find((p) => String(p.id) === String(bakeOfWeek.product_id))
       : undefined) ??
-    heroBakeOfWeek ??
-    collectionItems.find((p) => p.is_bake_of_week) ??
-    collectionItems.find((p) => p.featured) ??
-    collectionItems[0];
+    activeBakeItem;
 
   return (
     <>
       {booting && <LoadingScreen hiding={hidingLoader} />}
       <HeroSection
-        bakeOfTheWeek={heroBakeOfWeek || collectionItems.find((p) => p.is_bake_of_week) || collectionItems.find((p) => p.featured) || collectionItems[0]}
+        bakeOfTheWeek={activeBakeItem}
+        secondaryImage={activeBakeItem.secondary_image}
         onQuickView={heroQuickViewItem ? () => setQuickViewItem(heroQuickViewItem) : undefined}
       />
-      <FeaturedCakeSection featured={collectionItems.find((p) => p.featured) || collectionItems[0]} />
+      <FeaturedCakeSection featured={activeBakeItem} />
       <CollectionSection items={collectionItems} quickViewItem={quickViewItem} onQuickView={setQuickViewItem} onCloseQuickView={() => setQuickViewItem(null)} />
       <OurStorySection />
       <WeCareSection />
@@ -279,7 +289,7 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
             <span style={{
               fontSize: '0.65rem', fontWeight: 600, color: '#F5D35C',
               letterSpacing: '2.5px', textTransform: 'uppercase' as const,
-            }}>BAKE OF THE WEEK</span>
+            }}>{featured.badge || 'BAKE OF THE WEEK'}</span>
           </div>
 
           {/* Product title */}

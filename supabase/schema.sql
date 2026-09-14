@@ -49,16 +49,18 @@ create table if not exists bake_of_week (
   subtitle    text not null default 'Bake of the Week',
   price       integer not null default 0,
   unit        text not null default '/whole',
-  image       text default '',
-  description text default '',
-  active      boolean not null default true,
-  created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  image           text default '',
+  secondary_image text default '',
+  description     text default '',
+  active          boolean not null default true,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
 );
 
 -- Ensure columns exist on older installs
 alter table bake_of_week add column if not exists product_id uuid references products (id) on delete set null;
 alter table bake_of_week add column if not exists subtitle text not null default 'Bake of the Week';
+alter table bake_of_week add column if not exists secondary_image text default '';
 alter table bake_of_week add column if not exists description text default '';
 alter table bake_of_week add column if not exists active boolean not null default true;
 

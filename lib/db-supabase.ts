@@ -124,6 +124,7 @@ function mapBake(r: Row): BakeOfWeek {
     price: num(r.price),
     unit: str(r.unit, '/whole'),
     image: str(r.image),
+    secondary_image: str(r.secondary_image),
     description: str(r.description),
     active: r.active !== false,
     created_at: str(r.created_at, new Date().toISOString()),
@@ -160,22 +161,35 @@ export async function getDbBakeOfWeekById(id: string): Promise<BakeOfWeek | null
   }
 }
 
+function isMissingCol(e: unknown, col: string): boolean {
+  if (!e || typeof e !== 'object') return false;
+  const anyE = e as { code?: string; message?: string };
+  return anyE.code === 'PGRST204' && String(anyE.message || '').includes(col);
+}
+
 export async function createDbBakeOfWeek(data: Partial<BakeOfWeek>): Promise<BakeOfWeek> {
   const supabase = await createClient();
-  const res = await supabase
-    .from('bake_of_week')
-    .insert({
-      product_id: data.product_id || null,
-      title: data.title || 'Bake of the Week',
-      subtitle: data.subtitle || 'Bake of the Week',
-      price: num(data.price),
-      unit: data.unit || '/whole',
-      image: data.image || '',
-      description: data.description || '',
-      active: data.active !== false,
-    })
-    .select('*')
-    .single();
+  if (data.active) {
+    try {
+      await supabase.from('bake_of_week').update({ active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
+    } catch {}
+  }
+  const payload: Row = {
+    product_id: data.product_id || null,
+    title: data.title || 'Bake of the Week',
+    subtitle: data.subtitle || 'Bake of the Week',
+    price: num(data.price),
+    unit: data.unit || '/whole',
+    image: data.image || '',
+    secondary_image: data.secondary_image !== undefined ? data.secondary_image : '',
+    description: data.description || '',
+    active: data.active !== false,
+  };
+  let res = await supabase.from('bake_of_week').insert(payload).select('*').single();
+  if (res.error && isMissingCol(res.error, 'secondary_image')) {
+    delete payload.secondary_image;
+    res = await supabase.from('bake_of_week').insert(payload).select('*').single();
+  }
   if (res.error) {
     if (isMissingTable(res.error)) {
       throw new Error('bake_of_week table is missing — run supabase/schema.sql in the Supabase SQL Editor.');
@@ -187,6 +201,11 @@ export async function createDbBakeOfWeek(data: Partial<BakeOfWeek>): Promise<Bak
 
 export async function updateDbBakeOfWeek(id: string, updates: Partial<BakeOfWeek>): Promise<BakeOfWeek | null> {
   const supabase = await createClient();
+  if (updates.active) {
+    try {
+      await supabase.from('bake_of_week').update({ active: false }).neq('id', id);
+    } catch {}
+  }
   const patch: Row = { updated_at: new Date().toISOString() };
   if (updates.product_id !== undefined) patch.product_id = updates.product_id || null;
   if (updates.title !== undefined) patch.title = updates.title;
@@ -194,9 +213,15 @@ export async function updateDbBakeOfWeek(id: string, updates: Partial<BakeOfWeek
   if (updates.price !== undefined) patch.price = num(updates.price);
   if (updates.unit !== undefined) patch.unit = updates.unit;
   if (updates.image !== undefined) patch.image = updates.image;
+  if (updates.secondary_image !== undefined) patch.secondary_image = updates.secondary_image;
   if (updates.description !== undefined) patch.description = updates.description;
   if (updates.active !== undefined) patch.active = updates.active;
-  const res = await supabase.from('bake_of_week').update(patch).eq('id', id).select('*');
+
+  let res = await supabase.from('bake_of_week').update(patch).eq('id', id).select('*');
+  if (res.error && isMissingCol(res.error, 'secondary_image')) {
+    delete patch.secondary_image;
+    res = await supabase.from('bake_of_week').update(patch).eq('id', id).select('*');
+  }
   throwIfError(res);
   const rows = (res.data ?? []) as Row[];
   return rows.length > 0 ? mapBake(rows[0]) : null;
