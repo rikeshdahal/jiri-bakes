@@ -167,9 +167,9 @@ export default function AdminBakeOfWeekPage() {
       subtitle: subtitle.trim(),
       price: Number(price),
       unit: unit || '/whole',
-      image: image.trim(),
-      secondary_image: secondaryImage.trim(),
-      description: description.trim(),
+      image: (image || '').trim(),
+      secondary_image: (secondaryImage || '').trim(),
+      description: (description || '').trim(),
       active,
     };
     try {
