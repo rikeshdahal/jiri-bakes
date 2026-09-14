@@ -82,8 +82,8 @@ export default function AdminSettingsPage() {
         setUploadError(json.error || 'Failed to upload image');
         return;
       }
-      if (json.data?.url) {
-        const newUrl = json.data.url;
+      const newUrl = json.data?.url || json.url;
+      if (newUrl) {
         handleChange('we_care_image', newUrl);
         // Auto-save immediately so homepage reflects at once
         const allSettings = ALL_KEYS.map(({ key }) => ({ key, value: key === 'we_care_image' ? newUrl : (values[key] ?? '') }));

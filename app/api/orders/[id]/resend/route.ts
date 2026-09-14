@@ -3,17 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getDbOrderById } from '@/lib/db';
 import { sendOrderEmails, sendStatusEmail } from '@/lib/services/orders';
 
-async function requireAdmin(): Promise<boolean> {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return !!user;
-  } catch {
-    return false;
-  }
-}
+import { requireAdmin } from '@/lib/auth/admin';
 
 type Ctx = { params: Promise<{ id: string }> };
 

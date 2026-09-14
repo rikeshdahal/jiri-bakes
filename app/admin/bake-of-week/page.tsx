@@ -125,6 +125,16 @@ export default function AdminBakeOfWeekPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      flash('error', 'Please select a valid image file (JPG, PNG, WebP, etc.).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      flash('error', 'Image is too large. Maximum size is 5 MB.');
+      return;
+    }
+
     if (target === 'main') setUploadingMain(true);
     else setUploadingSecondary(true);
 
@@ -140,14 +150,19 @@ export default function AdminBakeOfWeekPage() {
         flash('error', data.error || 'Failed to upload image');
         return;
       }
-      if (target === 'main') {
-        setImage(data.url);
-      } else {
-        setSecondaryImage(data.url);
+      const uploadedUrl = data?.data?.url || data?.url || '';
+      if (!uploadedUrl) {
+        flash('error', 'Upload failed: Server did not return image URL.');
+        return;
       }
-      flash('success', `${target === 'main' ? 'Main' : 'Croissant'} image uploaded.`);
-    } catch {
-      flash('error', 'Error uploading image.');
+      if (target === 'main') {
+        setImage(uploadedUrl);
+      } else {
+        setSecondaryImage(uploadedUrl);
+      }
+      flash('success', `${target === 'main' ? 'Main cake' : 'Croissant accent'} photo uploaded successfully.`);
+    } catch (err: unknown) {
+      flash('error', err instanceof Error ? err.message : 'Error uploading image.');
     } finally {
       if (target === 'main') setUploadingMain(false);
       else setUploadingSecondary(false);

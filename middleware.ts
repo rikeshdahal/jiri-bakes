@@ -47,17 +47,30 @@ export async function middleware(request: NextRequest) {
     user = null;
   }
 
+  const sessionCookie = request.cookies.get('jiri_admin_session');
+  let hasValidAdminSession = !!user;
+  if (!hasValidAdminSession && sessionCookie?.value) {
+    try {
+      const parsed = JSON.parse(sessionCookie.value);
+      if (parsed?.email || parsed?.id) {
+        hasValidAdminSession = true;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   // Protect /admin routes except /admin/login
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (request.nextUrl.pathname === '/admin/login') {
       // If already logged in, redirect to dashboard
-      if (user) {
+      if (hasValidAdminSession) {
         return NextResponse.redirect(new URL('/admin', request.url));
       }
       return supabaseResponse;
     }
 
-    if (!user) {
+    if (!hasValidAdminSession) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }

@@ -53,7 +53,8 @@ export default function NewProductPage() {
           setError(json.error || 'Failed to upload image');
           break;
         }
-        if (json.data?.url) newUrls.push(json.data.url);
+        const url = json.data?.url || json.url;
+        if (url) newUrls.push(url);
       }
       if (newUrls.length > 0) setImages([...form.images, ...newUrls]);
     } catch {

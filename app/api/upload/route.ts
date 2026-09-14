@@ -36,12 +36,30 @@ async function saveToSupabase(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
+  // If using service role key, attempt to auto-create bucket if missing
+  if (SERVICE_ROLE_KEY) {
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (buckets && !buckets.some((b) => b.name === STORAGE_BUCKET)) {
+        await supabase.storage.createBucket(STORAGE_BUCKET, { public: true });
+      }
+    } catch {
+      // Ignore bucket check failure and proceed with upload
+    }
+  }
+
   const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(fileName, buffer, {
     contentType: file.type,
     cacheControl: '3600',
     upsert: false,
   });
-  if (error) throw error;
+
+  if (error) {
+    if (error.message?.toLowerCase().includes('bucket not found')) {
+      throw new Error(`Supabase Storage bucket "${STORAGE_BUCKET}" does not exist. Please create a public bucket named "${STORAGE_BUCKET}" in Supabase -> Storage.`);
+    }
+    throw error;
+  }
 
   const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
   return data.publicUrl;
@@ -50,7 +68,7 @@ async function saveToSupabase(file: File): Promise<string> {
 export async function POST(request: Request) {
   try {
     if (!(await requireAdmin())) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized: Admin login required' }, { status: 401 });
     }
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -70,6 +88,7 @@ export async function POST(request: Request) {
     if (shouldUseSupabaseStorage()) {
       const publicUrl = await saveToSupabase(file);
       return NextResponse.json({
+        url: publicUrl,
         data: {
           url: publicUrl,
           path: publicUrl,
@@ -94,6 +113,7 @@ export async function POST(request: Request) {
     const publicUrl = `/uploads/${fileName}`;
 
     return NextResponse.json({
+      url: publicUrl,
       data: {
         url: publicUrl,
         path: publicUrl,

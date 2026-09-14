@@ -23,17 +23,7 @@ async function getClientIp(): Promise<string> {
   }
 }
 
-async function requireAdmin(): Promise<boolean> {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return !!user;
-  } catch {
-    return false;
-  }
-}
+import { requireAdmin } from '@/lib/auth/admin';
 
 // GET /api/orders — admin only. Customers must use /api/track.
 export async function GET() {
