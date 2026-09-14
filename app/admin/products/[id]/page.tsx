@@ -27,6 +27,7 @@ export default function EditProductPage() {
     rating: '5',
     featured: false,
     is_bake_of_week: false,
+    display_order: '',
   });
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function EditProductPage() {
           rating: String(p.rating || 5),
           featured: p.featured || false,
           is_bake_of_week: p.is_bake_of_week || false,
+          display_order: p.display_order != null ? String(p.display_order) : '',
         });
       }
       setLoading(false);
@@ -120,6 +122,7 @@ export default function EditProductPage() {
           ...form,
           price: parseInt(form.price) || 0,
           rating: parseInt(form.rating) || 5,
+          display_order: form.display_order ? parseInt(form.display_order) : 0,
           image: form.images[0] || form.image,
         }),
       });
@@ -182,7 +185,14 @@ export default function EditProductPage() {
               { value: 'seasonal', label: 'Seasonal' },
             ]}
           />
-          <Input label="Badge" value={form.badge} onChange={(e) => update('badge', e.target.value)} />
+          <Input label="Batch" value={form.badge} onChange={(e) => update('badge', e.target.value)} placeholder="e.g. Morning Batch, Freshly baked" />
+        </div>
+
+        <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Input label="Display Order (1, 2, 3...)" type="number" value={form.display_order} onChange={(e) => update('display_order', e.target.value)} placeholder="e.g. 1" />
+          <div style={{ fontSize: '0.74rem', color: 'var(--color-text-tertiary)', lineHeight: 1.6, alignSelf: 'end', paddingBottom: 8 }}>
+
+          </div>
         </div>
 
         {/* Multi-image upload + URL */}

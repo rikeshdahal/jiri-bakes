@@ -24,6 +24,7 @@ export default function NewProductPage() {
     rating: '5',
     featured: false,
     is_bake_of_week: false,
+    display_order: '',
   });
 
   const update = (field: string, value: string | boolean) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -95,6 +96,7 @@ export default function NewProductPage() {
           ...form,
           price: parseInt(form.price) || 0,
           rating: parseInt(form.rating) || 5,
+          display_order: form.display_order ? parseInt(form.display_order) : undefined,
           image: form.images[0] || form.image,
         }),
       });
@@ -153,8 +155,27 @@ export default function NewProductPage() {
               { value: 'seasonal', label: 'Seasonal' },
             ]}
           />
-          <Input label="Badge" value={form.badge} onChange={(e) => update('badge', e.target.value)} placeholder="e.g. Fresh Today, Organic" />
+          <Input label="Batch" value={form.badge} onChange={(e) => update('badge', e.target.value)} placeholder="e.g. Morning Batch, Freshly baked " />
         </div>
+
+        <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Input label="Display Order (1, 2, 3...)" type="number" value={form.display_order} onChange={(e) => update('display_order', e.target.value)} placeholder="e.g. 1" />
+          <Select
+            label="Rating"
+            value={form.rating}
+            onChange={(e) => update('rating', e.target.value)}
+            options={[
+              { value: '5', label: '5 Stars' },
+              { value: '4', label: '4 Stars' },
+              { value: '3', label: '3 Stars' },
+              { value: '2', label: '2 Stars' },
+              { value: '1', label: '1 Star' },
+            ]}
+          />
+        </div>
+        <p style={{ fontSize: '0.74rem', color: 'var(--color-text-tertiary)', lineHeight: 1.6, marginTop: -12 }}>
+          Display Order khali chhode auto last ma bascha.  number = homepage ma pahila dekhincha.
+        </p>
 
         {/* Multi-image upload + URL */}
         <div>
@@ -277,41 +298,6 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          <Select
-            label="Rating"
-            value={form.rating}
-            onChange={(e) => update('rating', e.target.value)}
-            options={[
-              { value: '5', label: '5 Stars' },
-              { value: '4', label: '4 Stars' },
-              { value: '3', label: '3 Stars' },
-              { value: '2', label: '2 Stars' },
-              { value: '1', label: '1 Star' },
-            ]}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 6 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-brown-deep)' }}>
-              <input
-                type="checkbox"
-                checked={form.featured}
-                onChange={(e) => update('featured', e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: 'var(--color-green)' }}
-              />
-              ⭐ Featured in Homepage Showcase
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-brown-deep)' }}>
-              <input
-                type="checkbox"
-                checked={form.is_bake_of_week}
-                onChange={(e) => update('is_bake_of_week', e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: '#F5D35C' }}
-              />
-              Bake of the Week (Hero Floating Card)
-            </label>
-          </div>
-        </div>
-
         {form.images.length === 0 && form.image && (
           <div style={{ borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)', maxHeight: 180, position: 'relative' }}>
             <img src={form.image} alt="Preview" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
@@ -320,10 +306,10 @@ export default function NewProductPage() {
 
         <div style={{ display: 'flex', gap: 12, paddingTop: 8, flexWrap: 'wrap' }}>
           <button type="submit" disabled={saving || uploading} style={{
-            padding: '12px 32px', borderRadius: 'var(--radius-full)',
-            background: 'var(--color-green)', color: 'var(--color-cream)',
-            fontSize: '0.85rem', fontWeight: 600, border: 'none', cursor: 'pointer',
-            opacity: saving ? 0.7 : 1, fontFamily: 'var(--font-body)',
+            padding: '10px 18px', borderRadius: 'var(--radius-sm)',
+            background: 'var(--color-green)', color: '#FFFDF5',
+            fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer',
+            opacity: saving || uploading ? 0.7 : 1, fontFamily: 'var(--font-body)',
           }}>
             {saving ? 'Creating...' : 'Create Product'}
           </button>

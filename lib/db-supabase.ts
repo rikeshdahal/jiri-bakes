@@ -231,6 +231,16 @@ export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem
   const supabase = await createClient();
   const images = Array.isArray(data.images) ? data.images.map((i) => String(i).trim()).filter(Boolean) : [];
   const fallbackImage = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop';
+  let order = num(data.display_order, 0);
+  if (!order) {
+    const existing = await supabase.from('products').select('display_order');
+    if (!existing.error && Array.isArray(existing.data)) {
+      const max = Math.max(0, ...existing.data.map((r) => num((r as Row).display_order, 0)));
+      order = max + 1;
+    } else {
+      order = Date.now() % 1000000;
+    }
+  }
   const res = await supabase
     .from('products')
     .insert({
@@ -245,7 +255,7 @@ export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem
       rating: num(data.rating, 5),
       featured: Boolean(data.featured),
       is_bake_of_week: Boolean(data.is_bake_of_week),
-      display_order: num(data.display_order),
+      display_order: order,
     })
     .select('*')
     .single();

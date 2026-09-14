@@ -32,7 +32,39 @@ export default function AdminProductsPage() {
     setDeleting(null);
   };
 
-  const filtered = filter === 'all' ? products : products.filter((p) => p.category === filter);
+  const [moving, setMoving] = useState<string | null>(null);
+
+  const sorted = [...products].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  const filtered = filter === 'all' ? sorted : sorted.filter((p) => p.category === filter);
+
+  const move = async (index: number, dir: -1 | 1) => {
+    const j = index + dir;
+    if (j < 0 || j >= filtered.length) return;
+    const a = filtered[index];
+    const b = filtered[j];
+    const orderA = a.display_order ?? index + 1;
+    const orderB = b.display_order ?? j + 1;
+    setMoving(a.id);
+    try {
+      await fetch(`/api/products/${a.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_order: orderB }),
+      });
+      await fetch(`/api/products/${b.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_order: orderA }),
+      });
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === a.id ? { ...p, display_order: orderB } : p.id === b.id ? { ...p, display_order: orderA } : p
+        )
+      );
+    } finally {
+      setMoving(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -117,7 +149,7 @@ export default function AdminProductsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'rgba(255, 255, 255, 0.03)', borderBottom: '1px solid var(--color-border)' }}>
-                {['Item', 'Category', 'Price', 'Status Badge', 'Featured', 'Actions'].map((h) => (
+                {['Order', 'Item', 'Category', 'Price', 'Batch', 'Featured', 'Actions'].map((h) => (
                   <th
                     key={h}
                     style={{
@@ -136,8 +168,39 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
+              {filtered.map((p, idx) => (
                 <tr key={p.id} style={{ borderBottom: '1px solid rgba(245, 211, 92, 0.1)' }}>
+                  <td style={{ padding: '16px 24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{
+                        minWidth: 32,
+                        textAlign: 'center',
+                        padding: '4px 10px',
+                        borderRadius: 8,
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        background: 'rgba(56, 142, 60, 0.12)',
+                        color: 'var(--color-brown-deep)',
+                        border: '1px solid var(--color-border)',
+                      }}>
+                        {p.display_order ?? '—'}
+                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <button
+                          onClick={() => move(idx, -1)}
+                          disabled={idx === 0 || moving === p.id}
+                          title="Move up"
+                          style={{ padding: '1px 8px', borderRadius: 6, border: '1px solid var(--color-border)', background: 'transparent', cursor: idx === 0 ? 'default' : 'pointer', opacity: idx === 0 ? 0.3 : 1, fontSize: '0.7rem', color: 'var(--color-brown-deep)', lineHeight: 1.4 }}
+                        >▲</button>
+                        <button
+                          onClick={() => move(idx, 1)}
+                          disabled={idx === filtered.length - 1 || moving === p.id}
+                          title="Move down"
+                          style={{ padding: '1px 8px', borderRadius: 6, border: '1px solid var(--color-border)', background: 'transparent', cursor: idx === filtered.length - 1 ? 'default' : 'pointer', opacity: idx === filtered.length - 1 ? 0.3 : 1, fontSize: '0.7rem', color: 'var(--color-brown-deep)', lineHeight: 1.4 }}
+                        >▼</button>
+                      </div>
+                    </div>
+                  </td>
                   <td style={{ padding: '16px 24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <div style={{
@@ -175,15 +238,23 @@ export default function AdminProductsPage() {
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     {p.badge ? (
-                      <span style={{
-                        padding: '4px 12px',
-                        borderRadius: 9999,
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        background: 'rgba(245, 211, 92, 0.2)',
-                        color: 'var(--color-brown-deep)',
-                        border: '1px solid rgba(245, 211, 92, 0.5)',
-                      }}>
+                      <span
+                        title={p.badge}
+                        style={{
+                          display: 'inline-block',
+                          padding: '3px 10px',
+                          borderRadius: 9999,
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          background: 'rgba(245, 211, 92, 0.2)',
+                          color: 'var(--color-brown-deep)',
+                          border: '1px solid rgba(245, 211, 92, 0.5)',
+                          whiteSpace: 'nowrap',
+                          maxWidth: 140,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          verticalAlign: 'middle',
+                        }}>
                         {p.badge}
                       </span>
                     ) : (
@@ -239,7 +310,7 @@ export default function AdminProductsPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: 60, textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.88rem' }}>
+                  <td colSpan={7} style={{ padding: 60, textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.88rem' }}>
                     No products found in this category.
                   </td>
                 </tr>
