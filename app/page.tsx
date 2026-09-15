@@ -186,7 +186,22 @@ function FeaturedCakeSection({ featured }: { featured: MenuItem }) {
         padding: 'clamp(64px, 10vw, 110px) clamp(24px, 5vw, 80px)',
       }}
     >
-      {/* â”€â”€â”€ Background Decoration System â”€â”€â”€ */}
+      {/* ── Bakery doodle pattern — subtle gold on dark for realism ── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          backgroundImage: "url('/bakery-pattern.svg')",
+          backgroundRepeat: 'repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'clamp(220px, 30vw, 400px)',
+          opacity: 0.06,
+          filter: 'invert(78%) sepia(38%) saturate(600%) hue-rotate(-18deg) brightness(1.1)',
+        }}
+      />
+      {/* ─── Background Decoration System ─── */}
       <div style={{ position: 'absolute', top: '5%', right: '8%', width: 420, height: 420, borderRadius: '50%', border: '1px solid rgba(245, 211, 92, 0.08)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', top: '10%', right: '12%', width: 280, height: 280, borderRadius: '50%', border: '1px solid rgba(255, 253, 245, 0.04)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: '8%', left: '4%', width: 350, height: 350, borderRadius: '50%', border: '1px solid rgba(245, 211, 92, 0.06)', pointerEvents: 'none' }} />
@@ -501,7 +516,7 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
   return (
     <section
       id="collection"
-      className="section"
+      className="section bakery-pattern bakery-pattern-medium bakery-pattern-wash"
       style={{ background: 'var(--color-bg)', position: 'relative', overflow: 'hidden' }}
     >
       <div style={{
@@ -938,7 +953,7 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
 function OurStorySection() {
   const ref = useReveal();
   return (
-    <section id="about" className="section" style={{ background: 'var(--color-cream)' }}>
+    <section id="about" className="section bakery-pattern bakery-pattern-soft bakery-pattern-wash cream-wash" style={{ background: 'var(--color-cream)', position: 'relative', overflow: 'hidden' }}>
       <div
         ref={ref}
         className="reveal"
@@ -1022,7 +1037,7 @@ function WeCareSection() {
   }, []);
 
   return (
-    <section id="we-care" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 80px)' }}>
+    <section id="we-care" className="bakery-pattern bakery-pattern-soft bakery-pattern-wash" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 80px)' }}>
       <style>{`
         .wc-banner-img { display:block; width:100%; height:auto; }
         .wc-ig-badge {
@@ -1108,7 +1123,7 @@ function TestimonialsSection({ items }: { items: Testimonial[] }) {
   }, [total]);
 
   return (
-    <section className="section" style={{ background: 'var(--color-bg)' }}>
+    <section className="section bakery-pattern bakery-pattern-soft bakery-pattern-wash" style={{ background: 'var(--color-bg)', position: 'relative', overflow: 'hidden' }}>
       <h2 className="section-title reveal" style={{ textAlign: 'center' }}>
         What People <span style={{ color: 'var(--color-green)' }}>Say</span>
       </h2>
@@ -1165,6 +1180,7 @@ function VisitUsSection() {
   return (
     <section
       id="contact"
+      className="bakery-pattern bakery-pattern-medium bakery-pattern-wash cream-wash"
       style={{
         position: 'relative',
         overflow: 'hidden',
@@ -1456,6 +1472,22 @@ function FooterSection() {
       overflow: 'hidden',
       borderTop: '2px solid rgba(245, 211, 92, 0.25)',
     }}>
+      {/* Bakery doodle pattern — subtle gold on dark */}
+      <div
+        aria-hidden="true"
+        className="footer-bakery-pattern"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          backgroundImage: "url('/bakery-pattern.svg')",
+          backgroundRepeat: 'repeat',
+          backgroundPosition: 'center',
+          backgroundSize: '380px 380px',
+          opacity: 0.07,
+          filter: 'invert(78%) sepia(38%) saturate(600%) hue-rotate(-18deg) brightness(1.1)',
+        }}
+      />
       {/* Decorative background glow rings */}
       <div style={{ position: 'absolute', top: '-15%', right: '5%', width: 380, height: 380, borderRadius: '50%', border: '1px solid rgba(245, 211, 92, 0.08)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: '-20%', left: '5%', width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245, 211, 92, 0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -1634,6 +1666,14 @@ function FooterSection() {
           </div>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 1024px) {
+          .footer-bakery-pattern { background-size: 320px 320px !important; }
+        }
+        @media (max-width: 640px) {
+          .footer-bakery-pattern { background-size: 220px 220px !important; opacity: 0.06 !important; }
+        }
+      `}</style>
     </footer>
   );
 }

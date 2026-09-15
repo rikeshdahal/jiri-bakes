@@ -331,6 +331,72 @@ h1, h2, h3, h4, h5, h6 {
   to { stroke-dashoffset: 0; }
 }
 
+/* ─── Bakery Doodle Pattern — realistic hand-drawn bg, fully responsive ─── */
+.bakery-pattern {
+  position: relative;
+  isolation: isolate;
+}
+.bakery-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('/bakery-pattern.svg');
+  background-repeat: repeat;
+  background-position: center;
+  /* Realistic tile size — responsive via clamp */
+  background-size: 420px 420px;
+  opacity: 0.12;
+}
+.bakery-pattern > * {
+  position: relative;
+  z-index: 1;
+}
+/* Density variants */
+.bakery-pattern-soft::before { opacity: 0.07; background-size: 460px 460px; }
+.bakery-pattern-medium::before { opacity: 0.11; background-size: 400px 400px; }
+.bakery-pattern-strong::before { opacity: 0.16; background-size: 360px 360px; }
+
+/* Readability wash — soft cream gradient over pattern so text stays crisp */
+.bakery-pattern-wash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(248,244,232,0.72) 0%, rgba(248,244,232,0.55) 50%, rgba(248,244,232,0.72) 100%);
+}
+.bakery-pattern-wash.cream-wash::after {
+  background: linear-gradient(180deg, rgba(255,253,245,0.75) 0%, rgba(255,253,245,0.55) 50%, rgba(255,253,245,0.75) 100%);
+}
+
+/* Night mode — dim pattern, keep doodles visible but moody */
+[data-theme='night'] .bakery-pattern::before {
+  opacity: 0.07;
+  filter: invert(78%) sepia(38%) saturate(600%) hue-rotate(-18deg) brightness(1.05);
+}
+[data-theme='night'] .bakery-pattern-wash::after {
+  background: linear-gradient(180deg, rgba(9,16,31,0.82) 0%, rgba(9,16,31,0.68) 50%, rgba(9,16,31,0.82) 100%);
+}
+
+/* ── Responsive tuning: smaller tiles on smaller screens so pattern stays balanced ── */
+@media (max-width: 1024px) {
+  .bakery-pattern::before { background-size: 340px 340px; }
+  .bakery-pattern-soft::before { background-size: 380px 380px; }
+}
+@media (max-width: 640px) {
+  .bakery-pattern::before { background-size: 240px 240px; opacity: 0.1; }
+  .bakery-pattern-soft::before { opacity: 0.06; background-size: 260px 260px; }
+  .bakery-pattern-strong::before { opacity: 0.13; background-size: 220px 220px; }
+}
+@media (max-width: 380px) {
+  .bakery-pattern::before { background-size: 200px 200px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bakery-pattern::before { background-attachment: scroll; }
+}
+
 /* ─── Permanent Admin Dark Mode Theme ────────────────────── */
 .admin-root-dark {
   --color-bg: #09101F;

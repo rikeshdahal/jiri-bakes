@@ -182,6 +182,7 @@ export default function HeroSection({ bakeOfTheWeek, secondaryImage, onQuickView
 
         /* Responsive breakdown */
         @media (max-width: 1024px) {
+          .hero-bakery-pattern { background-size: 340px 340px !important; }
           .hero-grid {
             grid-template-columns: 1fr;
             text-align: center;
@@ -211,6 +212,7 @@ export default function HeroSection({ bakeOfTheWeek, secondaryImage, onQuickView
         }
 
         @media (max-width: 600px) {
+          .hero-bakery-pattern { background-size: 230px 230px !important; opacity: 0.07 !important; }
           .hero-visual-col { max-width: 320px !important; }
           .hero-grid { padding-top: 100px !important; padding-bottom: 48px !important; }
           .hero-btn-primary, .hero-btn-outline { padding: 13px 28px !important; font-size: 0.85rem !important; }
@@ -239,6 +241,22 @@ export default function HeroSection({ bakeOfTheWeek, secondaryImage, onQuickView
           transition: 'background 0.5s ease',
         }}
       >
+        {/* ─── Bakery doodle pattern — realistic hand-drawn bg, responsive ─── */}
+        <div
+          aria-hidden="true"
+          className="hero-bakery-pattern"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            backgroundImage: "url('/bakery-pattern.svg')",
+            backgroundRepeat: 'repeat',
+            backgroundPosition: 'center',
+            backgroundSize: '420px 420px',
+            opacity: isNight ? 0.06 : 0.08,
+          }}
+        />
         {/* ─── Van Gogh Celestial Background Swirls & Starry Rings ─── */}
         {isNight ? (
           <>
