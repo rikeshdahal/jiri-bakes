@@ -446,11 +446,11 @@
       "price": 650,
       "unit": "/loaf",
       "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop",
-      "secondary_image": "",
+      "secondary_image": "/uploads/1789387426146-3bjmpv.png",
       "description": "72-hour cold-fermented sourdough made with heritage wheat and a century-old starter culture.",
       "active": true,
       "created_at": "2026-09-14T11:48:00.931Z",
-      "updated_at": "2026-09-14T11:51:20.418Z"
+      "updated_at": "2026-09-15T06:36:23.211Z"
     }
   ]
 }

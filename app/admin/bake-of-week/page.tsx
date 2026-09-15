@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { CSSProperties, ChangeEvent } from 'react';
 import type { BakeOfWeek, MenuItem } from '@/types';
 
-const DEFAULT_CROISSANT_URL = 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80';
+const DEFAULT_ACCENT_URL = 'https://images.unsplash.com/photo-1623334044303-241021148842?w=600&auto=format&fit=crop&q=80';
 
 interface ProductOption {
   id: string;
@@ -31,7 +31,7 @@ export default function AdminBakeOfWeekPage() {
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('');
   const [image, setImage] = useState('');
-  const [secondaryImage, setSecondaryImage] = useState(DEFAULT_CROISSANT_URL);
+  const [secondaryImage, setSecondaryImage] = useState(DEFAULT_ACCENT_URL);
   const [description, setDescription] = useState('');
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -85,7 +85,7 @@ export default function AdminBakeOfWeekPage() {
     setPrice('');
     setUnit('/whole');
     setImage('');
-    setSecondaryImage(DEFAULT_CROISSANT_URL);
+    setSecondaryImage(DEFAULT_ACCENT_URL);
     setDescription('');
     setActive(true);
     setFormOpen(true);
@@ -102,7 +102,7 @@ export default function AdminBakeOfWeekPage() {
     setSecondaryImage(
       item.secondary_image !== undefined && item.secondary_image !== null
         ? item.secondary_image
-        : DEFAULT_CROISSANT_URL
+        : DEFAULT_ACCENT_URL
     );
     setDescription(item.description || '');
     setActive(Boolean(item.active));
@@ -160,7 +160,7 @@ export default function AdminBakeOfWeekPage() {
       } else {
         setSecondaryImage(uploadedUrl);
       }
-      flash('success', `${target === 'main' ? 'Main cake' : 'Croissant accent'} photo uploaded successfully.`);
+      flash('success', `${target === 'main' ? 'Main cake' : 'Accent'} photo uploaded successfully.`);
     } catch (err: unknown) {
       flash('error', err instanceof Error ? err.message : 'Error uploading image.');
     } finally {
@@ -504,60 +504,45 @@ export default function AdminBakeOfWeekPage() {
                 </div>
               </div>
 
-              {/* ─── Hero Croissant Wrap (Secondary Accent) Photo Section ─── */}
+              {/* ─── Accent Photo Section ─── */}
               <div style={{
                 background: 'rgba(255, 255, 255, 0.03)',
                 borderRadius: 14,
                 padding: 16,
                 border: '1px solid rgba(245, 211, 92, 0.15)',
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <label style={{ ...labelStyle, marginBottom: 0, color: '#F5D35C' }}>
-                    2. Overlapping Tilted Photo (hero-croissant-wrap)
+                    2. Accent Photo (Overlapping Frame)
                   </label>
-                  <div style={{ display: 'flex', gap: 10 }}>
+                  {secondaryImage && (
                     <button
                       type="button"
-                      onClick={() => setSecondaryImage(DEFAULT_CROISSANT_URL)}
-                      style={{ background: 'none', border: 'none', color: '#52B788', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                      onClick={() => setSecondaryImage('')}
+                      style={{ background: 'none', border: 'none', color: '#e74c3c', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
                     >
-                      Reset Default Croissant
+                      Remove
                     </button>
-                    {secondaryImage && (
-                      <button
-                        type="button"
-                        onClick={() => setSecondaryImage('')}
-                        style={{ background: 'none', border: 'none', color: '#e74c3c', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
-                      >
-                        Delete / Hide Accent
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
-
-                <p style={{ fontSize: '0.76rem', color: '#94A3B8', marginBottom: 12, lineHeight: 1.4 }}>
-                  This photo appears inside the tilted frame (<code>hero-croissant-wrap</code>) overlapping the main hero photo. Upload your own accent image, paste a link, or delete it to hide the wrap on the homepage.
-                </p>
 
                 <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <div style={{
-                    width: 110,
-                    height: 110,
-                    borderRadius: 16,
+                    width: 90,
+                    height: 90,
+                    borderRadius: 12,
                     overflow: 'hidden',
-                    border: '2.5px solid #FFFFFF',
-                    transform: 'rotate(-4deg)',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
-                    background: '#FAF6EE',
+                    border: '1.5px solid rgba(245, 211, 92, 0.3)',
+                    background: 'rgba(0,0,0,0.25)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
                   }}>
                     {secondaryImage ? (
-                      <img src={secondaryImage} alt="croissant accent preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={secondaryImage} alt="accent preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <span style={{ fontSize: '0.72rem', color: '#94A3B8', textAlign: 'center', padding: 8 }}>Hidden (Deleted)</span>
+                      <span style={{ fontSize: '0.72rem', color: '#94A3B8', textAlign: 'center', padding: 8 }}>No image</span>
                     )}
                   </div>
 
@@ -588,7 +573,7 @@ export default function AdminBakeOfWeekPage() {
                           gap: 6,
                         }}
                       >
-                        🥐 {uploadingSecondary ? 'Uploading...' : 'Upload Croissant / Accent Photo'}
+                        {uploadingSecondary ? 'Uploading...' : 'Upload Accent Photo'}
                       </button>
                     </div>
 
@@ -596,7 +581,7 @@ export default function AdminBakeOfWeekPage() {
                       style={{ ...inputStyle, padding: '9px 12px', fontSize: '0.82rem' }}
                       value={secondaryImage}
                       onChange={(e) => setSecondaryImage(e.target.value)}
-                      placeholder="Or paste accent image URL (https://...)"
+                      placeholder="Or paste image URL (https://...)"
                     />
                   </div>
                 </div>
@@ -673,7 +658,7 @@ export default function AdminBakeOfWeekPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(255, 255, 255, 0.03)', borderBottom: '1px solid var(--color-border)' }}>
-                  {['Main Item', 'Croissant Wrap', 'Price', 'Status', 'Active', 'Actions'].map((h) => (
+                  {['Main Item', 'Accent', 'Price', 'Status', 'Active', 'Actions'].map((h) => (
                     <th key={h} style={{
                       padding: '14px 24px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700,
                       letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--color-text-tertiary)',
@@ -703,7 +688,7 @@ export default function AdminBakeOfWeekPage() {
                       </div>
                     </td>
 
-                    {/* Croissant Wrap Thumbnail */}
+                    {/* Accent Thumbnail */}
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{
@@ -716,7 +701,7 @@ export default function AdminBakeOfWeekPage() {
                           background: 'rgba(255,255,255,0.05)',
                         }}>
                           {i.secondary_image ? (
-                            <img src={i.secondary_image} alt="croissant wrap" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={i.secondary_image} alt="accent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#94A3B8' }}>
                               None

@@ -330,26 +330,7 @@ export default function EditProductPage() {
               { value: '1', label: '1 Star' },
             ]}
           />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 6 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-brown-deep)' }}>
-              <input
-                type="checkbox"
-                checked={form.featured}
-                onChange={(e) => update('featured', e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: 'var(--color-green)' }}
-              />
-              ⭐ Featured in Homepage Showcase
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-brown-deep)' }}>
-              <input
-                type="checkbox"
-                checked={form.is_bake_of_week}
-                onChange={(e) => update('is_bake_of_week', e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: '#F5D35C' }}
-              />
-              Bake of the Week (Hero Floating Card)
-            </label>
-          </div>
+
         </div>
 
         {form.images.length === 0 && form.image && (
