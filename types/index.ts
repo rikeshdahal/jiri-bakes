@@ -105,3 +105,21 @@ export interface BakeOfWeek {
 export type ToastType = 'success' | 'error' | 'info';
 
 export type ProductCategory = 'cake' | 'pastry' | 'bread' | 'cookie' | 'seasonal';
+
+export interface CakeMenuItemRecord {
+  id: string;
+  name: string;
+  nepali_subtitle?: string;
+  price: number;
+  cat: 'popular' | 'cheesecake' | 'special';
+  badge?: string;
+  desc?: string;
+  tags?: string[];
+  image?: string;
+  weight?: string;
+  eggless?: boolean;
+  available?: boolean;
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}

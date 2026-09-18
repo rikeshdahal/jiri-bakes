@@ -8,10 +8,11 @@ import { useWishlist } from '@/components/layout/WishlistContext';
 import { useTheme } from '@/components/layout/ThemeContext';
 
 const navLinks = [
-  { id: 'home', label: 'Home', href: '#home' },
-  { id: 'collection', label: 'Shop', href: '#collection' },
-  { id: 'about', label: 'About Us', href: '#about' },
-  { id: 'contact', label: 'Contact', href: '#contact' },
+  { id: 'home', label: 'Home', href: '/#home' },
+  { id: 'collection', label: 'Shop', href: '/#collection' },
+  { id: 'menu', label: 'Our Menu', href: '/menu' },
+  { id: 'about', label: 'About Us', href: '/#about' },
+  { id: 'contact', label: 'Contact', href: '/#contact' },
 ];
 
 export default function Header() {
@@ -28,8 +29,13 @@ export default function Header() {
   const { count: wishlistCount, openWishlist } = useWishlist();
   const { theme, toggleTheme } = useTheme();
 
-  // Scroll Spy for smooth section detection
+  // Scroll Spy for smooth section detection on home page
   useEffect(() => {
+    if (pathname === '/menu') {
+      setActiveSection('menu');
+      return;
+    }
+
     let ticking = false;
 
     const updateActiveSection = () => {
@@ -68,7 +74,7 @@ export default function Header() {
     updateActiveSection();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [pathname]);
 
   // Update sliding indicator position smoothly
   useEffect(() => {
@@ -91,6 +97,9 @@ export default function Header() {
 
   useEffect(() => {
     setMobileOpen(false);
+    if (pathname === '/menu') {
+      setActiveSection('menu');
+    }
   }, [pathname]);
 
   if (pathname?.startsWith('/admin')) {
@@ -100,21 +109,32 @@ export default function Header() {
   const isNight = theme === 'night';
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, id: string) => {
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      const target = document.getElementById(id);
-      if (target) {
-        const headerOffset = 76;
-        const elementPosition = target.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = id === 'home' ? 0 : elementPosition - headerOffset;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
-      }
-      setActiveSection(id);
+    if (href === '/menu') {
+      setActiveSection('menu');
       setMobileOpen(false);
+      return;
+    }
+
+    if (href.startsWith('/#') || href.startsWith('#')) {
+      if (pathname === '/') {
+        e.preventDefault();
+        const target = document.getElementById(id);
+        if (target || id === 'home') {
+          const headerOffset = 76;
+          const elementPosition = target ? target.getBoundingClientRect().top + window.pageYOffset : 0;
+          const offsetPosition = id === 'home' ? 0 : Math.max(0, elementPosition - headerOffset);
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        }
+        setActiveSection(id);
+        setMobileOpen(false);
+      } else {
+        setActiveSection(id);
+        setMobileOpen(false);
+      }
     }
   };
 
@@ -337,9 +357,9 @@ export default function Header() {
           left: 0,
           right: 0,
           zIndex: 1000,
-          background: scrolled ? 'var(--header-bg)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(18px)' : 'none',
-          borderBottom: scrolled ? '1.5px solid var(--color-border)' : '1px solid transparent',
+          background: (scrolled || pathname !== '/') ? 'var(--header-bg)' : 'transparent',
+          backdropFilter: (scrolled || pathname !== '/') ? 'blur(18px)' : 'none',
+          borderBottom: (scrolled || pathname !== '/') ? '1.5px solid var(--color-border)' : '1px solid transparent',
           transition: 'all var(--motion-normal) var(--motion-ease)',
         }}
       >
@@ -387,30 +407,17 @@ export default function Header() {
             className="nav-links-desktop"
           >
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
-              if (link.href.startsWith('/')) {
-                return (
-                  <li key={link.id}>
-                    <Link
-                      ref={(el) => { linkRefs.current[link.id] = el as unknown as HTMLAnchorElement; }}
-                      href={link.href}
-                      className={`vg-nav-link ${isActive ? 'active' : ''}`}
-                    >
-                      <span>{link.label}</span>
-                    </Link>
-                  </li>
-                );
-              }
+              const isActive = (pathname === '/menu' && link.id === 'menu') || (pathname !== '/menu' && activeSection === link.id);
               return (
                 <li key={link.id}>
-                  <a
-                    ref={(el) => { linkRefs.current[link.id] = el; }}
+                  <Link
+                    ref={(el) => { linkRefs.current[link.id] = el as unknown as HTMLAnchorElement; }}
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href, link.id)}
                     className={`vg-nav-link ${isActive ? 'active' : ''}`}
                   >
                     <span>{link.label}</span>
-                  </a>
+                  </Link>
                 </li>
               );
             })}
@@ -589,28 +596,9 @@ export default function Header() {
             }}
           >
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
-              if (link.href.startsWith('/')) {
-                return (
-                  <Link
-                    key={link.id}
-                    href={link.href}
-                    className={isActive ? 'active' : ''}
-                    style={{
-                      fontSize: '1rem',
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive ? '#F5D35C' : 'var(--color-text-primary)',
-                      padding: '12px 0',
-                      textDecoration: 'none',
-                      borderBottom: '1px solid var(--color-border)',
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              }
+              const isActive = (pathname === '/menu' && link.id === 'menu') || (pathname !== '/menu' && activeSection === link.id);
               return (
-                <a
+                <Link
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href, link.id)}
@@ -622,10 +610,28 @@ export default function Header() {
                     padding: '12px 0',
                     textDecoration: 'none',
                     borderBottom: '1px solid var(--color-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  {link.label}
-                </a>
+                  <span>{link.label}</span>
+                  {link.id === 'menu' && (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        padding: '2px 8px',
+                        borderRadius: 9999,
+                        background: 'rgba(245, 211, 92, 0.18)',
+                        color: '#F5D35C',
+                        fontWeight: 700,
+                        border: '1px solid rgba(245, 211, 92, 0.35)',
+                      }}
+                    >
+                      Fresh Bakes
+                    </span>
+                  )}
+                </Link>
               );
             })}
           </div>

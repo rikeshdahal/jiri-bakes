@@ -1,6 +1,6 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
-import type { BakeOfWeek, MenuItem, Order, OrderItem, Testimonial, Setting } from '@/types';
+import type { BakeOfWeek, MenuItem, Order, OrderItem, Testimonial, Setting, CakeMenuItemRecord } from '@/types';
 
 /**
  * Supabase backend for the bakery data layer.
@@ -129,6 +129,26 @@ function mapBake(r: Row): BakeOfWeek {
     active: r.active !== false,
     created_at: str(r.created_at, new Date().toISOString()),
     updated_at: str(r.updated_at, new Date().toISOString()),
+  };
+}
+
+function mapCakeMenuItem(r: Row): CakeMenuItemRecord {
+  return {
+    id: str(r.id),
+    name: str(r.name, 'Untitled Cake'),
+    nepali_subtitle: str(r.nepali_subtitle) || undefined,
+    price: num(r.price),
+    cat: (['popular', 'cheesecake', 'special'].includes(str(r.cat)) ? str(r.cat) : 'popular') as CakeMenuItemRecord['cat'],
+    badge: str(r.badge) || undefined,
+    desc: str(r.desc) || undefined,
+    tags: arr<string>(r.tags),
+    image: str(r.image) || undefined,
+    weight: str(r.weight, '1 Pound'),
+    eggless: r.eggless !== undefined ? Boolean(r.eggless) : true,
+    available: r.available !== undefined ? Boolean(r.available) : true,
+    display_order: num(r.display_order),
+    created_at: str(r.created_at) || undefined,
+    updated_at: str(r.updated_at) || undefined,
   };
 }
 
@@ -459,4 +479,99 @@ export async function updateDbSettings(
     throwIfError(res);
   }
   return getDbSettings();
+}
+
+// ─── Cake Menu Items ────────────────────────────────────────────────
+export async function getDbCakeMenuItems(): Promise<CakeMenuItemRecord[]> {
+  const supabase = await createClient();
+  const res = await supabase.from('cake_menu_items').select('*');
+  if (res.error) {
+    if (isMissingTable(res.error)) return [];
+    throw toSupabaseError(res.error);
+  }
+  const items = ((res.data ?? []) as Row[]).map(mapCakeMenuItem);
+  return items.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+}
+
+export async function getDbCakeMenuItemById(id: string): Promise<CakeMenuItemRecord | null> {
+  const supabase = await createClient();
+  const res = await supabase.from('cake_menu_items').select('*').eq('id', id).maybeSingle();
+  if (res.error) {
+    if (isMissingTable(res.error)) return null;
+    throw toSupabaseError(res.error);
+  }
+  return res.data ? mapCakeMenuItem(res.data as Row) : null;
+}
+
+export async function createDbCakeMenuItem(
+  item: Omit<CakeMenuItemRecord, 'id' | 'created_at' | 'updated_at'>
+): Promise<CakeMenuItemRecord> {
+  const supabase = await createClient();
+  const res = await supabase
+    .from('cake_menu_items')
+    .insert({
+      name: item.name,
+      nepali_subtitle: item.nepali_subtitle || null,
+      price: num(item.price),
+      cat: item.cat || 'popular',
+      badge: item.badge || null,
+      desc: item.desc || null,
+      tags: item.tags || [],
+      image: item.image || null,
+      weight: item.weight || '1 Pound',
+      eggless: item.eggless !== undefined ? item.eggless : true,
+      available: item.available !== undefined ? item.available : true,
+      display_order: num(item.display_order, 0),
+    })
+    .select('*')
+    .single();
+  if (res.error) {
+    if (isMissingTable(res.error)) {
+      throw new Error("Table 'cake_menu_items' does not exist. Run supabase/schema.sql to create it.");
+    }
+    throw toSupabaseError(res.error);
+  }
+  return mapCakeMenuItem(res.data as Row);
+}
+
+export async function updateDbCakeMenuItem(
+  id: string,
+  updates: Partial<CakeMenuItemRecord>
+): Promise<CakeMenuItemRecord | null> {
+  const supabase = await createClient();
+  const patch: Row = { updated_at: new Date().toISOString() };
+  if (updates.name !== undefined) patch.name = updates.name;
+  if (updates.nepali_subtitle !== undefined) patch.nepali_subtitle = updates.nepali_subtitle;
+  if (updates.price !== undefined) patch.price = num(updates.price);
+  if (updates.cat !== undefined) patch.cat = updates.cat;
+  if (updates.badge !== undefined) patch.badge = updates.badge;
+  if (updates.desc !== undefined) patch.desc = updates.desc;
+  if (updates.tags !== undefined) patch.tags = updates.tags;
+  if (updates.image !== undefined) patch.image = updates.image;
+  if (updates.weight !== undefined) patch.weight = updates.weight;
+  if (updates.eggless !== undefined) patch.eggless = updates.eggless;
+  if (updates.available !== undefined) patch.available = updates.available;
+  if (updates.display_order !== undefined) patch.display_order = num(updates.display_order);
+
+  const res = await supabase.from('cake_menu_items').update(patch).eq('id', id).select('*');
+  if (res.error) {
+    if (isMissingTable(res.error)) {
+      throw new Error("Table 'cake_menu_items' does not exist. Run supabase/schema.sql to create it.");
+    }
+    throw toSupabaseError(res.error);
+  }
+  const rows = (res.data ?? []) as Row[];
+  return rows.length > 0 ? mapCakeMenuItem(rows[0]) : null;
+}
+
+export async function deleteDbCakeMenuItem(id: string): Promise<boolean> {
+  const supabase = await createClient();
+  const res = await supabase.from('cake_menu_items').delete().eq('id', id).select('id');
+  if (res.error) {
+    if (isMissingTable(res.error)) {
+      throw new Error("Table 'cake_menu_items' does not exist. Run supabase/schema.sql to create it.");
+    }
+    throw toSupabaseError(res.error);
+  }
+  return ((res.data ?? []) as Row[]).length > 0;
 }

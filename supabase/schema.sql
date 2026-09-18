@@ -353,3 +353,89 @@ begin
       using (bucket_id = 'uploads');
   end if;
 end $$;
+
+-- ─── 15. Cake Menu Items Table (Artisan Paper & Online Cake Menu) ──────
+create table if not exists cake_menu_items (
+  id               uuid primary key default uuid_generate_v4(),
+  name             text not null,
+  nepali_subtitle  text default '',
+  price            integer not null default 0,
+  cat              text not null default 'popular' check (cat in ('popular', 'cheesecake', 'special')),
+  badge            text default '',
+  description      text default '',
+  tags             jsonb not null default '[]'::jsonb,
+  image            text default '',
+  weight           text default '1 lb standard',
+  eggless          boolean not null default true,
+  available        boolean not null default true,
+  display_order    integer not null default 0,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+-- Ensure columns exist on older installs
+alter table cake_menu_items add column if not exists nepali_subtitle text default '';
+alter table cake_menu_items add column if not exists badge text default '';
+alter table cake_menu_items add column if not exists description text default '';
+alter table cake_menu_items add column if not exists tags jsonb not null default '[]'::jsonb;
+alter table cake_menu_items add column if not exists weight text default '1 lb standard';
+alter table cake_menu_items add column if not exists eggless boolean not null default true;
+alter table cake_menu_items add column if not exists available boolean not null default true;
+alter table cake_menu_items add column if not exists display_order integer not null default 0;
+
+create unique index if not exists uniq_cake_menu_items_name on cake_menu_items (lower(name));
+create index if not exists idx_cake_menu_items_display_order on cake_menu_items(display_order);
+create index if not exists idx_cake_menu_items_cat on cake_menu_items(cat);
+
+-- Enable RLS
+alter table cake_menu_items enable row level security;
+
+-- Policies: public reads, authenticated full access
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'cake_menu_items' and policyname = 'Public read cake menu'
+  ) then
+    create policy "Public read cake menu" on cake_menu_items for select using (true);
+  end if;
+
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'cake_menu_items' and policyname = 'Admin write cake menu'
+  ) then
+    create policy "Admin write cake menu" on cake_menu_items for all to authenticated using (true) with check (true);
+  end if;
+end $$;
+
+-- 18 authentic seed cake menu items
+insert into cake_menu_items (name, price, cat, badge, description, tags, image, weight, eggless, available, display_order)
+values
+  ('Classic Vanilla', 550, 'popular', 'Timeless Classic', 'Light, airy golden sponge layered with pure Madagascar vanilla cream and delicate buttercream piping.', '["Soft Sponge", "Pure Vanilla", "Bestseller"]'::jsonb, 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 1),
+  ('Black Forest', 650, 'popular', 'Crowd Favorite', 'Rich chocolate sponge steeped in cherry infusion, filled with dark sweet cherries, whipped cream and shaved dark chocolate.', '["Dark Cherry", "Chocolate Shavings", "Party Special"]'::jsonb, 'https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 2),
+  ('Strawberry / Blueberry', 700, 'popular', 'Wild Berry', 'Delicate vanilla sponge kissed with house-simmered wild strawberry and blueberry compote with a light berry chantilly.', '["Real Fruit", "Wild Berries", "Spring Bloom"]'::jsonb, 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 3),
+  ('Pineapple / Mango', 700, 'popular', 'Tropical Fresh', 'Refreshing tropical sponge layered with juicy pineapple cubes, seasonal mango nectar, and velvety dairy cream.', '["Tropical Treat", "Juicy Fruits", "Refreshing"]'::jsonb, 'https://images.unsplash.com/photo-1557308536-ee471ef2c390?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 4),
+  ('White Forest', 700, 'popular', 'White Chocolate', 'Tender vanilla sponge enveloped in snow-white chocolate ribbons, centered with whole cherries and silk whipped cream.', '["White Ganache", "Whole Cherries", "Celebration"]'::jsonb, 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 5),
+  ('Choco Vanilla', 750, 'popular', 'Harmony Dual', 'The best of both worlds: alternating layers of dark cocoa sponge and fragrant vanilla cream with a glossy chocolate drip.', '["Two-in-One", "Cocoa Fudge", "Family Favorite"]'::jsonb, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 6),
+  ('Choco Mocca', 800, 'popular', 'Barista Choice', 'Dark chocolate sponge infused with fresh roasted espresso coffee liqueur syrup and silky mocha buttercream.', '["Roasted Espresso", "Mocha Ganache", "Aromatic"]'::jsonb, 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 7),
+  ('Chocolate Chip Cake', 800, 'popular', 'Belgian Choc', 'Moist Dutch-process cocoa sponge generously studded with dark chocolate morsels that melt warmly with every forkful.', '["Choco Drops", "Crunch & Melt", "Kids Favorite"]'::jsonb, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 8),
+  ('Butterscotch', 800, 'popular', 'Caramel Crunch', 'Golden caramel sponge filled with buttery homemade cashew praline crunch and golden butterscotch glaze.', '["Nutty Praline", "Rich Butterscotch", "Crunchy"]'::jsonb, 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 9),
+  ('Chocolate Truffle Fudge', 900, 'popular', 'Pure Chocolate', 'Deep dark chocolate indulgence made with pure cocoa, smooth chocolate buttercream, and a glossy cocoa mirror glaze.', '["54% Dark Cocoa", "Fudge Glaze", "Decadent"]'::jsonb, 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 10),
+  ('Cassatto Cake', 900, 'special', 'Heritage Recipe', 'A nostalgic multi-layered celebration sponge studded with candied fruit peel, roasted pistachios, and scented orange syrup.', '["Candied Citrus", "Roasted Nuts", "Traditional"]'::jsonb, 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 11),
+  ('Oreo Chocolate', 900, 'popular', 'Cookies & Cream', 'Silky cocoa sponge packed with generous mounds of crunchy crushed Oreo biscuit cream and crowned with mini Oreos.', '["Oreo Crunch", "Cookies & Cream", "Bestseller"]'::jsonb, 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 12),
+  ('No-Bake Chilled Cake', 1000, 'cheesecake', 'Chilled Mousse', 'Delicately set chilled cheese & mousse cake resting on a golden butter cookie crust with a jewel-toned fruit glaze.', '["No-Bake Mousse", "Chilled Velvet", "Light Finish"]'::jsonb, 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&auto=format&fit=crop&q=80', '1 lb round', true, true, 13),
+  ('Red Velvet', 1200, 'special', 'Signature Red', 'Luxurious ruby cocoa velvet sponge paired with generous layers of tangy Philadelphia-style cream cheese frosting.', '["Cream Cheese", "Ruby Velvet", "Anniversary Top"]'::jsonb, 'https://images.unsplash.com/photo-1616541823729-00fe0aacd32c?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 14),
+  ('Khuwa Cake', 1400, 'special', 'Nepali Heritage', 'Jiri Bakes pride! Hand-churned mountain khuwa simmered into a tender organic sponge with green cardamom and saffron pistachio slivers.', '["Himalayan Khuwa", "Nepali Fusion", "Must Try"]'::jsonb, 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 15),
+  ('Choco Truffle', 1400, 'special', 'Dark Ganache', 'The pinnacle of chocolate mastery: 65% single-origin dark cocoa truffle ganache folded over dense chocolate sponge.', '["French Ganache", "Truffle Melt", "Ultra Rich"]'::jsonb, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80', '1 lb standard', true, true, 16),
+  ('NY Cheese Cake', 1800, 'cheesecake', 'New York Style', 'Classic dense and ultra-creamy baked New York cheesecake infused with citrus zest on a spiced whole wheat graham crust.', '["Baked Classic", "Cream Cheese", "Gourmet"]'::jsonb, 'https://images.unsplash.com/photo-1524351199678-941a58a3df50?w=600&auto=format&fit=crop&q=80', '1.2 lbs whole', false, true, 17),
+  ('Basque Burnt Cheesecake', 2500, 'cheesecake', 'Master Baker Special', 'The viral San Sebastián icon! High-heat caramelized blistered mahogany crust revealing a warm, molten custard center.', '["Molten Center", "Caramelized Top", "Artisan Icon"]'::jsonb, 'https://images.unsplash.com/photo-1567171466295-4afa63d45416?w=600&auto=format&fit=crop&q=80', '1.5 lbs whole', false, true, 18)
+on conflict (lower(name)) do update set
+  price = excluded.price,
+  cat = excluded.cat,
+  badge = excluded.badge,
+  description = excluded.description,
+  tags = excluded.tags,
+  image = excluded.image,
+  weight = excluded.weight,
+  eggless = excluded.eggless,
+  available = excluded.available,
+  display_order = excluded.display_order,
+  updated_at = now();

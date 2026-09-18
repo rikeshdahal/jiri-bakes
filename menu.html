@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jiri Bakes - Interactive Paper & Modern Menu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        jiri: {
+                            paper: '#FDFBF7',
+                            paperCard: '#F8F3EA',
+                            paperBorder: '#E6DCB8',
+                            paperText: '#3B3228',
+                            green: '#3EA85A',
+                            navy: '#0B132B',
+                            darkCard: '#131D38',
+                            gold: '#E2B714',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        hand: ['"Caveat"', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .paper-theme {
+            background-color: #f6f1e7;
+            background-image: radial-gradient(#e5dccb 0.75px, transparent 0.75px), radial-gradient(#e5dccb 0.75px, #f6f1e7 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            color: #3b3228;
+        }
+
+        .dark-theme {
+            background-color: #0b132b;
+            color: #f8fafc;
+        }
+
+        .paper-card {
+            background: #fdfcf7;
+            box-shadow: 0 10px 30px -5px rgba(80, 60, 40, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eadecc;
+            position: relative;
+        }
+
+        .dark-card {
+            background: rgba(19, 29, 56, 0.85);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(226, 183, 20, 0.2);
+        }
+
+        /* Dotted Leader Line for classic paper menu layout */
+        .dotted-line {
+            flex-grow: 1;
+            border-bottom: 2px dotted rgba(90, 75, 60, 0.35);
+            margin: 0 12px;
+            align-self: baseline;
+            height: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .dark .dotted-line {
+            border-bottom: 2px dotted rgba(226, 183, 20, 0.35);
+        }
+
+        /* Sketches SVG styling */
+        .sketch-svg {
+            stroke: #a39580;
+            fill: none;
+            opacity: 0.35;
+            transition: opacity 0.3s ease, stroke 0.3s ease;
+        }
+
+        .dark .sketch-svg {
+            stroke: #e2b714;
+            opacity: 0.25;
+        }
+
+        @keyframes subtleFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .float-sketch {
+            animation: subtleFloat 6s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3EA85A;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body id="appBody"
+    class="paper-theme min-h-full flex flex-col justify-between selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- Top Navigation Header -->
+
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-grow w-full">
+
+        <!-- Search & Quick Filter Bar -->
+        <div class="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="relative w-full sm:w-72">
+                <i
+                    class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Search cake flavor..."
+                    class="w-full pl-10 pr-4 py-2 rounded-full bg-white/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all">
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 text-xs font-medium"
+                id="filterContainer">
+                <button onclick="filterCategory('all')"
+                    class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold shadow-sm shadow-emerald-600/20 filter-tab active"
+                    data-cat="all">All Items</button>
+                <button onclick="filterCategory('popular')"
+                    class="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-stone-700 dark:text-slate-300 filter-tab"
+                    data-cat="popular">Popular Sponges</button>
+                <button onclick="filterCategory('cheesecake')"
+                    class="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-stone-700 dark:text-slate-300 filter-tab"
+                    data-cat="cheesecake">Cheesecakes</button>
+            </div>
+        </div>
+
+        <!-- Classic Paper Menu Sheet Container -->
+        <div id="paperSheet"
+            class="paper-card dark-card rounded-2xl p-6 sm:p-12 transition-all duration-500 relative overflow-hidden">
+
+            <!-- Background Hand-drawn Sketches (Matching the reference menu card) -->
+            <div class="absolute top-6 left-6 pointer-events-none hidden sm:block float-sketch">
+                <svg class="sketch-svg w-20 h-20" viewBox="0 0 100 100">
+                    <path d="M 20 70 L 80 70 L 75 40 L 25 40 Z" stroke-width="2" />
+                    <path d="M 25 40 L 75 40 L 70 20 L 30 20 Z" stroke-width="2" />
+                    <line x1="50" y1="20" x2="50" y2="10" stroke-width="2" />
+                    <circle cx="50" cy="8" r="3" stroke-width="2" />
+                </svg>
+            </div>
+
+            <div class="absolute top-8 right-8 pointer-events-none hidden sm:block float-sketch"
+                style="animation-delay: -2s;">
+                <svg class="sketch-svg w-28 h-28" viewBox="0 0 100 100">
+                    <path d="M 10 75 Q 50 90 90 75 L 80 40 Q 50 50 20 40 Z" stroke-width="2" />
+                    <path d="M 20 40 Q 50 50 80 40 L 70 20 Q 50 25 30 20 Z" stroke-width="2" />
+                    <path d="M 50 22 C 55 10 45 5 50 0" stroke-width="1.5" />
+                </svg>
+            </div>
+
+            <div class="absolute bottom-10 left-8 pointer-events-none hidden md:block float-sketch"
+                style="animation-delay: -3s;">
+                <svg class="sketch-svg w-24 h-24" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="35" stroke-width="2" stroke-dasharray="4,2" />
+                    <circle cx="50" cy="50" r="15" stroke-width="1.5" />
+                </svg>
+            </div>
+
+            <div class="absolute bottom-8 right-6 pointer-events-none hidden md:block float-sketch"
+                style="animation-delay: -1s;">
+                <svg class="sketch-svg w-28 h-24" viewBox="0 0 100 100">
+                    <ellipse cx="50" cy="60" rx="35" ry="15" stroke-width="2" />
+                    <ellipse cx="50" cy="50" rx="30" ry="12" stroke-width="1.5" />
+                    <ellipse cx="50" cy="40" rx="25" ry="10" stroke-width="1.5" />
+                </svg>
+            </div>
+
+            <!-- Menu Header Section -->
+            <div class="text-center max-w-md mx-auto mb-10 relative z-10">
+                <!-- Jiri Bakes Hand-written styled logo -->
+                <div class="inline-block relative">
+                    <h1
+                        class="font-hand text-6xl sm:text-7xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight flex items-center justify-center gap-1">
+                        Jiri
+                    </h1>
+                    <span
+                        class="font-sans text-xs tracking-widest uppercase text-emerald-800 dark:text-emerald-300 font-semibold block -mt-3">Bakes</span>
+                </div>
+
+                <!-- Center Candle Birthday Cake Illustration -->
+                <div class="my-6 flex justify-center">
+                    <div
+                        class="p-3 rounded-full bg-amber-50 dark:bg-slate-800 border border-amber-200/80 dark:border-slate-700 shadow-sm">
+                        <svg class="w-12 h-12 stroke-amber-800 dark:stroke-amber-400 fill-none" viewBox="0 0 64 64">
+                            <!-- Candle Flame -->
+                            <path d="M 32 8 C 32 8 34 13 32 16 C 30 13 32 8 32 8 Z" fill="#F59E0B" stroke="#D97706"
+                                stroke-width="1.5" />
+                            <!-- Candle -->
+                            <line x1="32" y1="16" x2="32" y2="24" stroke-width="2" stroke-linecap="round" />
+                            <!-- Top Tier -->
+                            <rect x="22" y="24" width="20" height="12" rx="2" stroke-width="2" />
+                            <!-- Bottom Tier -->
+                            <rect x="16" y="36" width="32" height="16" rx="3" stroke-width="2" />
+                            <!-- Base Stand Line -->
+                            <line x1="12" y1="52" x2="52" y2="52" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="border-b border-stone-300 dark:border-slate-700 w-3/4 mx-auto mb-6"></div>
+
+                <h2 class="font-serif text-2xl sm:text-3xl font-bold text-stone-800 dark:text-amber-300 tracking-wide">
+                    Cake Menu
+                </h2>
+            </div>
+
+            <!-- Paper Menu Items List (Faithful to the original structure with interactive features) -->
+            <div id="menuItemsList" class="max-w-2xl mx-auto space-y-3 relative z-10">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="noResults" class="hidden text-center py-10 text-stone-500 dark:text-slate-400">
+                <i class="fa-solid fa-cookie-bite text-3xl mb-2 text-amber-600"></i>
+                <p>No cake flavor matches your search.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Interactive Cart Side Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div id="cartBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0"></div>
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div id="cartContent"
+                class="w-screen max-w-md bg-stone-50 dark:bg-slate-900 text-stone-800 dark:text-slate-100 shadow-2xl border-l border-amber-200 dark:border-slate-800 flex flex-col justify-between transform transition-transform translate-x-full duration-300">
+
+                <!-- Drawer Header -->
+                <div class="p-6 border-b border-stone-200 dark:border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-basket-shopping text-emerald-600 dark:text-jiri-gold text-xl"></i>
+                        <h3 class="font-serif text-xl font-bold">Your Cake Order</h3>
+                    </div>
+                    <button id="closeCartBtn"
+                        class="p-2 rounded-full hover:bg-stone-200 dark:hover:bg-slate-800 text-stone-500 dark:text-slate-400 transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Drawer Cart Items -->
+                <div id="cartItemList" class="p-6 flex-grow overflow-y-auto space-y-4">
+                    <!-- Cart items inserted dynamically -->
+                </div>
+
+                <!-- Drawer Footer -->
+                <div
+                    class="p-6 border-t border-stone-200 dark:border-slate-800 bg-stone-100 dark:bg-slate-950 space-y-4">
+                    <div class="space-y-1.5 text-sm">
+                        <div class="flex justify-between text-stone-600 dark:text-slate-400">
+                            <span>Subtotal</span>
+                            <span id="cartSubtotal" class="font-mono font-semibold">NPR 0</span>
+                        </div>
+                        <div class="flex justify-between text-stone-600 dark:text-slate-400">
+                            <span>Fresh Packaging</span>
+                            <span class="text-emerald-600 dark:text-emerald-400 font-medium">Free</span>
+                        </div>
+                        <div
+                            class="flex justify-between text-base font-bold text-stone-900 dark:text-amber-400 border-t border-stone-300 dark:border-slate-800 pt-2">
+                            <span>Total</span>
+                            <span id="cartTotal" class="font-mono">NPR 0</span>
+                        </div>
+                    </div>
+
+                    <button id="whatsappCheckout"
+                        class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-jiri-gold dark:hover:bg-amber-400 text-white dark:text-jiri-navy font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Send Order via WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        class="border-t border-stone-300 dark:border-slate-800 py-6 px-4 text-center text-xs text-stone-500 dark:text-slate-400">
+        <p class="font-medium">Jiri Bakes • Handcrafted Organic Cakes & Bakery • Lokanthali, Nepal</p>
+        <p class="mt-1 opacity-75">© 2026 Jiri Bakes. All prices in Nepalese Rupees (NPR).</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Exact cake menu items from the uploaded paper image
+        const menuItems = [
+            { id: 1, name: "Classic vanilla", price: 550, cat: "popular" },
+            { id: 2, name: "Black Forest", price: 650, cat: "popular" },
+            { id: 3, name: "Strawberry/blueberry", price: 700, cat: "popular" },
+            { id: 4, name: "Pineapple/mango", price: 700, cat: "popular" },
+            { id: 5, name: "White Forest", price: 700, cat: "popular" },
+            { id: 6, name: "Choco Vanilla", price: 750, cat: "popular" },
+            { id: 7, name: "Choco mocca", price: 800, cat: "popular" },
+            { id: 8, name: "Chocolate Chip Cake", price: 800, cat: "popular" },
+            { id: 9, name: "Butterscotch", price: 800, cat: "popular" },
+            { id: 10, name: "Chocolate", price: 900, cat: "popular" },
+            { id: 11, name: "Cassatto cake", price: 900, cat: "special" },
+            { id: 12, name: "Oreo chocolate", price: 900, cat: "popular" },
+            { id: 13, name: "No-bake cake", price: 1000, cat: "cheesecake" },
+            { id: 14, name: "Red Velvet", price: 1200, cat: "special" },
+            { id: 15, name: "Khuwa cake", price: 1400, cat: "special" },
+            { id: 16, name: "Choco Truffle", price: 1400, cat: "special" },
+            { id: 17, name: "NY cheese cake", price: 1800, cat: "cheesecake" },
+            { id: 18, name: "Basque Burnt Cheesecake", price: 2500, cat: "cheesecake" }
+        ];
+
+        let cart = [];
+        let activeCategory = 'all';
+        let searchQuery = '';
+        let currentTheme = 'paper'; // 'paper' or 'dark'
+
+        // DOM elements
+        const menuItemsList = document.getElementById('menuItemsList');
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+        const cartDrawer = document.getElementById('cartDrawer');
+        const cartBackdrop = document.getElementById('cartBackdrop');
+        const cartContent = document.getElementById('cartContent');
+        const openCartBtn = document.getElementById('openCartBtn');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartItemList = document.getElementById('cartItemList');
+        const cartSubtotal = document.getElementById('cartSubtotal');
+        const cartTotal = document.getElementById('cartTotal');
+        const paperThemeBtn = document.getElementById('paperThemeBtn');
+        const darkThemeBtn = document.getElementById('darkThemeBtn');
+        const appBody = document.getElementById('appBody');
+        const paperSheet = document.getElementById('paperSheet');
+        const whatsappCheckout = document.getElementById('whatsappCheckout');
+
+        function renderMenu() {
+            const filtered = menuItems.filter(item => {
+                const matchesCat = activeCategory === 'all' || item.cat === activeCategory;
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                menuItemsList.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            menuItemsList.innerHTML = filtered.map(item => `
+                <div class="group relative flex items-center justify-between p-2 rounded-xl hover:bg-stone-200/50 dark:hover:bg-slate-800/60 transition-all duration-200">
+                    <!-- Cake Name -->
+                    <span class="font-serif text-base sm:text-lg font-medium text-stone-800 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-amber-300 transition-colors">
+                        ${item.name}
+                    </span>
+
+                    <!-- Dotted Leader Line -->
+                    <div class="dotted-line"></div>
+
+                    <!-- Price & Add Button Wrapper -->
+                    <div class="flex items-center gap-3 pl-2">
+                        <span class="font-mono text-base sm:text-lg font-bold text-stone-800 dark:text-amber-400">
+                            ${item.price}
+                        </span>
+
+                        <!-- Interactive 'Add to Order' Button -->
+                        <button onclick="addToCart(${item.id})" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-jiri-gold dark:hover:bg-amber-400 text-white dark:text-jiri-navy font-semibold text-xs shadow-sm transition-all transform active:scale-95 flex items-center gap-1.5 opacity-90 group-hover:opacity-100">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) return;
+
+            const existing = cart.find(i => i.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+
+            updateCartUI();
+            openCart();
+        }
+
+        function updateCartQty(id, delta) {
+            const idx = cart.findIndex(i => i.id === id);
+            if (idx !== -1) {
+                cart[idx].qty += delta;
+                if (cart[idx].qty <= 0) {
+                    cart.splice(idx, 1);
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            cartBadge.textContent = count;
+
+            if (cart.length === 0) {
+                cartItemList.innerHTML = `
+                    <div class="text-center py-12 text-stone-400 dark:text-slate-500">
+                        <i class="fa-solid fa-basket-shopping text-4xl mb-3 opacity-50"></i>
+                        <p class="text-sm">Your order bag is empty.</p>
+                    </div>
+                `;
+            } else {
+                cartItemList.innerHTML = cart.map(item => `
+                    <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-200 dark:border-slate-700/60 flex items-center justify-between shadow-sm">
+                        <div>
+                            <h4 class="font-serif font-bold text-sm text-stone-800 dark:text-slate-100">${item.name}</h4>
+                            <span class="text-xs text-emerald-700 dark:text-amber-400 font-mono">NPR ${item.price}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="updateCartQty(${item.id}, -1)" class="w-7 h-7 rounded-lg bg-stone-100 dark:bg-slate-700 hover:bg-stone-200 text-stone-700 dark:text-slate-200 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span class="font-mono text-sm font-bold w-4 text-center">${item.qty}</span>
+                            <button onclick="updateCartQty(${item.id}, 1)" class="w-7 h-7 rounded-lg bg-stone-100 dark:bg-slate-700 hover:bg-stone-200 text-stone-700 dark:text-slate-200 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            cartSubtotal.textContent = `NPR ${total}`;
+            cartTotal.textContent = `NPR ${total}`;
+        }
+
+        function openCart() {
+            cartDrawer.classList.remove('hidden');
+            setTimeout(() => {
+                cartBackdrop.classList.remove('opacity-0');
+                cartContent.classList.remove('translate-x-full');
+            }, 10);
+        }
+
+        function closeCart() {
+            cartBackdrop.classList.add('opacity-0');
+            cartContent.classList.add('translate-x-full');
+            setTimeout(() => {
+                cartDrawer.classList.add('hidden');
+            }, 300);
+        }
+
+        function filterCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                const isMatch = btn.getAttribute('data-cat') === cat;
+                if (isMatch) {
+                    btn.className = "px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold shadow-sm filter-tab active";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-stone-700 dark:text-slate-300 filter-tab";
+                }
+            });
+            renderMenu();
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                appBody.className = "dark-theme min-h-full flex flex-col justify-between dark";
+                paperSheet.className = "dark-card rounded-2xl p-6 sm:p-12 transition-all duration-500 relative overflow-hidden";
+
+                darkThemeBtn.className = "px-3.5 py-1.5 rounded-full transition-all duration-300 bg-jiri-gold text-jiri-navy font-semibold flex items-center gap-1.5 shadow-sm";
+                paperThemeBtn.className = "px-3.5 py-1.5 rounded-full transition-all duration-300 text-slate-400 font-semibold flex items-center gap-1.5";
+            } else {
+                document.documentElement.classList.remove('dark');
+                appBody.className = "paper-theme min-h-full flex flex-col justify-between";
+                paperSheet.className = "paper-card rounded-2xl p-6 sm:p-12 transition-all duration-500 relative overflow-hidden";
+
+                paperThemeBtn.className = "px-3.5 py-1.5 rounded-full transition-all duration-300 bg-white text-amber-900 shadow-sm font-semibold flex items-center gap-1.5";
+                darkThemeBtn.className = "px-3.5 py-1.5 rounded-full transition-all duration-300 text-stone-600 font-semibold flex items-center gap-1.5";
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderMenu();
+        });
+
+        openCartBtn.addEventListener('click', openCart);
+        closeCartBtn.addEventListener('click', closeCart);
+        cartBackdrop.addEventListener('click', closeCart);
+
+        paperThemeBtn.addEventListener('click', () => setTheme('paper'));
+        darkThemeBtn.addEventListener('click', () => setTheme('dark'));
+
+        whatsappCheckout.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert("Please add cakes to your order bag first!");
+                return;
+            }
+
+            let msg = "Hello Jiri Bakes! 🎂 I would like to order:\n\n";
+            cart.forEach(item => {
+                msg += `• ${item.name} x${item.qty} = NPR ${item.price * item.qty}\n`;
+            });
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            msg += `\nTotal: NPR ${total}\nPlease confirm my order.`;
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        });
+
+        // Initialize menu view
+        renderMenu();
+        updateCartUI();
+    </script>
+</body>
+
+</html>

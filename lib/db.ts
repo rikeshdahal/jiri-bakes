@@ -1,4 +1,4 @@
-import type { BakeOfWeek, MenuItem, Order, Testimonial, Setting } from '@/types';
+import type { BakeOfWeek, MenuItem, Order, Testimonial, Setting, CakeMenuItemRecord } from '@/types';
 import * as fileDb from './db-file';
 import * as pgDb from './db-supabase';
 
@@ -159,4 +159,31 @@ export async function updateDbSettings(
   settingsToUpdate: Array<{ key: string; value: string }>,
 ): Promise<Setting[]> {
   return run(() => pgDb.updateDbSettings(settingsToUpdate), () => fileDb.updateDbSettings(settingsToUpdate));
+}
+
+// ─── Cake Menu Items ────────────────────────────────────────────────
+
+export async function getDbCakeMenuItems(): Promise<CakeMenuItemRecord[]> {
+  return run(() => pgDb.getDbCakeMenuItems(), () => fileDb.getDbCakeMenuItems());
+}
+
+export async function getDbCakeMenuItemById(id: string): Promise<CakeMenuItemRecord | null> {
+  return run(() => pgDb.getDbCakeMenuItemById(id), () => fileDb.getDbCakeMenuItemById(id));
+}
+
+export async function createDbCakeMenuItem(
+  item: Omit<CakeMenuItemRecord, 'id' | 'created_at' | 'updated_at'>
+): Promise<CakeMenuItemRecord> {
+  return run(() => pgDb.createDbCakeMenuItem(item), () => fileDb.createDbCakeMenuItem(item));
+}
+
+export async function updateDbCakeMenuItem(
+  id: string,
+  updates: Partial<CakeMenuItemRecord>
+): Promise<CakeMenuItemRecord | null> {
+  return run(() => pgDb.updateDbCakeMenuItem(id, updates), () => fileDb.updateDbCakeMenuItem(id, updates));
+}
+
+export async function deleteDbCakeMenuItem(id: string): Promise<boolean> {
+  return run(() => pgDb.deleteDbCakeMenuItem(id), () => fileDb.deleteDbCakeMenuItem(id));
 }

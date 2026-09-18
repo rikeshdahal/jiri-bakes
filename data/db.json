@@ -452,5 +452,367 @@
       "created_at": "2026-09-14T11:48:00.931Z",
       "updated_at": "2026-09-15T06:36:23.211Z"
     }
+  ],
+  "cake_menu_items": [
+    {
+      "id": "cake-1",
+      "name": "Classic Vanilla",
+      "price": 550,
+      "cat": "popular",
+      "badge": "Popular",
+      "desc": "Light golden sponge layered with pure Madagascar vanilla whipped cream and white chocolate shavings.",
+      "tags": [
+        "Classic",
+        "Vanilla",
+        "Whipped Cream"
+      ],
+      "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 1,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T07:45:47.138Z"
+    },
+    {
+      "id": "cake-2",
+      "name": "Black Forest",
+      "price": 650,
+      "cat": "popular",
+      "badge": "Classic",
+      "desc": "Layers of cocoa-rich chocolate sponge, sour cherries, whipped cream and dark chocolate curls.",
+      "tags": [
+        "Chocolate",
+        "Cherries",
+        "German Classic"
+      ],
+      "image": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 2,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T07:45:47.115Z"
+    },
+    {
+      "id": "cake-3",
+      "name": "Strawberry / Blueberry",
+      "price": 700,
+      "cat": "popular",
+      "badge": "Berry Delight",
+      "desc": "Fluffy vanilla sponge infused with fresh mountain berry coulis and seasonal compote.",
+      "tags": [
+        "Berries",
+        "Fruity",
+        "Seasonal"
+      ],
+      "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 3,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-4",
+      "name": "Pineapple / Mango",
+      "price": 700,
+      "cat": "popular",
+      "badge": "Tropical",
+      "desc": "Tropical fruit gateau soaked with fresh pineapple glaze and sun-ripened mango essence.",
+      "tags": [
+        "Tropical",
+        "Fresh Fruit",
+        "Pineapple"
+      ],
+      "image": "/uploads/1789717749685-j2o8v1.jpeg",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 4,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T07:49:11.455Z"
+    },
+    {
+      "id": "cake-5",
+      "name": "White Forest",
+      "price": 700,
+      "cat": "popular",
+      "badge": "Pure Vanilla",
+      "desc": "Snow-white vanilla sponge frosted with whipped Chantilly cream and ivory chocolate flakes.",
+      "tags": [
+        "White Chocolate",
+        "Whipped Cream"
+      ],
+      "image": "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 5,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-6",
+      "name": "Choco Vanilla",
+      "price": 750,
+      "cat": "popular",
+      "badge": "Best Duo",
+      "desc": "The best of both worlds: marbled chocolate and vanilla sponges with velvety frosting.",
+      "tags": [
+        "Marble",
+        "Chocolate",
+        "Vanilla"
+      ],
+      "image": "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 6,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-7",
+      "name": "Choco Mocca",
+      "price": 800,
+      "cat": "popular",
+      "badge": "Coffee Rich",
+      "desc": "Espresso-soaked chocolate sponge with creamy mocha buttercream and cocoa dust.",
+      "tags": [
+        "Coffee",
+        "Mocha",
+        "Espresso"
+      ],
+      "image": "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 7,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-8",
+      "name": "Chocolate Chip Cake",
+      "price": 800,
+      "cat": "popular",
+      "badge": "Choc Lovers",
+      "desc": "Moist chocolate sponge packed with Belgian chocolate chips and glossy fudge glaze.",
+      "tags": [
+        "Choco Chips",
+        "Belgian",
+        "Fudge"
+      ],
+      "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 8,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-9",
+      "name": "Butterscotch",
+      "price": 800,
+      "cat": "popular",
+      "badge": "Crunchy",
+      "desc": "Caramel-infused butter sponge layered with crunchy butterscotch praline and butter glaze.",
+      "tags": [
+        "Caramel",
+        "Praline",
+        "Crunch"
+      ],
+      "image": "https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 9,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-10",
+      "name": "Chocolate Truffle Fudge",
+      "price": 900,
+      "cat": "popular",
+      "badge": "Decadent",
+      "desc": "Dense, decadent chocolate sponge slathered in smooth melted fudge and truffle ganache.",
+      "tags": [
+        "Truffle",
+        "Fudge Ganache",
+        "Rich"
+      ],
+      "image": "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 10,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-11",
+      "name": "Cassatto Cake",
+      "price": 900,
+      "cat": "special",
+      "badge": "Chef's Choice",
+      "desc": "Traditional Sicilian-style party cake with rich ricotta cream, candied fruits, and marzipan rim.",
+      "tags": [
+        "Italian",
+        "Ricotta",
+        "Candied Fruit"
+      ],
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRnWoAIjdAKzD7uVX1YPF7UgFiE7o9ZDvex4S6hhHKiSrs5o2FwW1dZcM&s=10",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 11,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T07:49:49.784Z"
+    },
+    {
+      "id": "cake-12",
+      "name": "Oreo Chocolate",
+      "price": 900,
+      "cat": "popular",
+      "badge": "Kids Favourite",
+      "desc": "Dark cocoa cake filled and topped with crushed Oreo cookies and sweet cookies & cream frosting.",
+      "tags": [
+        "Oreo",
+        "Cookies & Cream"
+      ],
+      "image": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 12,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-13",
+      "name": "No-Bake Chilled Cake",
+      "price": 1000,
+      "cat": "cheesecake",
+      "badge": "Chilled",
+      "desc": "Cool, silky smooth set cream cheese on a crunchy honey biscuit crust, served chilled.",
+      "tags": [
+        "No-Bake",
+        "Chilled",
+        "Cream Cheese"
+      ],
+      "image": "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 13,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-14",
+      "name": "Red Velvet",
+      "price": 1200,
+      "cat": "special",
+      "badge": "Signature",
+      "desc": "Vibrant crimson buttermilk sponge with a hint of cocoa, filled with silky cream cheese frosting.",
+      "tags": [
+        "Red Velvet",
+        "Cream Cheese",
+        "Signature"
+      ],
+      "image": "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 14,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-15",
+      "name": "Khuwa Cake",
+      "nepali_subtitle": "Signature Himalayan Specialty",
+      "price": 1400,
+      "cat": "special",
+      "badge": "Local Special",
+      "desc": "Signature Himalayan specialty baked with slow-reduced Jiri cow milk mawa and saffron cardamom.",
+      "tags": [
+        "Khuwa",
+        "Jiri Milk",
+        "Himalayan",
+        "Saffron"
+      ],
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 15,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-16",
+      "name": "Choco Truffle",
+      "price": 1400,
+      "cat": "special",
+      "badge": "Premium Dark",
+      "desc": "Pure luxury: dense French dark chocolate sponge layered with 70% dark ganache.",
+      "tags": [
+        "70% Dark",
+        "French Ganache",
+        "Luxury"
+      ],
+      "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 16,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-17",
+      "name": "NY Cheese Cake",
+      "price": 1800,
+      "cat": "cheesecake",
+      "badge": "Baked NYC",
+      "desc": "Authentic slow-baked dense New York style cheesecake made with rich cream cheese and vanilla.",
+      "tags": [
+        "Baked",
+        "New York Style",
+        "Creamy"
+      ],
+      "image": "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 17,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "cake-18",
+      "name": "Basque Burnt Cheesecake",
+      "price": 2500,
+      "cat": "cheesecake",
+      "badge": "San Sebastian",
+      "desc": "San Sebastian style caramelized burnt crust with an irresistibly creamy, melting molten custard center.",
+      "tags": [
+        "Basque",
+        "Burnt Top",
+        "Molten Cream"
+      ],
+      "image": "https://images.unsplash.com/photo-1524351199678-941a58a3df50?w=600&h=500&fit=crop",
+      "weight": "1 Pound",
+      "eggless": true,
+      "available": true,
+      "display_order": 18,
+      "created_at": "2026-09-18T00:00:00.000Z",
+      "updated_at": "2026-09-18T00:00:00.000Z"
+    }
   ]
 }
