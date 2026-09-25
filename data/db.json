@@ -182,6 +182,33 @@
   ],
   "orders": [
     {
+      "id": "JB-2026-T7NKSC",
+      "customer_name": "Rikesh Dahal",
+      "customer_phone": "9841255549",
+      "customer_email": "rikeshhacker747@gmail.com",
+      "customer_address": "Visit to store – Lokanthali, Bhaktapur",
+      "items": [
+        {
+          "product_id": "c3",
+          "name": "Heritage Sourdough Loaf [Eggless]",
+          "price": 650,
+          "quantity": 1
+        }
+      ],
+      "total": 650,
+      "payment_method": "Visit Store / Pay in Person",
+      "status": "pending",
+      "notes": "Variant: Eggless • Message: \"Hacker\" • Delivery Slot: 2026-09-25 (10:00 AM – 01:00 PM) • Instructions: Variant: Eggless • Message: \"Hacker\" • Delivery Slot: 2026-09-25 (10:00 AM – 01:00 PM)",
+      "variant": "Eggless",
+      "message_on_item": "Hacker",
+      "item_note": "",
+      "delivery_date": "2026-09-25",
+      "delivery_time": "10:00 AM – 01:00 PM",
+      "delivery_location": "Store Visit",
+      "created_at": "2026-09-24T11:05:25.403Z",
+      "updated_at": "2026-09-24T11:05:25.403Z"
+    },
+    {
       "id": "JB-2026-U7XZZD",
       "customer_name": "Ram",
       "customer_phone": "9841255549",

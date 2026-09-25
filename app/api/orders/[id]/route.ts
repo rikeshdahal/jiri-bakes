@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { getDbOrderById, updateDbOrder, deleteDbOrder } from '@/lib/db';
 import { statusSchema } from '@/lib/validations/order';
 import { sendStatusEmail } from '@/lib/services/orders';
-
 import { requireAdmin } from '@/lib/auth/admin';
+import { cleanText } from '@/lib/validations/order';
 
 type Ctx = { params: Promise<{ id: string }> };
+
+// Admin-editable fields on an order (excludes id, created_at, total, status).
+// Prevents mass-assignment of protected fields even by admins.
+const ADMIN_EDITABLE_FIELDS = new Set([
+  'customer_name', 'customer_phone', 'customer_email', 'customer_address',
+  'notes', 'delivery_date', 'delivery_time', 'delivery_location',
+  'payment_method', 'variant', 'message_on_item', 'item_note',
+]);
 
 export async function GET(_request: Request, { params }: Ctx) {
   try {
@@ -61,8 +68,22 @@ export async function PUT(request: Request, { params }: Ctx) {
       return NextResponse.json({ data, mailSent });
     }
 
-    // Generic admin edit (notes, address, etc.) — still admin-only.
-    const data = await updateDbOrder(id, body as Record<string, unknown>);
+    // Generic admin edit — only allow explicitly whitelisted fields.
+    // This prevents mass-assignment of protected fields like `id`, `total`, `items`.
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+    const safeUpdates: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+      if (ADMIN_EDITABLE_FIELDS.has(key)) {
+        safeUpdates[key] = typeof value === 'string' ? cleanText(value, 500) : value;
+      }
+    }
+    if (Object.keys(safeUpdates).length === 0) {
+      return NextResponse.json({ error: 'No updatable fields provided' }, { status: 400 });
+    }
+
+    const data = await updateDbOrder(id, safeUpdates);
     if (!data) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     return NextResponse.json({ data });
   } catch (err: unknown) {

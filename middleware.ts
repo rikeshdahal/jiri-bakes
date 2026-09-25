@@ -47,16 +47,25 @@ export async function middleware(request: NextRequest) {
     user = null;
   }
 
-  const sessionCookie = request.cookies.get('jiri_admin_session');
+  // Only fall back to cookie session if Supabase auth returned no user.
+  // Reject the legacy 'admin-master' backdoor ID and require a UUID-like id.
   let hasValidAdminSession = !!user;
-  if (!hasValidAdminSession && sessionCookie?.value) {
-    try {
-      const parsed = JSON.parse(sessionCookie.value);
-      if (parsed?.email || parsed?.id) {
-        hasValidAdminSession = true;
+  if (!hasValidAdminSession) {
+    const sessionCookie = request.cookies.get('jiri_admin_session');
+    if (sessionCookie?.value) {
+      try {
+        const parsed = JSON.parse(sessionCookie.value);
+        if (
+          parsed?.email &&
+          parsed?.id &&
+          parsed.id !== 'admin-master' &&
+          /^[0-9a-f-]{20,}$/i.test(String(parsed.id))
+        ) {
+          hasValidAdminSession = true;
+        }
+      } catch {
+        // ignore malformed cookie
       }
-    } catch {
-      // ignore
     }
   }
 

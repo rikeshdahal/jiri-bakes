@@ -58,3 +58,6 @@ Thumbs.db
 *.cert
 
 data/db.json.corrupt-*
+
+# Local file database (may contain real customer orders - never commit)
+data/db.json

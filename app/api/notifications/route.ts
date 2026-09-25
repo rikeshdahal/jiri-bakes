@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/admin';
 
 // Global set of SSE writer functions – one per connected admin tab
 const clients = new Set<(data: string) => void>();
@@ -16,8 +17,13 @@ export function pushOrderNotification(order: {
   clients.forEach((send) => send(payload));
 }
 
-// GET /api/notifications – SSE stream for admin
+// GET /api/notifications – SSE stream for admin only
 export async function GET() {
+  // Only authenticated admins may subscribe to order notifications.
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({

@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
-  const [userEmail, setUserEmail] = useState('admin@jiribakes.com');
+  const [userEmail, setUserEmail] = useState('');
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [loggingOut, setLoggingOut] = useState(false);
 

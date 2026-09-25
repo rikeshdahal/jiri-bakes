@@ -31,7 +31,6 @@ async function pickBackend(): Promise<DbBackend> {
   try {
     await pgDb.probe();
     sticky = 'supabase';
-    console.log('[db] Using Supabase backend.');
   } catch (e) {
     sticky = 'file';
     console.warn(

@@ -86,10 +86,13 @@ export async function POST(request: Request) {
       settings.notifyTo.length > 0 ? settings.notifyTo : supportEmail ? [supportEmail] : [];
     let staff = false;
     if (notifyTargets.length > 0 && !notifyTargets.includes(email)) {
+      // Escape HTML entities to prevent injection in the staff email
+      const esc = (s: string) =>
+        s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       const staffRes = await sendMail({
         to: notifyTargets,
         subject: `[New Inquiry] ${name} — ${email}`,
-        html: `<p>New contact inquiry from <strong>${name}</strong> (${email} / ${phone}).</p><p style="white-space:pre-wrap;">${message}</p>`,
+        html: `<p>New contact inquiry from <strong>${esc(name)}</strong> (${esc(email)} / ${esc(phone)}).</p><p style="white-space:pre-wrap;">${esc(message)}</p>`,
         text: `New contact inquiry from ${name} (${email} / ${phone}).\n\n${message}`,
         replyTo: email,
       });
