@@ -270,6 +270,8 @@ const defaultSettings: Setting[] = [
   { key: 'site_tagline', value: 'Where Flour Meets Feeling' },
   { key: 'phone', value: '+977 1-4567890' },
   { key: 'whatsapp_phone', value: '9779841234567' },
+  { key: 'instagram_url', value: 'https://www.instagram.com/jiri_bakes' },
+  { key: 'facebook_url', value: 'https://www.facebook.com/deepiel' },
   { key: 'email', value: 'hello@jiribakes.com.np' },
   { key: 'address', value: 'Lokanthali, Araniko Highway, Bhaktapur, Nepal' },
   { key: 'hours_weekday', value: 'Mon – Sat: 7:00 AM – 8:00 PM' },

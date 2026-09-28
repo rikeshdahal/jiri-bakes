@@ -18,6 +18,11 @@ const CONTACT_KEYS = [
   { key: 'address', label: 'Bakery Address', placeholder: 'Lokanthali, Araniko Highway, Bhaktapur, Nepal' },
 ] as const;
 
+const SOCIAL_KEYS = [
+  { key: 'instagram_url', label: 'Instagram Profile URL', placeholder: 'https://www.instagram.com/jiri_bakes' },
+  { key: 'facebook_url', label: 'Facebook Page URL', placeholder: 'https://www.facebook.com/deepiel' },
+] as const;
+
 const HOURS_KEYS = [
   { key: 'hours_weekday', label: 'Weekday Hours', placeholder: 'Mon – Sat: 7:00 AM – 8:00 PM' },
   { key: 'hours_sunday', label: 'Sunday Hours', placeholder: 'Sunday: 8:00 AM – 6:00 PM' },
@@ -27,6 +32,7 @@ const HOURS_KEYS = [
 const ALL_KEYS = [
   ...SETTINGS_KEYS,
   ...CONTACT_KEYS,
+  ...SOCIAL_KEYS,
   ...HOURS_KEYS,
   { key: 'we_care_image' },
 ];
@@ -184,6 +190,7 @@ export default function AdminSettingsPage() {
 
       {renderSection('Brand', SETTINGS_KEYS)}
       {renderSection('Contact', CONTACT_KEYS)}
+      {renderSection('Social Profiles (floating buttons)', SOCIAL_KEYS)}
       {renderSection('Hours', HOURS_KEYS)}
 
       {/* ─── We Care Banner Image (device upload or URL) ─── */}

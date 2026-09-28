@@ -190,6 +190,8 @@ insert into settings (key, value) values
   ('site_tagline', 'Where Flour Meets Feeling'),
   ('phone', '+977 1-4567890'),
   ('whatsapp_phone', '9779841234567'),
+  ('instagram_url', 'https://www.instagram.com/jiri_bakes'),
+  ('facebook_url', 'https://www.facebook.com/deepiel'),
   ('email', 'hello@jiribakes.com.np'),
   ('address', 'Lokanthali, Araniko Highway, Bhaktapur, Nepal'),
   ('hours_weekday', 'Mon – Sat: 7:00 AM – 8:00 PM'),
