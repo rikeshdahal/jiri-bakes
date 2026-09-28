@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { MenuItem } from '@/types';
 import { useCart } from '@/components/layout/AppShell';
 import { useWishlist } from '@/components/layout/WishlistContext';
@@ -11,6 +12,7 @@ interface QuickViewModalProps {
 }
 
 export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
+  const [mounted, setMounted] = useState(false);
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [qty, setQty] = useState(1);
@@ -18,13 +20,23 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
   const [activeImg, setActiveImg] = useState(0);
   const [paused, setPaused] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    setActiveImg(0);
+    setQty(1);
+    setAdded(false);
+  }, [item?.id]);
+
   const isFav = item ? isInWishlist(item.id) : false;
 
   const fallbackImage = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=700&h=800&fit=crop';
-  const galleryImages = (item?.images && item.images.filter(Boolean).length > 0)
+  const galleryImages = (item?.images && Array.isArray(item.images) && item.images.filter(Boolean).length > 0)
     ? item.images.filter(Boolean) as string[]
-    : (item?.image ? [item.image] : []);
-  const activeSrc = galleryImages.length > 0 ? galleryImages[activeImg % galleryImages.length] || fallbackImage : fallbackImage;
+    : (item?.image ? [item.image] : [fallbackImage]);
+  const activeSrc = galleryImages[activeImg % galleryImages.length] || fallbackImage;
 
   const goPrev = () => setActiveImg((i) => (i - 1 + galleryImages.length) % galleryImages.length);
   const goNext = () => setActiveImg((i) => (i + 1) % galleryImages.length);
@@ -41,28 +53,32 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
+      document.body.style.overflow = prevOverflow;
     };
   }, [item, onClose]);
 
-  if (!item) return null;
+  if (!item || !mounted) return null;
+
+  const itemPrice = typeof item.price === 'number' ? item.price : Number(item.price) || 0;
 
   const categoryLabel =
     item.category === 'cake' ? 'CAKES'
     : item.category === 'pastry' ? 'PASTRIES'
     : item.category === 'bread' ? 'BREADS'
-    : 'COOKIES';
+    : item.category === 'cookie' ? 'COOKIES'
+    : (item.category ? String(item.category).toUpperCase() : 'ARTISAN BAKE');
 
   const handleAdd = () => {
     for (let i = 0; i < qty; i++) {
       addItem({
         id: item.id,
         name: item.name,
-        price: item.price,
-        img: item.image || '',
+        price: itemPrice,
+        img: item.image || galleryImages[0] || '',
         unit: item.unit,
       });
     }
@@ -70,26 +86,36 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
     setTimeout(() => setAdded(false), 1500);
   };
 
-  return (
+  const modalNode = (
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`Quick view for ${item.name}`}
-      style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 999999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'clamp(16px, 4vw, 36px)',
+      }}
       onClick={onClose}
     >
       <style>{`
         @keyframes qvBackdropIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes qvPanelIn { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes qvPanelIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes qvImgFade { from { opacity: 0.4; } to { opacity: 1; } }
       `}</style>
 
+      {/* Backdrop */}
       <div
         style={{
-          position: 'absolute',
+          position: 'fixed',
           inset: 0,
-          background: 'rgba(20, 14, 8, 0.6)',
-          backdropFilter: 'blur(5px)',
+          background: 'rgba(7, 12, 23, 0.76)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           animation: 'qvBackdropIn 0.25s ease forwards',
         }}
       />
@@ -105,10 +131,11 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
           background: 'var(--color-surface-raised)',
           borderRadius: 20,
           border: '1px solid rgba(245, 211, 92, 0.3)',
-          boxShadow: '0 24px 80px rgba(0, 0, 0, 0.45)',
+          boxShadow: '0 28px 90px rgba(0, 0, 0, 0.6)',
           animation: 'qvPanelIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
           display: 'grid',
           gridTemplateColumns: '1.05fr 1fr',
+          zIndex: 2,
         }}
         className="qv-grid"
       >
@@ -355,4 +382,6 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
       `}</style>
     </div>
   );
+
+  return createPortal(modalNode, document.body);
 }

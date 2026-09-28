@@ -143,12 +143,13 @@ export default function HomePage() {
         onQuickView={heroQuickViewItem ? () => setQuickViewItem(heroQuickViewItem) : undefined}
       />
       <FeaturedCakeSection featured={activeBakeItem} />
-      <CollectionSection items={collectionItems} quickViewItem={quickViewItem} onQuickView={setQuickViewItem} onCloseQuickView={() => setQuickViewItem(null)} />
+      <CollectionSection items={collectionItems} onQuickView={setQuickViewItem} />
       <OurStorySection />
       <WeCareSection />
       <TestimonialsSection items={testimonials} />
       <VisitUsSection />
       <FooterSection />
+      <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={() => setQuickViewItem(null)} />
     </>
   );
 }
@@ -461,7 +462,7 @@ function useIsMobile(breakpoint = 600) {
   return isMobile;
 }
 
-function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView }: { items: MenuItem[]; quickViewItem: MenuItem | null; onQuickView: (item: MenuItem) => void; onCloseQuickView: () => void }) {
+function CollectionSection({ items, onQuickView }: { items: MenuItem[]; onQuickView: (item: MenuItem) => void }) {
   const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [addedId, setAddedId] = useState<string | null>(null);
@@ -696,7 +697,6 @@ function CollectionSection({ items, quickViewItem, onQuickView, onCloseQuickView
         </p>
       )}
 
-      <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={onCloseQuickView} />
 
       <style>{`
         @keyframes fadeCard {

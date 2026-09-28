@@ -334,7 +334,6 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Bakery Doodle Pattern — realistic hand-drawn bg, fully responsive ─── */
 .bakery-pattern {
   position: relative;
-  isolation: isolate;
 }
 .bakery-pattern::before {
   content: '';
@@ -352,6 +351,11 @@ h1, h2, h3, h4, h5, h6 {
 .bakery-pattern > * {
   position: relative;
   z-index: 1;
+}
+.bakery-pattern > [style*="position: absolute"],
+.bakery-pattern > [style*="position:absolute"] {
+  position: absolute !important;
+  z-index: 0 !important;
 }
 /* Density variants */
 .bakery-pattern-soft::before { opacity: 0.07; background-size: 460px 460px; }
