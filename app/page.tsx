@@ -712,8 +712,6 @@ function CollectionSection({ items, onQuickView }: { items: MenuItem[]; onQuickV
           .collection-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
           .collection-card { border-radius: 12px !important; }
           .collection-card-img { height: 150px !important; cursor: pointer !important; }
-          /* Hide hovering quick view icons and add to cart overlay on mobile */
-          .collection-card-overlay { display: none !important; }
           .collection-card-body { padding: 12px 12px 14px !important; }
           .collection-card-cat { font-size: 0.52rem !important; letter-spacing: 1.4px !important; margin-bottom: 4px !important; }
           .collection-card-title { font-size: 0.88rem !important; margin-bottom: 4px !important; line-height: 1.3 !important; }
@@ -744,7 +742,7 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
         borderRadius: 16,
         overflow: 'hidden',
         border: '1px solid var(--color-border)',
-        boxShadow: hovered ? '0 12px 32px rgba(0, 0, 0, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)',
+        boxShadow: hovered ? '0 12px 32px rgba(0, 0, 0, 0.16)' : '0 2px 8px rgba(0, 0, 0, 0.05)',
         transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
         position: 'relative',
@@ -753,8 +751,17 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
         height: '100%',
       }}
     >
-      {/* Image */}
-      <div className="collection-card-img" onClick={() => onQuickView(item)} style={{ position: 'relative', height: 260, overflow: 'hidden', cursor: 'pointer' }}>
+      {/* Image — clicking opens quick view on desktop and mobile */}
+      <div
+        className="collection-card-img"
+        onClick={() => onQuickView(item)}
+        onKeyDown={(e) => { if (e.key === 'Enter') onQuickView(item); }}
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${item.name} details`}
+        title={`Click to view ${item.name}`}
+        style={{ position: 'relative', height: 260, overflow: 'hidden', cursor: 'pointer' }}
+      >
         <img
           src={item.images?.[0] || item.image}
           alt={item.name}
@@ -763,8 +770,8 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: hovered ? 'scale(1.03)' : 'scale(1)',
+            transition: 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
           }}
         />
 
@@ -827,81 +834,6 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
         <svg style={{ position: 'absolute', bottom: 8, left: 8, width: 28, height: 28, opacity: 0.4 }} viewBox="0 0 28 28" fill="none">
           <path d="M26 2 L26 22 Q26 26 22 26 L2 26" stroke="#F5D35C" strokeWidth="1.2" strokeLinecap="round" fill="none" />
         </svg>
-
-        {/* Quick View overlay */}
-        <div
-          className="collection-card-overlay"
-          onClick={() => onQuickView(item)}
-          onKeyDown={(e) => { if (e.key === 'Enter') onQuickView(item); }}
-          role="button"
-          tabIndex={0}
-          aria-label={`Quick view ${item.name}`}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 5,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            gap: 10,
-            paddingBottom: 18,
-            background: hovered ? 'rgba(20, 14, 8, 0.32)' : 'rgba(20, 14, 8, 0)',
-            opacity: hovered ? 1 : 0,
-            transition: 'opacity 0.3s var(--motion-ease), background 0.3s var(--motion-ease)',
-          }}
-        >
-          <button
-            onClick={(e) => { e.stopPropagation(); onQuickView(item); }}
-            aria-label={`Quick view ${item.name}`}
-            title="Quick View"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: '50%',
-              background: 'rgba(255, 253, 245, 0.94)',
-              color: 'var(--color-green)',
-              border: '1.5px solid var(--color-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transform: hovered ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.96)',
-              transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.28)',
-              cursor: 'pointer',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onAdd(item); }}
-            aria-label={`Add ${item.name} to cart`}
-            title="Add to Cart"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: '50%',
-              background: 'var(--color-green)',
-              color: '#FFFDF5',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transform: hovered ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.96)',
-              transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              boxShadow: '0 6px 20px rgba(40, 85, 28, 0.4)',
-              cursor: 'pointer',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
-          </button>
-        </div>
       </div>
 
       {/* Content */}
