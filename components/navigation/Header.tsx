@@ -19,6 +19,7 @@ const navLinks = [
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
@@ -26,28 +27,45 @@ export default function Header() {
 
   const navListRef = useRef<HTMLUListElement>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const lastScrollYRef = useRef(0);
 
   const pathname = usePathname();
   const { count, openCart } = useCart();
   const { count: wishlistCount, openWishlist } = useWishlist();
   const { theme, toggleTheme } = useTheme();
 
-  // Scroll Spy for smooth section detection on home page
+  // Scroll Spy & Smart Hide on Scroll Down / Reveal on Scroll Up
   useEffect(() => {
-    if (pathname === '/menu') {
-      setActiveSection('menu');
-      return;
-    }
-
     let ticking = false;
 
     const updateActiveSection = () => {
-      setScrolled(window.scrollY > 25);
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 25);
+
+      // Hide navbar when scrolling down, show when scrolling up
+      if (currentScrollY < 80 || mobileOpen) {
+        setVisible(true);
+      } else {
+        const diff = currentScrollY - lastScrollYRef.current;
+        if (diff > 8) {
+          // Scrolling down
+          setVisible(false);
+        } else if (diff < -8) {
+          // Scrolling up
+          setVisible(true);
+        }
+      }
+      lastScrollYRef.current = currentScrollY;
+
+      if (pathname === '/menu') {
+        setActiveSection('menu');
+        return;
+      }
 
       const sectionOrder = ['contact', 'about', 'collection', 'home'];
-      const scrollY = window.scrollY + 200;
+      const scrollY = currentScrollY + 200;
 
-      if (window.scrollY < 180) {
+      if (currentScrollY < 180) {
         setActiveSection('home');
         return;
       }
@@ -381,10 +399,11 @@ export default function Header() {
           left: 0,
           right: 0,
           zIndex: 1000,
+          transform: visible || mobileOpen ? 'translateY(0)' : 'translateY(-105%)',
           background: (scrolled || pathname !== '/') ? 'var(--header-bg)' : 'transparent',
           backdropFilter: (scrolled || pathname !== '/') ? 'blur(18px)' : 'none',
           borderBottom: (scrolled || pathname !== '/') ? '1.5px solid var(--color-border)' : '1px solid transparent',
-          transition: 'all var(--motion-normal) var(--motion-ease)',
+          transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background var(--motion-normal) var(--motion-ease), backdrop-filter var(--motion-normal) var(--motion-ease), border-bottom var(--motion-normal) var(--motion-ease)',
         }}
       >
         <div
