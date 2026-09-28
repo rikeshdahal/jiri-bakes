@@ -149,7 +149,7 @@ export default function HomePage() {
       <TestimonialsSection items={testimonials} />
       <VisitUsSection />
       <FooterSection />
-      <QuickViewModal key={quickViewItem?.id ?? 'none'} item={quickViewItem} onClose={() => setQuickViewItem(null)} />
+      <QuickViewModal item={quickViewItem} onClose={() => setQuickViewItem(null)} />
     </>
   );
 }

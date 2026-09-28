@@ -64,7 +64,7 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
     };
   }, [item, onClose]);
 
-  if (!item || !mounted) return null;
+  if (!item || typeof document === 'undefined') return null;
 
   const itemPrice = typeof item.price === 'number' ? item.price : Number(item.price) || 0;
 
