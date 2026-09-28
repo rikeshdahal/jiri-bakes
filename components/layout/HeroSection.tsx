@@ -307,7 +307,7 @@ export default function HeroSection({ bakeOfTheWeek, secondaryImage, onQuickView
                 color: isNight ? '#F5D35C' : 'var(--color-green, #28551C)',
                 letterSpacing: '0.4px',
               }}>
-                {isNight ? 'Lokanthali, Nepal · Starry Night Bakery' : 'Lokanthali, Nepal · Simply Organic'}
+                {isNight ? 'Lokanthali, Nepal · Simply Organic' : 'Lokanthali, Nepal · Simply Organic'}
               </span>
             </div>
 

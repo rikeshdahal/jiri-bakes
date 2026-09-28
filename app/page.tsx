@@ -703,66 +703,23 @@ function CollectionSection({ items, onQuickView }: { items: MenuItem[]; onQuickV
           from { opacity: 0; transform: translateY(16px) scale(0.97); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .collection-card {
-          animation: fadeCard 0.4s ease forwards;
-          display: flex !important;
-          flex-direction: column !important;
-          height: 100% !important;
-        }
-        .collection-card-body {
-          display: flex !important;
-          flex-direction: column !important;
-          flex: 1 1 auto !important;
-        }
-        .collection-card-title {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          min-height: 2.5em;
-          max-height: 2.5em;
-        }
-        .collection-card-desc {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          min-height: 3em;
-          max-height: 3em;
-          line-height: 1.5;
-        }
-        .collection-card-footer {
-          margin-top: auto !important;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding-top: 10px;
-        }
+        .collection-card { animation: fadeCard 0.4s ease forwards; }
         @media (max-width: 900px) {
           .collection-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
         @media (max-width: 600px) {
-          /* Compact 2-col grid on phones */
+          /* Compact 2-col grid on phones so 4 cards ≈ 2 rows, rest behind View All */
           .collection-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
           .collection-card { border-radius: 12px !important; }
-          .collection-card-img { height: 160px !important; cursor: pointer !important; }
-          /* Hide hovering quick view icons and add to cart overlay button on mobile */
+          .collection-card-img { height: 150px !important; cursor: pointer !important; }
+          /* Hide hovering quick view icons and add to cart overlay on mobile */
           .collection-card-overlay { display: none !important; }
           .collection-card-body { padding: 12px 12px 14px !important; }
           .collection-card-cat { font-size: 0.52rem !important; letter-spacing: 1.4px !important; margin-bottom: 4px !important; }
-          .collection-card-title {
-            font-size: 0.88rem !important;
-            margin-bottom: 4px !important;
-            line-height: 1.25 !important;
-            min-height: 2.5em !important;
-            max-height: 2.5em !important;
-          }
+          .collection-card-title { font-size: 0.88rem !important; margin-bottom: 4px !important; line-height: 1.3 !important; }
           .collection-card-desc {
-            font-size: 0.72rem !important;
-            line-height: 1.4 !important;
-            margin-bottom: 10px !important;
-            min-height: 2.8em !important;
-            max-height: 2.8em !important;
+            font-size: 0.7rem !important; line-height: 1.5 !important; margin-bottom: 10px !important;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
           }
           .collection-card-price { font-size: 0.92rem !important; }
           .collection-card-add { padding: 7px 14px !important; font-size: 0.7rem !important; }
@@ -791,6 +748,9 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
         transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
       }}
     >
       {/* Image */}
@@ -912,7 +872,7 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
@@ -945,18 +905,29 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
       </div>
 
       {/* Content */}
-      <div className="collection-card-body">
+      <div className="collection-card-body" style={{ padding: '20px 22px 22px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div className="collection-card-cat" style={{
           fontSize: '0.6rem', fontWeight: 600, letterSpacing: '2px',
           textTransform: 'uppercase' as const, color: 'var(--color-brown)',
           marginBottom: 8,
         }}>{item.category === 'cake' ? 'CAKES' : item.category === 'pastry' ? 'PASTRIES' : item.category === 'bread' ? 'BREADS' : 'COOKIES'}</div>
 
-        <h3 className="collection-card-title">{item.name}</h3>
+        <h3 className="collection-card-title" style={{
+          fontFamily: 'var(--font-display)', fontSize: '1.2rem',
+          color: 'var(--color-brown-deep)', marginBottom: 8, lineHeight: 1.25,
+        }}>{item.name}</h3>
 
-        <p className="collection-card-desc">{item.description}</p>
+        <p className="collection-card-desc" style={{
+          color: 'var(--color-text-tertiary)', fontSize: '0.82rem',
+          lineHeight: 1.65, marginBottom: 18,
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          minHeight: '4.1em',
+        }}>{item.description}</p>
 
-        <div className="collection-card-footer">
+        <div className="collection-card-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
           <span className="collection-card-price" style={{
             fontFamily: 'var(--font-display)', fontSize: '1.2rem',
             color: 'var(--color-green)', fontWeight: 400,
@@ -971,18 +942,16 @@ function CollectionCard({ item, added, onAdd, onQuickView }: { item: MenuItem; a
               borderRadius: 'var(--radius-full)',
               background: added ? 'var(--color-orange)' : 'var(--color-green)',
               color: 'var(--color-cream)',
-              fontSize: '0.78rem',
+              border: 'none',
+              fontSize: '0.8rem',
               fontWeight: 600,
-              letterSpacing: '0.4px',
-              fontFamily: 'var(--font-body)',
-              transition: 'all 0.3s var(--motion-ease)',
-              transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
-              boxShadow: hovered ? '0 4px 12px rgba(40, 85, 28, 0.2)' : 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transform: added ? 'scale(1.08)' : (hovered ? 'translateY(-1px)' : 'scale(1)'),
+              boxShadow: added ? '0 4px 16px rgba(224, 122, 63, 0.4)' : (hovered ? '0 4px 12px rgba(40, 85, 28, 0.2)' : 'none'),
             }}
-            onMouseEnter={(e) => { if (!added) e.currentTarget.style.background = 'var(--color-green-light)'; }}
-            onMouseLeave={(e) => { if (!added) e.currentTarget.style.background = 'var(--color-green)'; }}
           >
-            {added ? 'Added \u2713' : '+ Add'}
+            {added ? '✓ Added' : '+ Add'}
           </button>
         </div>
       </div>
