@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useCart } from '@/components/layout/AppShell';
 import { useWishlist } from '@/components/layout/WishlistContext';
 import { useTheme } from '@/components/layout/ThemeContext';
+import { useBackClose } from '@/lib/hooks/useBackClose';
 
 const navLinks = [
   { id: 'home', label: 'Home', href: '/#home' },
@@ -20,6 +21,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+  useBackClose(mobileOpen, () => setMobileOpen(false), 'navmenu');
 
   const navListRef = useRef<HTMLUListElement>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
@@ -108,6 +111,24 @@ export default function Header() {
 
   const isNight = theme === 'night';
 
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const handlePop = () => {
+      const hash = (window.location.hash || '').replace('#', '') || 'home';
+      const target = document.getElementById(hash);
+      const headerOffset = 76;
+      const elementPosition = target ? target.getBoundingClientRect().top + window.pageYOffset : 0;
+      const offsetPosition = hash === 'home' ? 0 : Math.max(0, elementPosition - headerOffset);
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+      setActiveSection(hash);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, [pathname]);
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, id: string) => {
     if (href === '/menu') {
       setActiveSection('menu');
@@ -131,6 +152,9 @@ export default function Header() {
         }
         setActiveSection(id);
         setMobileOpen(false);
+        if (typeof window !== 'undefined' && window.location.hash !== `#${id}`) {
+          window.history.pushState({ section: id }, '', `#${id}`);
+        }
       } else {
         setActiveSection(id);
         setMobileOpen(false);

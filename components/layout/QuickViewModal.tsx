@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import type { MenuItem } from '@/types';
 import { useCart } from '@/components/layout/AppShell';
 import { useWishlist } from '@/components/layout/WishlistContext';
+import { useBackClose } from '@/lib/hooks/useBackClose';
 
 interface QuickViewModalProps {
   item: MenuItem | null;
@@ -19,6 +20,8 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
   const [added, setAdded] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
   const [paused, setPaused] = useState(false);
+
+  useBackClose(Boolean(item), onClose, 'quickview');
 
   useEffect(() => {
     setMounted(true);

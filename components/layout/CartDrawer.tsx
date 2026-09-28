@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from 'react';
 import { useCart } from './AppShell';
+import { useBackClose } from '@/lib/hooks/useBackClose';
 import {
   getRecentOrders,
   saveRecentOrder,
@@ -35,6 +36,18 @@ export default function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, clearCart, subtotal } = useCart();
 
   const [step, setStep] = useState<Step>('cart');
+
+  useBackClose(
+    isOpen,
+    () => {
+      if (step !== 'cart') {
+        setStep('cart');
+      } else {
+        closeCart();
+      }
+    },
+    `cart_${step}`
+  );
   const [customerName, setCustomerName]       = useState('');
   const [customerPhone, setCustomerPhone]     = useState('');
   const [customerEmail, setCustomerEmail]     = useState('');

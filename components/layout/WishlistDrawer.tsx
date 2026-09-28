@@ -2,10 +2,13 @@
 
 import { useWishlist } from './WishlistContext';
 import { useCart } from './AppShell';
+import { useBackClose } from '@/lib/hooks/useBackClose';
 
 export default function WishlistDrawer() {
   const { items, isOpen, closeWishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const { addItem } = useCart();
+
+  useBackClose(isOpen, closeWishlist, 'wishlist');
 
   if (!isOpen) return null;
 
