@@ -148,7 +148,7 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Welcome Banner */}
-      <div style={{
+      <div className="admin-welcome-banner" style={{
         background: 'linear-gradient(135deg, #2B1D10 0%, #1A2818 100%)',
         borderRadius: 20,
         padding: '32px 36px',
@@ -161,14 +161,14 @@ export default function AdminDashboard() {
         flexWrap: 'wrap',
         gap: 20,
       }}>
-        <div>
+        <div className="admin-welcome-text" style={{ minWidth: 0 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 9999, background: 'rgba(245, 211, 92, 0.15)', border: '1px solid rgba(245, 211, 92, 0.25)', marginBottom: 12 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F5D35C' }} />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#F5D35C', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F5D35C', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#F5D35C', letterSpacing: '1px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
               Bakery Overview
             </span>
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem, 3.2vw, 2.2rem)', color: '#FFFDF5', lineHeight: 1.15, marginBottom: 8 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.35rem, 5vw, 2.2rem)', color: '#FFFDF5', lineHeight: 1.15, marginBottom: 8 }}>
             Welcome to Jiri Bakes Studio
           </h1>
           <p style={{ fontSize: '0.88rem', color: 'rgba(255, 253, 245, 0.72)', maxWidth: 500, lineHeight: 1.6 }}>
@@ -176,9 +176,10 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="admin-welcome-actions" style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
           <Link
             href="/admin/products/new"
+            className="admin-btn-primary"
             style={{
               padding: '12px 24px',
               borderRadius: 9999,
@@ -189,12 +190,15 @@ export default function AdminDashboard() {
               textDecoration: 'none',
               transition: 'all 0.2s',
               boxShadow: '0 4px 14px rgba(245, 211, 92, 0.3)',
+              whiteSpace: 'nowrap',
+              textAlign: 'center',
             }}
           >
             + Add Product
           </Link>
           <Link
             href="/admin/orders"
+            className="admin-btn-secondary"
             style={{
               padding: '12px 24px',
               borderRadius: 9999,
@@ -205,6 +209,8 @@ export default function AdminDashboard() {
               fontWeight: 600,
               textDecoration: 'none',
               transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+              textAlign: 'center',
             }}
           >
             View Orders
@@ -464,6 +470,37 @@ export default function AdminDashboard() {
 }
 @media (min-width: 769px) {
   .admin-orders-mobile-cards { display: none !important; }
+}
+@media (max-width: 640px) {
+  .admin-welcome-banner {
+    padding: 20px 18px !important;
+    border-radius: 16px !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+  }
+  .admin-welcome-text p {
+    font-size: 0.8rem !important;
+  }
+  .admin-welcome-actions {
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .admin-welcome-actions .admin-btn-primary,
+  .admin-welcome-actions .admin-btn-secondary {
+    flex: 1 !important;
+    padding: 10px 12px !important;
+    font-size: 0.76rem !important;
+    border-radius: 12px !important;
+  }
+}
+@media (max-width: 380px) {
+  .admin-welcome-actions {
+    flex-direction: column !important;
+  }
+  .admin-welcome-actions .admin-btn-primary,
+  .admin-welcome-actions .admin-btn-secondary {
+    width: 100% !important;
+  }
 }
       `}</style>
     </div>

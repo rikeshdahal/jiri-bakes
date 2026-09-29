@@ -326,6 +326,7 @@ export default function AdminCakeMenuPage() {
       {/* Toast Notification */}
       {toast && (
         <div
+          className="admin-cake-toast"
           style={{
             position: 'fixed',
             bottom: 24,
@@ -350,6 +351,7 @@ export default function AdminCakeMenuPage() {
 
       {/* Top Header */}
       <div
+        className="admin-cake-header"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -359,16 +361,17 @@ export default function AdminCakeMenuPage() {
           gap: 16,
         }}
       >
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <span style={{ fontSize: '1.6rem' }}>🎂</span>
+            <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>🎂</span>
             <h1
               style={{
                 fontFamily: 'var(--font-display, serif)',
-                fontSize: 'clamp(1.6rem, 3.2vw, 2.3rem)',
+                fontSize: 'clamp(1.3rem, 5vw, 2.3rem)',
                 color: '#F5D35C',
                 margin: 0,
                 fontWeight: 700,
+                lineHeight: 1.2,
               }}
             >
               Cake Menu Management
@@ -379,11 +382,12 @@ export default function AdminCakeMenuPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="admin-cake-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
           <Link
             href="/menu"
             target="_blank"
             rel="noopener noreferrer"
+            className="admin-cake-live-link"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -397,6 +401,7 @@ export default function AdminCakeMenuPage() {
               fontWeight: 600,
               textDecoration: 'none',
               transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
             }}
           >
             <span>Live Menu</span>
@@ -409,9 +414,11 @@ export default function AdminCakeMenuPage() {
 
           <button
             onClick={openCreateModal}
+            className="admin-cake-add-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: 8,
               padding: '11px 24px',
               borderRadius: 9999,
@@ -423,6 +430,7 @@ export default function AdminCakeMenuPage() {
               cursor: 'pointer',
               boxShadow: '0 4px 14px rgba(45, 106, 79, 0.35)',
               transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
             }}
           >
             <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>+</span>
@@ -433,6 +441,7 @@ export default function AdminCakeMenuPage() {
 
       {/* KPI Stats Grid */}
       <div
+        className="admin-cake-kpis"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -507,6 +516,7 @@ export default function AdminCakeMenuPage() {
 
       {/* Search & Category Filter Bar */}
       <div
+        className="admin-cake-filterbar"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -516,22 +526,24 @@ export default function AdminCakeMenuPage() {
           marginBottom: 20,
         }}
       >
-        {/* Category Pills */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {/* Category Pills (scrollable rail on mobile) */}
+        <div className="admin-cake-cat-rail" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {[
-            { id: 'all', label: `All Cakes (${items.length})` },
-            { id: 'popular', label: `Popular Sponges (${stats.popular})` },
-            { id: 'cheesecake', label: `Cheesecakes (${stats.cheesecake})` },
-            { id: 'special', label: `Specialties (${stats.special})` },
-            { id: 'unavailable', label: `Sold Out (${items.length - stats.available})` },
+            { id: 'all', label: 'All', count: items.length },
+            { id: 'popular', label: 'Popular', count: stats.popular },
+            { id: 'cheesecake', label: 'Cheesecakes', count: stats.cheesecake },
+            { id: 'special', label: 'Specialties', count: stats.special },
+            { id: 'unavailable', label: 'Sold Out', count: items.length - stats.available },
           ].map((tab) => {
             const active = activeCategory === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveCategory(tab.id as CategoryFilter)}
+                aria-pressed={active}
                 style={{
-                  padding: '7px 16px',
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '7px 14px',
                   borderRadius: 9999,
                   fontSize: '0.78rem',
                   fontWeight: 600,
@@ -540,25 +552,36 @@ export default function AdminCakeMenuPage() {
                   background: active ? 'rgba(245, 211, 92, 0.18)' : 'rgba(255, 255, 255, 0.04)',
                   color: active ? '#F5D35C' : '#BDB49A',
                   border: `1px solid ${active ? '#F5D35C' : 'rgba(255, 255, 255, 0.08)'}`,
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {tab.label}
+                <span style={{
+                  fontSize: '0.68rem', fontWeight: 700,
+                  background: active ? 'rgba(245, 211, 92, 0.25)' : 'rgba(255,255,255,0.08)',
+                  borderRadius: 9999, padding: '1px 7px',
+                }}>
+                  {tab.count}
+                </span>
               </button>
             );
           })}
         </div>
 
         {/* Search input */}
-        <div style={{ position: 'relative', minWidth: 260, flex: '1 1 260px', maxWidth: 360 }}>
+        <div className="admin-cake-search" style={{ position: 'relative', minWidth: 240, flex: '1 1 240px', maxWidth: 360 }}>
           <input
             type="text"
             placeholder="Search cakes by name, flavour, tag..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search cakes"
             style={{
               width: '100%',
+              boxSizing: 'border-box',
               padding: '9px 34px 9px 14px',
-              borderRadius: 9999,
+              borderRadius: 12,
               background: 'rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               color: '#FFFDF5',
@@ -569,6 +592,7 @@ export default function AdminCakeMenuPage() {
           {search && (
             <button
               onClick={() => setSearch('')}
+              aria-label="Clear search"
               style={{
                 position: 'absolute',
                 right: 10,
@@ -587,8 +611,9 @@ export default function AdminCakeMenuPage() {
         </div>
       </div>
 
-      {/* Main Table Card */}
+      {/* Main Table Card (desktop) */}
       <div
+        className="admin-cake-table-card"
         style={{
           background: 'rgba(15, 23, 42, 0.65)',
           backdropFilter: 'blur(12px)',
@@ -921,6 +946,110 @@ export default function AdminCakeMenuPage() {
         </div>
       </div>
 
+      {/* Mobile Card List (mobile-first, replaces table on small screens) */}
+      <div className="admin-cake-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: 12 }}>
+        {filteredItems.length === 0 ? (
+          <div style={{ padding: '40px 20px', textAlign: 'center', color: '#BDB49A', background: 'rgba(15, 23, 42, 0.65)', borderRadius: 16, border: '1px solid rgba(245, 211, 92, 0.15)' }}>
+            No cake menu items found matching current filters.
+          </div>
+        ) : (
+          filteredItems.map((item, index) => {
+            const isAvailable = item.available !== false;
+            return (
+              <div
+                key={item.id}
+                style={{
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  borderRadius: 16,
+                  border: '1px solid rgba(245, 211, 92, 0.15)',
+                  padding: 14,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                  opacity: isAvailable ? 1 : 0.75,
+                }}
+              >
+                {/* Top: image + name + price */}
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', minWidth: 0 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(245, 211, 92, 0.2)', flexShrink: 0 }}>
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>🎂</div>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isAvailable ? '#FFFDF5' : '#888', textDecoration: !isAvailable ? 'line-through' : 'none' }}>
+                        {item.name}
+                      </span>
+                      <span style={{ fontSize: '0.62rem', fontWeight: 600, padding: '1px 6px', borderRadius: 6, background: 'rgba(59,130,246,0.15)', color: '#60A5FA', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+                        {item.cat === 'popular' ? 'Popular' : item.cat}
+                      </span>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: '0.98rem', fontWeight: 700, color: '#F5D35C', marginTop: 2 }}>
+                      NPR {item.price.toLocaleString()} <span style={{ fontSize: '0.68rem', color: '#BDB49A', fontWeight: 400 }}>{item.weight || '1 Pound'}</span>
+                    </div>
+                  </div>
+                  {/* Reorder arrows */}
+                  <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                    <button
+                      onClick={() => handleMove(index, -1)}
+                      disabled={index === 0 || movingId === item.id}
+                      aria-label="Move up"
+                      style={{ width: 32, height: 32, borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFDF5', cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.25 : 0.85, fontSize: '0.7rem' }}
+                    >
+                      ▲
+                    </button>
+                    <button
+                      onClick={() => handleMove(index, 1)}
+                      disabled={index === filteredItems.length - 1 || movingId === item.id}
+                      aria-label="Move down"
+                      style={{ width: 32, height: 32, borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFDF5', cursor: index === filteredItems.length - 1 ? 'default' : 'pointer', opacity: index === filteredItems.length - 1 ? 0.25 : 0.85, fontSize: '0.7rem' }}
+                    >
+                      ▼
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bottom: stock toggle + actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => handleToggleAvailability(item)}
+                    disabled={togglingId === item.id}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '7px 12px', borderRadius: 9999, fontSize: '0.72rem', fontWeight: 700,
+                      cursor: 'pointer', flexShrink: 0,
+                      background: isAvailable ? 'rgba(82, 183, 136, 0.18)' : 'rgba(239, 68, 68, 0.18)',
+                      color: isAvailable ? '#52B788' : '#F87171',
+                      border: `1px solid ${isAvailable ? 'rgba(82, 183, 136, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                    }}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: isAvailable ? '#52B788' : '#F87171' }} />
+                    {isAvailable ? 'In Stock' : 'Sold Out'}
+                  </button>
+                  <div style={{ flex: 1 }} />
+                  <button
+                    onClick={() => openEditModal(item)}
+                    style={{ padding: '7px 16px', borderRadius: 9, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFDF5', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', minHeight: 36 }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id, item.name)}
+                    disabled={deletingId === item.id}
+                    style={{ padding: '7px 16px', borderRadius: 9, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#F87171', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', minHeight: 36 }}
+                  >
+                    {deletingId === item.id ? '…' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
       {/* Modal for Add / Edit */}
       {isModalOpen && (
         <div
@@ -940,6 +1069,7 @@ export default function AdminCakeMenuPage() {
           }}
         >
           <div
+            className="admin-cake-modal"
             style={{
               background: '#0F172A',
               border: '1px solid rgba(245, 211, 92, 0.25)',
@@ -979,7 +1109,7 @@ export default function AdminCakeMenuPage() {
             </div>
 
             <form onSubmit={handleSave}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="admin-cake-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 {/* Cake Name */}
                 <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: '#BDB49A', marginBottom: 6 }}>
@@ -1131,7 +1261,7 @@ export default function AdminCakeMenuPage() {
                   <label style={{ display: 'block', fontSize: '0.78rem', color: '#BDB49A', marginBottom: 6 }}>
                     Cake Photo
                   </label>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div className="admin-cake-image-row" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <input
                       type="text"
                       value={formData.image}
@@ -1268,7 +1398,7 @@ export default function AdminCakeMenuPage() {
               </div>
 
               {/* Modal Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
+              <div className="admin-cake-modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -1307,6 +1437,72 @@ export default function AdminCakeMenuPage() {
           </div>
         </div>
       )}
+
+      <style>{`
+.admin-cake-cat-rail::-webkit-scrollbar { display: none; }
+.admin-cake-cat-rail { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+@media (max-width: 768px) {
+  .admin-cake-table-card { display: none !important; }
+  .admin-cake-mobile-cards { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .admin-cake-mobile-cards { display: none !important; }
+}
+.admin-cake-mobile-cards { overflow-wrap: break-word; }
+@media (max-width: 640px) {
+  .admin-cake-header { margin-bottom: 20px !important; gap: 12px !important; }
+  .admin-cake-header-actions { width: 100% !important; gap: 8px !important; }
+  .admin-cake-live-link {
+    padding: 9px 14px !important;
+    font-size: 0.74rem !important;
+  }
+  .admin-cake-add-btn {
+    flex: 1 !important;
+    padding: 10px 14px !important;
+    font-size: 0.78rem !important;
+    border-radius: 12px !important;
+  }
+  .admin-cake-kpis {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+  }
+  .admin-cake-kpis > div { padding: 12px 14px !important; border-radius: 14px !important; }
+  .admin-cake-kpis > div > div:last-child { font-size: 1.3rem !important; }
+  .admin-cake-filterbar { gap: 10px !important; margin-bottom: 16px !important; }
+  .admin-cake-cat-rail {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    margin: 0 -4px !important;
+    padding: 0 4px 4px !important;
+    max-width: 100% !important;
+  }
+  .admin-cake-search { flex: 1 1 100% !important; max-width: none !important; min-width: 0 !important; }
+  .admin-cake-modal {
+    padding: 18px !important;
+    border-radius: 18px !important;
+    max-height: 92dvh !important;
+  }
+  .admin-cake-form-grid { grid-template-columns: 1fr !important; }
+  .admin-cake-form-grid > div { grid-column: span 1 !important; }
+  .admin-cake-image-row { flex-wrap: wrap !important; }
+  .admin-cake-modal-actions { flex-direction: column-reverse !important; }
+  .admin-cake-modal-actions button { width: 100% !important; padding: 12px !important; }
+  .admin-cake-modal input,
+  .admin-cake-modal select,
+  .admin-cake-modal textarea {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+  .admin-cake-toast {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+  }
+}
+      `}</style>
     </div>
   );
 }

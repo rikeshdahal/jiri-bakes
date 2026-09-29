@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Order } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -21,6 +21,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'cod' | 'visit'>('all');
+  const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [resendingId, setResendingId] = useState<string | null>(null);
@@ -93,14 +94,46 @@ export default function AdminOrdersPage() {
     );
   };
 
+  const typeCounts = useMemo(() => {
+    let cod = 0;
+    let visit = 0;
+    for (const o of orders) {
+      if (isVisitShop(o)) visit++;
+      else cod++;
+    }
+    return { all: orders.length, cod, visit };
+  }, [orders]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: orders.length };
+    for (const o of orders) counts[o.status] = (counts[o.status] || 0) + 1;
+    return counts;
+  }, [orders]);
+
+  const searchQuery = search.trim().toLowerCase();
+
   const filteredOrders = orders.filter((o) => {
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
     const matchType =
       typeFilter === 'all' ||
       (typeFilter === 'visit' && isVisitShop(o)) ||
       (typeFilter === 'cod' && !isVisitShop(o));
-    return matchStatus && matchType;
+    if (!matchStatus || !matchType) return false;
+    if (!searchQuery) return true;
+    const haystack = [o.id, o.customer_name, o.customer_phone, o.customer_email]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(searchQuery);
   });
+
+  const isFiltered = statusFilter !== 'all' || typeFilter !== 'all' || searchQuery !== '';
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setSearch('');
+  };
 
   const formatDate = (iso: string) => {
     try {
@@ -161,69 +194,170 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Order Type & Status Filters */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-        {/* Type Filter Pills (COD vs Visit Shop) */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px', marginRight: 4 }}>
-            Order Type:
-          </span>
-          {[
-            { key: 'all', label: 'All Types', count: orders.length },
-            { key: 'cod', label: 'Cash on Delivery', count: orders.filter((o) => !isVisitShop(o)).length },
-            { key: 'visit', label: 'Visit Shop', count: orders.filter((o) => isVisitShop(o)).length },
-          ].map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTypeFilter(t.key as typeof typeFilter)}
+      <div className="admin-orders-filter-card" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        marginBottom: 20,
+        padding: '14px 16px',
+        background: 'var(--color-card-bg)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 16,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+      }}>
+        {/* Search */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, order ID, phone…"
+              aria-label="Search orders"
               style={{
-                padding: '7px 16px',
-                minHeight: 40,
-                borderRadius: 9999,
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border: `1px solid ${typeFilter === t.key ? '#52B788' : 'var(--color-border)'}`,
-                background: typeFilter === t.key ? 'rgba(82, 183, 136, 0.2)' : 'var(--color-card-bg)',
-                color: typeFilter === t.key ? '#52B788' : 'var(--color-text-tertiary)',
-                transition: 'all 0.2s',
-                boxShadow: typeFilter === t.key ? '0 2px 8px rgba(40,85,28,0.2)' : 'none',
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '9px 34px 9px 36px',
+                borderRadius: 12,
+                fontSize: '0.82rem',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--color-border)',
+                color: '#FFFDF5',
+                outline: 'none',
               }}
-            >
-              {t.label} ({t.count})
-            </button>
-          ))}
-        </div>
-
-        {/* Status Filter Pills */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px', marginRight: 4 }}>
-            Status:
-          </span>
-          {['all', ...ALL_STATUSES].map((s) => {
-            const count = s === 'all' ? orders.length : orders.filter((o) => o.status === s).length;
-            const isSelected = statusFilter === s;
-            return (
+              onFocus={(e) => { e.currentTarget.style.borderColor = '#F5D35C'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+            />
+            {search && (
               <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
+                onClick={() => setSearch('')}
+                aria-label="Clear search"
                 style={{
-                  padding: '6px 14px',
-                  minHeight: 40,
-                  borderRadius: 9999,
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  border: `1px solid ${isSelected ? '#F5D35C' : 'var(--color-border)'}`,
-                  background: isSelected ? 'rgba(245, 211, 92, 0.15)' : 'var(--color-card-bg)',
-                  color: isSelected ? '#F5D35C' : 'var(--color-text-tertiary)',
-                  textTransform: 'capitalize',
-                  transition: 'all 0.2s',
+                  position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.1)', border: 'none',
+                  color: '#94A3B8', cursor: 'pointer', fontSize: '0.7rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                {s} ({count})
+                ✕
               </button>
-            );
-          })}
+            )}
+          </div>
+        </div>
+
+        {/* Type segmented control */}
+        <div className="admin-filter-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0, width: 44 }}>
+            Type
+          </span>
+          <div style={{
+            display: 'flex', gap: 4, padding: 4, borderRadius: 12,
+            background: 'rgba(255,255,255,0.04)', border: '1px solid var(--color-border)',
+            flex: 1, minWidth: 0,
+          }}>
+            {[
+              { key: 'all', label: 'All', icon: null },
+              { key: 'cod', label: 'COD', icon: '🛵' },
+              { key: 'visit', label: 'Visit', icon: '🏠' },
+            ].map((t) => {
+              const active = typeFilter === t.key;
+              const count = typeCounts[t.key as keyof typeof typeCounts] ?? 0;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTypeFilter(t.key as typeof typeFilter)}
+                  aria-pressed={active}
+                  style={{
+                    flex: 1, minWidth: 0,
+                    padding: '7px 6px',
+                    borderRadius: 9,
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: 'none',
+                    background: active ? 'rgba(82, 183, 136, 0.22)' : 'transparent',
+                    color: active ? '#52B788' : 'var(--color-text-tertiary)',
+                    transition: 'all 0.18s',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}
+                >
+                  {t.icon ? `${t.icon} ` : ''}{t.label} · {count}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Status chip rail (horizontally scrollable) */}
+        <div className="admin-filter-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0, width: 44 }}>
+            Status
+          </span>
+          <div className="admin-status-rail" style={{
+            display: 'flex', gap: 6, flex: 1, minWidth: 0,
+            overflowX: 'auto', paddingBottom: 2,
+            scrollbarWidth: 'none',
+          }}>
+            {['all', ...ALL_STATUSES].map((s) => {
+              const count = statusCounts[s] ?? 0;
+              const isSelected = statusFilter === s;
+              const dot = s === 'all' ? '#F5D35C' : (STATUS_COLORS[s] || '#8A7654');
+              return (
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  aria-pressed={isSelected}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '6px 12px',
+                    borderRadius: 9999,
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    border: `1px solid ${isSelected ? dot : 'var(--color-border)'}`,
+                    background: isSelected ? `${dot}22` : 'rgba(255,255,255,0.04)',
+                    color: isSelected ? dot : 'var(--color-text-tertiary)',
+                    textTransform: 'capitalize',
+                    transition: 'all 0.18s',
+                    opacity: !isSelected && count === 0 ? 0.45 : 1,
+                  }}
+                >
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+                  {s}
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 700,
+                    background: isSelected ? `${dot}30` : 'rgba(255,255,255,0.08)',
+                    borderRadius: 9999, padding: '1px 7px',
+                  }}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Result meta + clear */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <span style={{ fontSize: '0.74rem', color: 'var(--color-text-tertiary)' }}>
+            Showing <strong style={{ color: '#FFFDF5' }}>{filteredOrders.length}</strong> of <strong style={{ color: '#FFFDF5' }}>{orders.length}</strong> orders
+          </span>
+          {isFiltered && (
+            <button
+              onClick={clearFilters}
+              style={{
+                fontSize: '0.74rem', fontWeight: 700, color: '#F5D35C',
+                background: 'rgba(245, 211, 92, 0.1)', border: '1px solid rgba(245, 211, 92, 0.3)',
+                borderRadius: 9999, padding: '5px 14px', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              ✕ Clear filters
+            </button>
+          )}
         </div>
       </div>
 
@@ -237,7 +371,23 @@ export default function AdminOrdersPage() {
           borderRadius: 20,
           border: '1px solid var(--color-border)',
         }}>
-          No matching orders found.
+          <div style={{ fontSize: '2rem', marginBottom: 10 }}>🔍</div>
+          <div style={{ fontWeight: 600, color: '#FFFDF5', marginBottom: 4 }}>No matching orders found</div>
+          <div style={{ fontSize: '0.8rem', marginBottom: isFiltered ? 14 : 0 }}>
+            {isFiltered ? 'Try a different search or clear the filters below.' : 'No orders recorded yet.'}
+          </div>
+          {isFiltered && (
+            <button
+              onClick={clearFilters}
+              style={{
+                fontSize: '0.78rem', fontWeight: 700, color: '#2B1D10',
+                background: '#F5D35C', border: 'none',
+                borderRadius: 9999, padding: '9px 22px', cursor: 'pointer',
+              }}
+            >
+              Clear all filters
+            </button>
+          )}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -307,7 +457,7 @@ export default function AdminOrdersPage() {
                           border: '1px solid rgba(41, 128, 185, 0.3)',
                         }}
                       >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visit Shop / Store Pickup
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visit Shop
                       </span>
                     ) : (
                       <span
@@ -324,13 +474,13 @@ export default function AdminOrdersPage() {
                           border: '1px solid rgba(232, 123, 50, 0.3)',
                         }}
                       >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/></svg> Cash on Delivery
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'-1px',marginRight:2}}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/></svg> COD
                       </span>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <span style={{ fontSize: '1.05rem', fontWeight: 700, color: '#F5D35C', fontFamily: 'var(--font-display)' }}>
+                  <div className="admin-order-card-meta" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span className="admin-order-card-total" style={{ fontSize: '1.05rem', fontWeight: 700, color: '#F5D35C', fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>
                       NPR {order.total.toLocaleString()}
                     </span>
 
@@ -344,12 +494,13 @@ export default function AdminOrdersPage() {
                         color: statusColor,
                         border: `1px solid ${statusColor}40`,
                         textTransform: 'capitalize',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {order.status}
                     </span>
 
-                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s', flexShrink: 0 }}>
                       ▼
                     </span>
                   </div>
@@ -357,8 +508,8 @@ export default function AdminOrdersPage() {
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div style={{ padding: '0 22px 22px', borderTop: '1px solid var(--color-border)', background: '#0B132B' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, paddingTop: 18 }}>
+                  <div className="admin-order-expanded" style={{ padding: '0 22px 22px', borderTop: '1px solid var(--color-border)', background: '#0B132B', minWidth: 0 }}>
+                    <div className="admin-order-expanded-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 20, paddingTop: 18 }}>
                       {/* Customer & Delivery Mode Details */}
                       <div>
                         <h4 style={{ fontSize: '0.76rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', marginBottom: 10 }}>
@@ -450,10 +601,10 @@ export default function AdminOrdersPage() {
                         </h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {order.items?.map((it, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, border: '1px solid var(--color-border)', fontSize: '0.82rem' }}>
-                              <span style={{ fontWeight: 600, color: '#FFFDF5' }}>{it.name}</span>
-                              <span style={{ color: '#94A3B8' }}>
-                                {it.quantity} × NPR {it.price.toLocaleString()} = <strong style={{ color: '#52B788' }}>NPR {(it.price * it.quantity).toLocaleString()}</strong>
+                            <div key={idx} className="admin-order-item-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4, padding: '7px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, border: '1px solid var(--color-border)', fontSize: '0.82rem' }}>
+                              <span style={{ fontWeight: 600, color: '#FFFDF5', minWidth: 0, overflowWrap: 'break-word' }}>{it.name} <span style={{ color: '#94A3B8', fontWeight: 400 }}>× {it.quantity}</span></span>
+                              <span style={{ color: '#94A3B8', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                <strong style={{ color: '#52B788' }}>NPR {(it.price * it.quantity).toLocaleString()}</strong>
                               </span>
                             </div>
                           ))}
@@ -490,12 +641,12 @@ export default function AdminOrdersPage() {
                     </div>
 
                     {/* Status Workflow Action Buttons */}
-                    <div style={{ marginTop: 12, paddingTop: 16, borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                    <div className="admin-status-actions" style={{ marginTop: 12, paddingTop: 16, borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                       <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-tertiary)' }}>
-                        Update Order Status (emails customer automatically):
+                        Update Status <span style={{ fontWeight: 400 }}>(emails customer):</span>
                       </span>
 
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <div className="admin-status-actions-grid" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {ALL_STATUSES.map((st) => (
                           <button
                             key={st}
@@ -513,9 +664,10 @@ export default function AdminOrdersPage() {
                               opacity: updatingId === order.id ? 0.6 : 1,
                               textTransform: 'capitalize',
                               transition: 'all 0.15s',
+                              minHeight: 38,
                             }}
                           >
-                            {order.status === st ? `✓ ${st}` : `Mark as ${st}`}
+                            {order.status === st ? `✓ ${st}` : st}
                           </button>
                         ))}
                       </div>
@@ -529,11 +681,60 @@ export default function AdminOrdersPage() {
       )}
 
       <style>{`
+.admin-status-rail::-webkit-scrollbar { display: none; }
+.admin-status-rail { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+@media (max-width: 640px) {
+  .admin-orders-filter-card {
+    padding: 12px !important;
+    gap: 10px !important;
+    border-radius: 14px !important;
+  }
+  .admin-filter-row > span:first-child {
+    display: none !important;
+  }
+  /* Collapse expanded details to a single column — min()/minmax()
+     percentages don't collapse reliably, so force it explicitly. */
+  .admin-order-expanded-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .admin-order-expanded-grid > div {
+    min-width: 0 !important;
+  }
+  .admin-order-expanded a,
+  .admin-order-expanded span {
+    overflow-wrap: anywhere;
+  }
+  .admin-order-card-header {
+    padding: 14px 14px !important;
+    gap: 10px !important;
+    overflow-wrap: break-word;
+  }
+  .admin-order-card-total {
+    font-size: 0.92rem !important;
+  }
+  .admin-order-expanded {
+    padding: 0 14px 16px !important;
+  }
+  .admin-status-actions-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+  }
+  .admin-status-actions-grid button {
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 9px 8px !important;
+  }
+}
 @media (max-width: 480px) {
   .admin-order-card-header {
     flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
+    align-items: stretch !important;
+  }
+  .admin-order-card-meta {
+    justify-content: space-between !important;
+    width: 100% !important;
   }
 }
       `}</style>

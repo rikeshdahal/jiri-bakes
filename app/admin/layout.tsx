@@ -159,6 +159,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         color: '#FFFDF5',
         fontFamily: 'var(--font-body)',
         colorScheme: 'dark',
+        // Safety net: no page-level sideways scroll on small screens.
+        // (overflow-x: clip preserves position:sticky unlike hidden.)
+        overflowX: 'clip',
+        maxWidth: '100vw',
       }}
     >
       {/* ─── Global Admin Keyframes ─── */}
@@ -177,6 +181,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           background: rgba(245, 211, 92, 0.12) !important;
           color: #F5D35C !important;
           transform: translateX(3px);
+        }
+        .admin-main-canvas, .admin-main-canvas > main {
+          min-width: 0;
+        }
+        .admin-main-canvas img {
+          max-width: 100%;
         }
       `}</style>
 
@@ -215,8 +225,31 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         className={`modern-sidebar ${sidebarOpen ? 'open' : ''}`}
       >
         {/* Brand Header */}
-        <div style={{ padding: '26px 22px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: 13, textDecoration: 'none' }}>
+        <div style={{ padding: '26px 22px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="admin-sidebar-close"
+            aria-label="Close menu"
+            style={{
+              display: 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.6)',
+              cursor: 'pointer',
+              flexShrink: 0,
+              order: 2,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: 13, textDecoration: 'none', minWidth: 0 }}>
             <div style={{ position: 'relative' }}>
               <img
                 src="/main-logo.png"
@@ -422,6 +455,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div
         style={{
           flex: 1,
+          // minWidth:0 lets this flex item shrink below content width —
+          // without it, any wide descendant forces whole-page horizontal scroll.
+          minWidth: 0,
           marginLeft: 270,
           display: 'flex',
           flexDirection: 'column',
@@ -432,6 +468,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       >
         {/* Modern Dark Top Header */}
         <header
+          className="admin-top-header"
           style={{
             height: 68,
             background: 'rgba(13, 21, 39, 0.92)',
@@ -440,6 +477,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 10,
             padding: '0 clamp(18px, 3.5vw, 36px)',
             position: 'sticky',
             top: 0,
@@ -447,7 +485,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           }}
         >
           {/* Mobile hamburger & Breadcrumbs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="admin-header-left" style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
             <button
               onClick={() => setSidebarOpen(true)}
               className="admin-hamburger-btn"
@@ -456,8 +494,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 display: 'none',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 44,
-                height: 44,
+                width: 38,
+                height: 38,
                 borderRadius: 10,
                 background: 'rgba(255,255,255,0.06)',
                 border: '1px solid rgba(255,255,255,0.1)',
@@ -466,24 +504,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 flexShrink: 0,
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem' }}>
-              <span style={{ color: 'rgba(255, 253, 245, 0.5)' }}>Admin Studio</span>
-              <span style={{ color: 'rgba(245, 211, 92, 0.3)' }}>/</span>
-              <span style={{ color: '#F5D35C', fontWeight: 600, textTransform: 'capitalize' }}>
+            <div className="admin-breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem', minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span className="admin-breadcrumb-prefix" style={{ color: 'rgba(255, 253, 245, 0.5)', flexShrink: 0 }}>Admin Studio</span>
+              <span className="admin-breadcrumb-sep" style={{ color: 'rgba(245, 211, 92, 0.3)', flexShrink: 0 }}>/</span>
+              <span style={{ color: '#F5D35C', fontWeight: 600, textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {pathname.replace('/admin', '').replace('/', '') || 'Dashboard'}
               </span>
             </div>
           </div>
 
           {/* Quick Actions & Live Status */}
-          <div className="admin-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="admin-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             <div className="admin-live-badge" style={{
               display: 'flex',
               alignItems: 'center',
@@ -495,9 +533,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               fontSize: '0.75rem',
               fontWeight: 600,
               color: '#52B788',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2ecc71', display: 'inline-block' }} />
-              <span>Live Database</span>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2ecc71', display: 'inline-block', flexShrink: 0 }} />
+              <span className="admin-live-badge-text">Live Database</span>
             </div>
 
             {/* Real-time order notification bell */}
@@ -520,40 +560,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(245, 211, 92, 0.25)',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
                 transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <span>+</span>
-              <span>New Product</span>
+              <span className="admin-new-plus">+</span>
+              <span className="admin-new-text">New Product</span>
           </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="admin-sidebar-close"
-            aria-label="Close menu"
-            style={{
-              display: 'none',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.6)',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
         </div>
         </header>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: 'clamp(20px, 3vw, 36px)', maxWidth: 1400 }}>
+        <main style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box', padding: 'clamp(12px, 3vw, 36px)', maxWidth: 1400 }}>
           {children}
         </main>
       </div>
@@ -578,25 +598,71 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             display: flex !important;
           }
         }
+        @media (max-width: 720px) {
+          .admin-live-badge {
+            padding: 6px 10px !important;
+          }
+          .admin-live-badge .admin-live-badge-text {
+            display: none !important;
+          }
+        }
         @media (max-width: 640px) {
           .modern-sidebar {
             width: 85vw !important;
             max-width: 300px !important;
           }
+          .admin-top-header {
+            height: 60px !important;
+            padding: 0 12px !important;
+            gap: 8px !important;
+          }
+          .admin-header-left {
+            gap: 8px !important;
+          }
+          .admin-hamburger-btn {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 9px !important;
+          }
+          .admin-breadcrumb {
+            font-size: 0.76rem !important;
+            gap: 6px !important;
+          }
+          .admin-breadcrumb-prefix,
+          .admin-breadcrumb-sep {
+            display: none !important;
+          }
+          .admin-header-actions {
+            gap: 8px !important;
+          }
+          .admin-new-product-link {
+            padding: 8px 13px !important;
+            font-size: 0.74rem !important;
+          }
         }
         @media (max-width: 480px) {
+          .admin-top-header {
+            padding: 0 10px !important;
+          }
           .admin-header-actions {
             gap: 6px !important;
           }
-          .admin-header-actions .admin-live-badge {
+          .admin-live-badge {
             display: none !important;
           }
-          .admin-header-actions .admin-new-product-link {
-            padding: 8px 12px !important;
-            font-size: 0.72rem !important;
+          .admin-new-product-link {
+            width: 34px !important;
+            height: 34px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            border-radius: 9px !important;
           }
-          .admin-header-actions .admin-new-product-link span:first-child {
+          .admin-new-product-link .admin-new-text {
             display: none !important;
+          }
+          .admin-new-product-link .admin-new-plus {
+            font-size: 1.05rem !important;
+            line-height: 1 !important;
           }
         }
       `}</style>

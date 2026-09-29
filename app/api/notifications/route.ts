@@ -17,8 +17,11 @@ export function pushOrderNotification(order: {
   clients.forEach((send) => send(payload));
 }
 
-// GET /api/notifications – SSE stream for admin only
-export async function GET() {
+// GET /api/notifications – SSE stream for admin only.
+// NOTE: in-memory fan-out is a fast-path only (single instance). The admin
+// bell also polls /api/orders, so notifications still arrive on serverless /
+// multi-instance deployments where this process never sees the order POST.
+export async function GET(request: Request) {
   // Only authenticated admins may subscribe to order notifications.
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -26,36 +29,58 @@ export async function GET() {
 
   const encoder = new TextEncoder();
 
+  let send: ((data: string) => void) | null = null;
+  let heartbeat: ReturnType<typeof setInterval> | null = null;
+
+  const cleanup = () => {
+    if (heartbeat) {
+      clearInterval(heartbeat);
+      heartbeat = null;
+    }
+    if (send) {
+      clients.delete(send);
+      send = null;
+    }
+  };
+
   const stream = new ReadableStream({
     start(controller) {
       // Send an initial heartbeat so the browser confirms connection
       controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
 
       // Register this client
-      const send = (data: string) => {
+      send = (data: string) => {
         try {
           controller.enqueue(encoder.encode(`data: ${data}\n\n`));
         } catch {
-          // stream already closed
+          // stream already closed — drop this client
+          cleanup();
         }
       };
 
       clients.add(send);
 
       // Heartbeat every 25 s to keep connection alive through proxies
-      const heartbeat = setInterval(() => {
+      heartbeat = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(': heartbeat\n\n'));
         } catch {
-          clearInterval(heartbeat);
+          cleanup();
         }
       }, 25_000);
 
-      // Cleanup when admin disconnects
-      return () => {
-        clearInterval(heartbeat);
-        clients.delete(send);
-      };
+      // If the admin tab goes away, the request signal aborts — clean up.
+      request.signal.addEventListener('abort', () => {
+        cleanup();
+        try {
+          controller.close();
+        } catch {
+          // already closed
+        }
+      });
+    },
+    cancel() {
+      cleanup();
     },
   });
 
