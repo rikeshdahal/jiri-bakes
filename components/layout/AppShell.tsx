@@ -103,6 +103,7 @@ function CartProvider({ children }: { children: ReactNode }) {
       });
 
       showToast?.(`Added "${item.name}" to your bag`, 'success');
+      setIsOpen(true);
     },
     [showToast]
   );

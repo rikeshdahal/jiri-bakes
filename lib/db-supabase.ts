@@ -1,13 +1,17 @@
 import 'server-only';
-import { createClient } from '@/lib/supabase/server';
+import { createDbClient } from '@/lib/supabase/server';
 import type { BakeOfWeek, MenuItem, Order, OrderItem, Testimonial, Setting, CakeMenuItemRecord } from '@/types';
 
 /**
  * Supabase backend for the bakery data layer.
  *
- * Uses the cookie-aware server client so Row Level Security applies
- * end-to-end: anonymous visitors get public reads (+ order inserts),
- * logged-in admins get full access. No service-role key needed.
+ * Writes/reads go through `createDbClient()` (service-role when
+ * SUPABASE_SERVICE_ROLE_KEY is set, else the cookie-aware anon client).
+ * Anonymous checkouts can INSERT orders but have no SELECT on `orders`,
+ * so `createDbOrder` never depends on an INSERT…RETURNING roundtrip —
+ * without that, customer orders only lived in the ephemeral file fallback
+ * (visible once via live SSE, gone on refresh) while admin-authenticated
+ * orders persisted. See createDbOrder below.
  *
  * All reads sort in JS (not in SQL) so the backend keeps working even
  * on older installs that lack newer columns. The `bake_of_week` table
@@ -49,7 +53,7 @@ function isMissingTable(e: unknown): boolean {
 
 /** Connectivity + schema probe used by the dispatcher to pick a backend. */
 export async function probe(): Promise<void> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const { error } = await supabase.from('products').select('id').limit(1);
   if (error) throw toSupabaseError(error);
 }
@@ -159,7 +163,7 @@ const byCreatedDesc = (a: { created_at?: string }, b: { created_at?: string }) =
 
 export async function getDbBakeOfWeek(): Promise<BakeOfWeek[]> {
   try {
-    const supabase = await createClient();
+    const supabase = await createDbClient();
     const res = await supabase.from('bake_of_week').select('*');
     throwIfError(res);
     return ((res.data ?? []) as Row[]).map(mapBake).sort(byCreatedDesc);
@@ -171,7 +175,7 @@ export async function getDbBakeOfWeek(): Promise<BakeOfWeek[]> {
 
 export async function getDbBakeOfWeekById(id: string): Promise<BakeOfWeek | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await createDbClient();
     const res = await supabase.from('bake_of_week').select('*').eq('id', id).maybeSingle();
     throwIfError(res);
     return res.data ? mapBake(res.data as Row) : null;
@@ -188,7 +192,7 @@ function isMissingCol(e: unknown, col: string): boolean {
 }
 
 export async function createDbBakeOfWeek(data: Partial<BakeOfWeek>): Promise<BakeOfWeek> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   if (data.active) {
     try {
       await supabase.from('bake_of_week').update({ active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
@@ -220,7 +224,7 @@ export async function createDbBakeOfWeek(data: Partial<BakeOfWeek>): Promise<Bak
 }
 
 export async function updateDbBakeOfWeek(id: string, updates: Partial<BakeOfWeek>): Promise<BakeOfWeek | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   if (updates.active) {
     try {
       await supabase.from('bake_of_week').update({ active: false }).neq('id', id);
@@ -248,7 +252,7 @@ export async function updateDbBakeOfWeek(id: string, updates: Partial<BakeOfWeek
 }
 
 export async function deleteDbBakeOfWeek(id: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('bake_of_week').delete().eq('id', id).select('id');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).length > 0;
@@ -257,7 +261,7 @@ export async function deleteDbBakeOfWeek(id: string): Promise<boolean> {
 // ─── Products ────────────────────────────────────────────────────────
 
 export async function getDbProducts(): Promise<MenuItem[]> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('products').select('*');
   throwIfError(res);
   return ((res.data ?? []) as Row[])
@@ -266,14 +270,14 @@ export async function getDbProducts(): Promise<MenuItem[]> {
 }
 
 export async function getDbProductById(id: string): Promise<MenuItem | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('products').select('*').eq('id', id).maybeSingle();
   throwIfError(res);
   return res.data ? mapProduct(res.data as Row) : null;
 }
 
 export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const images = Array.isArray(data.images) ? data.images.map((i) => String(i).trim()).filter(Boolean) : [];
   const fallbackImage = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=500&fit=crop';
   let order = num(data.display_order, 0);
@@ -309,7 +313,7 @@ export async function createDbProduct(data: Partial<MenuItem>): Promise<MenuItem
 }
 
 export async function updateDbProduct(id: string, updates: Partial<MenuItem>): Promise<MenuItem | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const patch: Row = { updated_at: new Date().toISOString() };
   const fields: (keyof MenuItem)[] = [
     'name', 'description', 'price', 'unit', 'category', 'badge', 'image',
@@ -326,7 +330,7 @@ export async function updateDbProduct(id: string, updates: Partial<MenuItem>): P
 }
 
 export async function deleteDbProduct(id: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('products').delete().eq('id', id).select('id');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).length > 0;
@@ -335,57 +339,81 @@ export async function deleteDbProduct(id: string): Promise<boolean> {
 // ─── Orders ──────────────────────────────────────────────────────────
 
 export async function getDbOrders(): Promise<Order[]> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('orders').select('*');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).map(mapOrder).sort(byCreatedDesc);
 }
 
 export async function getDbOrderById(id: string): Promise<Order | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('orders').select('*').eq('id', id).maybeSingle();
   throwIfError(res);
   return res.data ? mapOrder(res.data as Row) : null;
 }
 
 export async function createDbOrder(data: Partial<Order> & { payment_method?: string }): Promise<Order> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
+  const payload: Row = {
+    id: typeof data.id === 'string' && data.id.trim() ? data.id.trim().slice(0, 32) : undefined,
+    customer_name: data.customer_name || 'Guest Customer',
+    customer_phone: data.customer_phone || '',
+    customer_email: data.customer_email || '',
+    customer_address: data.customer_address || '',
+    items: Array.isArray(data.items) ? data.items : [],
+    total: num(data.total),
+    payment_method: data.payment_method || 'Cash on Delivery',
+    status: (data.status as string) || 'pending',
+    notes: data.notes || '',
+    variant: data.variant || 'Egg',
+    message_on_item: data.message_on_item || '',
+    item_note: data.item_note || '',
+    delivery_date: data.delivery_date || '',
+    delivery_time: data.delivery_time || '',
+    delivery_location: data.delivery_location || '',
+  };
   const res = await supabase
     .from('orders')
-    .insert({
-      id: typeof data.id === 'string' && data.id.trim() ? data.id.trim().slice(0, 32) : undefined,
-      customer_name: data.customer_name || 'Guest Customer',
-      customer_phone: data.customer_phone || '',
-      customer_email: data.customer_email || '',
-      customer_address: data.customer_address || '',
-      items: Array.isArray(data.items) ? data.items : [],
-      total: num(data.total),
-      payment_method: data.payment_method || 'Cash on Delivery',
-      status: (data.status as string) || 'pending',
-      notes: data.notes || '',
-      variant: data.variant || 'Egg',
-      message_on_item: data.message_on_item || '',
-      item_note: data.item_note || '',
-      delivery_date: data.delivery_date || '',
-      delivery_time: data.delivery_time || '',
-      delivery_location: data.delivery_location || '',
-    })
+    .insert(payload)
     .select('*')
     .single();
-  if (res.error) {
-    const msg = String((res.error as { message?: unknown }).message ?? '');
-    if (/invalid input syntax.*uuid|invalid.*uuid/i.test(msg)) {
-      throw new Error(
-        'orders.id is still uuid — run the v4 migration in supabase/schema.sql (orders.id → text) in the Supabase SQL Editor.',
-      );
-    }
-    throw toSupabaseError(res.error);
+  if (!res.error) return mapOrder(res.data as Row);
+
+  const msg = String((res.error as { message?: unknown }).message ?? '');
+  if (/invalid input syntax.*uuid|invalid.*uuid/i.test(msg)) {
+    throw new Error(
+      'orders.id is still uuid — run the v4 migration in supabase/schema.sql (orders.id → text) in the Supabase SQL Editor.',
+    );
   }
-  return mapOrder(res.data as Row);
+
+  // Anonymous checkouts have INSERT-but-not-SELECT on `orders`, so the
+  // INSERT…RETURNING above fails even though the row WAS written (or is
+  // blocked only on the returning side). Retry as a plain insert — which
+  // needs no SELECT permission — and synthesise the return value instead
+  // of losing a real customer order to the ephemeral file fallback.
+  const retry = await supabase.from('orders').insert(payload);
+  if (!retry.error) {
+    const now = new Date().toISOString();
+    return mapOrder({ ...payload, created_at: now, updated_at: now });
+  }
+  const retryMsg = String((retry.error as { message?: unknown }).message ?? '');
+  const retryCode = (retry.error as { code?: unknown }).code;
+  // Row is already there (first attempt wrote it, only RETURNING failed,
+  // or a double-submit raced) — synthesise rather than fail the checkout.
+  if (retryCode === '23505' || /duplicate|already exists|unique/i.test(retryMsg)) {
+    const now = new Date().toISOString();
+    return mapOrder({ ...payload, created_at: now, updated_at: now });
+  }
+  if (/invalid input syntax.*uuid|invalid.*uuid/i.test(retryMsg)) {
+    throw new Error(
+      'orders.id is still uuid — run the v4 migration in supabase/schema.sql (orders.id → text) in the Supabase SQL Editor.',
+    );
+  }
+  throw toSupabaseError(res.error);
 }
 
 export async function updateDbOrder(id: string, updates: Partial<Order>): Promise<Order | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const patch: Row = { updated_at: new Date().toISOString() };
   const fields: (keyof Order)[] = [
     'customer_name', 'customer_phone', 'customer_email', 'customer_address', 'items',
@@ -402,7 +430,7 @@ export async function updateDbOrder(id: string, updates: Partial<Order>): Promis
 }
 
 export async function deleteDbOrder(id: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('orders').delete().eq('id', id).select('id');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).length > 0;
@@ -411,14 +439,14 @@ export async function deleteDbOrder(id: string): Promise<boolean> {
 // ─── Testimonials ────────────────────────────────────────────────────
 
 export async function getDbTestimonials(): Promise<Testimonial[]> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('testimonials').select('*');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).map(mapTestimonial).sort(byCreatedDesc);
 }
 
 export async function createDbTestimonial(data: Partial<Testimonial>): Promise<Testimonial> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase
     .from('testimonials')
     .insert({
@@ -436,7 +464,7 @@ export async function createDbTestimonial(data: Partial<Testimonial>): Promise<T
 }
 
 export async function updateDbTestimonial(id: string, updates: Partial<Testimonial>): Promise<Testimonial | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const patch: Row = {};
   const fields: (keyof Testimonial)[] = ['name', 'initials', 'role', 'text', 'rating', 'approved'];
   for (const f of fields) {
@@ -449,7 +477,7 @@ export async function updateDbTestimonial(id: string, updates: Partial<Testimoni
 }
 
 export async function deleteDbTestimonial(id: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('testimonials').delete().eq('id', id).select('id');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).length > 0;
@@ -458,7 +486,7 @@ export async function deleteDbTestimonial(id: string): Promise<boolean> {
 // ─── Settings ────────────────────────────────────────────────────────
 
 export async function getDbSettings(): Promise<Setting[]> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('settings').select('*');
   throwIfError(res);
   return ((res.data ?? []) as Row[]).map((r) => ({
@@ -471,7 +499,7 @@ export async function getDbSettings(): Promise<Setting[]> {
 export async function updateDbSettings(
   settingsToUpdate: Array<{ key: string; value: string }>,
 ): Promise<Setting[]> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   for (const item of settingsToUpdate) {
     const res = await supabase
       .from('settings')
@@ -483,7 +511,7 @@ export async function updateDbSettings(
 
 // ─── Cake Menu Items ────────────────────────────────────────────────
 export async function getDbCakeMenuItems(): Promise<CakeMenuItemRecord[]> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('cake_menu_items').select('*');
   if (res.error) {
     if (isMissingTable(res.error)) return [];
@@ -494,7 +522,7 @@ export async function getDbCakeMenuItems(): Promise<CakeMenuItemRecord[]> {
 }
 
 export async function getDbCakeMenuItemById(id: string): Promise<CakeMenuItemRecord | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('cake_menu_items').select('*').eq('id', id).maybeSingle();
   if (res.error) {
     if (isMissingTable(res.error)) return null;
@@ -506,7 +534,7 @@ export async function getDbCakeMenuItemById(id: string): Promise<CakeMenuItemRec
 export async function createDbCakeMenuItem(
   item: Omit<CakeMenuItemRecord, 'id' | 'created_at' | 'updated_at'>
 ): Promise<CakeMenuItemRecord> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase
     .from('cake_menu_items')
     .insert({
@@ -538,7 +566,7 @@ export async function updateDbCakeMenuItem(
   id: string,
   updates: Partial<CakeMenuItemRecord>
 ): Promise<CakeMenuItemRecord | null> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const patch: Row = { updated_at: new Date().toISOString() };
   if (updates.name !== undefined) patch.name = updates.name;
   if (updates.nepali_subtitle !== undefined) patch.nepali_subtitle = updates.nepali_subtitle;
@@ -565,7 +593,7 @@ export async function updateDbCakeMenuItem(
 }
 
 export async function deleteDbCakeMenuItem(id: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createDbClient();
   const res = await supabase.from('cake_menu_items').delete().eq('id', id).select('id');
   if (res.error) {
     if (isMissingTable(res.error)) {
